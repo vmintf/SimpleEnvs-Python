@@ -1,0 +1,251 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "simpleenvs-python"
+version = "1.0.0"
+description = "Ultra-secure, high-performance .env file loader"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "vmintf", email = "vmintf@gmail.com"}
+]
+maintainers = [
+    {name = "vmintf", email = "vmintf@gmail.com"}
+]
+keywords = [
+    "environment", "env", "dotenv", "config", "security",
+    "performance", "async", "enterprise"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Security",
+    "Topic :: Utilities",
+    "Typing :: Typed"
+]
+requires-python = ">=3.7"
+dependencies = [
+    "aiofiles>=0.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.0.0",
+    "flake8>=6.0.0",
+    "pre-commit>=3.0.0"
+]
+docs = [
+    "mkdocs>=1.4.0",
+    "mkdocs-material>=9.0.0",
+    "mkdocstrings[python]>=0.20.0"
+]
+test = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "pytest-benchmark>=4.0.0"
+]
+benchmark = [
+    "python-dotenv>=1.0.0",  # For comparison benchmarks
+    "pytest-benchmark>=4.0.0",
+    "memory-profiler>=0.60.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/simpleenvs/simpleenvs"
+Documentation = "https://simpleenvs.github.io/simpleenvs"
+Repository = "https://github.com/simpleenvs/simpleenvs.git"
+"Bug Tracker" = "https://github.com/simpleenvs/simpleenvs/issues"
+Changelog = "https://github.com/simpleenvs/simpleenvs/blob/main/CHANGELOG.md"
+Funding = "https://github.com/sponsors/simpleenvs"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["simpleenvs*"]
+
+[tool.setuptools.package-data]
+simpleenvs = ["py.typed"]
+
+# =============================================================================
+# DEVELOPMENT TOOLS CONFIGURATION
+# =============================================================================
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=simpleenvs",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-fail-under=90"
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "security: marks tests as security-related",
+    "benchmark: marks tests as benchmarks"
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["simpleenvs"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod"
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py37', 'py38', 'py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+src_paths = ["src", "tests"]
+
+[tool.mypy]
+python_version = "3.7"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503", "E501"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".eggs",
+    "*.egg-info",
+    ".venv",
+    ".mypy_cache",
+    ".pytest_cache"
+]
+
+# =============================================================================
+# SECURITY AND QUALITY
+# =============================================================================
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = ["B101"]  # Skip assert_used test
+
+[tool.safety]
+# Configuration for safety (dependency vulnerability scanner)
+ignore = []
+
+# =============================================================================
+# PERFORMANCE BENCHMARKING
+# =============================================================================
+
+[tool.pytest-benchmark]
+min_rounds = 5
+max_time = 2.0
+min_time = 0.000005
+timer = "time.perf_counter"
+calibration_precision = 10
+warmup = true
+warmup_iterations = 100000
+disable_gc = true
+json_file = "benchmark.json"
+
+# =============================================================================
+# DOCUMENTATION
+# =============================================================================
+
+[tool.mkdocs]
+site_name = "SimpleEnvs"
+site_description = "Ultra-secure, high-performance .env file loader"
+site_url = "https://simpleenvs.github.io/simpleenvs"
+repo_url = "https://github.com/simpleenvs/simpleenvs"
+repo_name = "simpleenvs/simpleenvs"
+
+# =============================================================================
+# PRE-COMMIT HOOKS
+# =============================================================================
+
+[tool.pre-commit]
+repos = [
+    {repo = "https://github.com/pre-commit/pre-commit-hooks", rev = "v4.4.0"},
+    {repo = "https://github.com/psf/black", rev = "23.1.0"},
+    {repo = "https://github.com/pycqa/isort", rev = "5.12.0"},
+    {repo = "https://github.com/pycqa/flake8", rev = "6.0.0"},
+    {repo = "https://github.com/pre-commit/mirrors-mypy", rev = "v1.0.0"}
+]
