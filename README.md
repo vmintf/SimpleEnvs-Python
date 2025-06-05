@@ -22,7 +22,7 @@
 ## 📦 Installation
 
 ```bash
-pip install simpleenvs
+pip install simpleenvs-python
 ```
 
 ## ⚡ Quick Start
@@ -467,7 +467,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - 📖 [Full Documentation](https://simpleenvs.github.io/simpleenvs)
 - 🐛 [Issue Tracker](https://github.com/simpleenvs/simpleenvs/issues)
 - 💬 [Discussions](https://github.com/simpleenvs/simpleenvs/discussions)
-- 📦 [PyPI Package](https://pypi.org/project/simpleenvs/)
+- 📦 [PyPI Package](https://pypi.org/project/simpleenvs-python/)
 
 ---
 
