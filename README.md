@@ -488,6 +488,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - Inspired by [python-dotenv](https://github.com/theskumar/python-dotenv)
 - Built with security principles from [OWASP](https://owasp.org/)
 - Performance optimizations inspired by [Zig](https://ziglang.org/) design philosophy
+- Project orignated from Zig SimpleEnvs
+[SimpleEnvs](https://github.com/vmintf/SimpleEnvs)
 
 ## 📚 Learn More
 
