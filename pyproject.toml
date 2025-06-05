@@ -3,8 +3,8 @@ requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "simpleenvs-python"
-version = "1.0.0"
+name = "SimpleEnvs-Python"
+version = "1.0.2"
 description = "Ultra-secure, high-performance .env file loader"
 readme = "README.md"
 license = {text = "MIT"}
@@ -70,19 +70,19 @@ benchmark = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/simpleenvs/simpleenvs"
-Documentation = "https://simpleenvs.github.io/simpleenvs"
-Repository = "https://github.com/simpleenvs/simpleenvs.git"
-"Bug Tracker" = "https://github.com/simpleenvs/simpleenvs/issues"
-Changelog = "https://github.com/simpleenvs/simpleenvs/blob/main/CHANGELOG.md"
-Funding = "https://github.com/sponsors/simpleenvs"
+Homepage = "https://github.com/vmintf/SimpleEnvs-Python"
+Documentation = "https://vmintf.github.io/SimpleEnvs-Python"
+Repository = "https://github.com/vmintf/SimpleEnvs-Python.git"
+"Bug Tracker" = "https://github.com/vmintf/SimpleEnvs-Python/issues"
+Changelog = "https://github.com/vmintf/SimpleEnvs-Python/blob/main/CHANGELOG.md"
+Funding = "https://github.com/sponsors/SimpleEnvs-Python"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["simpleenvs*"]
+include = ["simpleenvs_python*"]  # 변경
 
 [tool.setuptools.package-data]
 simpleenvs = ["py.typed"]
