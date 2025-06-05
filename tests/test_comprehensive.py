@@ -4,24 +4,23 @@ Comprehensive test suite for SimpleEnvs
 Designed to achieve 90%+ code coverage
 """
 
-import pytest
 import asyncio
-import tempfile
-import os
-from pathlib import Path
-from unittest.mock import patch, mock_open
 import gc
+import os
+import tempfile
+from pathlib import Path
+from unittest.mock import mock_open, patch
 
+import pytest
 import simpleenvs
-from simpleenvs import SimpleEnvLoader, SecureEnvLoader
-from simpleenvs.exceptions import *
+from simpleenvs import SecureEnvLoader, SimpleEnvLoader, utils
 from simpleenvs.constants import *
-from simpleenvs import utils
-
+from simpleenvs.exceptions import *
 
 # =============================================================================
 # FIXTURES
 # =============================================================================
+
 
 @pytest.fixture
 def temp_env_file():
@@ -41,7 +40,7 @@ BOOL_FALSE=false
 INT_NEGATIVE=-42
 """
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False) as f:
         f.write(content.strip())
         f.flush()
         yield f.name
@@ -53,7 +52,7 @@ INT_NEGATIVE=-42
 @pytest.fixture
 def large_env_file():
     """Create large .env file for testing"""
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False) as f:
         f.write("# Large test file\n")
         for i in range(1000):
             f.write(f"VAR_{i}=value_{i}\n")
@@ -77,7 +76,7 @@ DANGEROUS_SCRIPT=<script>alert('xss')</script>
 PATH_TRAVERSAL=../../../etc/passwd
 """
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False) as f:
         f.write(content.strip())
         f.flush()
         yield f.name
@@ -88,6 +87,7 @@ PATH_TRAVERSAL=../../../etc/passwd
 # =============================================================================
 # SIMPLE LOADER TESTS
 # =============================================================================
+
 
 class TestSimpleEnvLoader:
     """Test SimpleEnvLoader functionality"""
@@ -132,7 +132,7 @@ class TestSimpleEnvLoader:
         """Test auto-discovery of .env file"""
         # Copy temp file to current directory as .env
         env_content = Path(temp_env_file).read_text()
-        with open(".env", 'w') as f:
+        with open(".env", "w") as f:
             f.write(env_content)
 
         try:
@@ -236,6 +236,7 @@ class TestSimpleEnvLoader:
 # SECURE LOADER TESTS
 # =============================================================================
 
+
 class TestSecureEnvLoader:
     """Test SecureEnvLoader functionality"""
 
@@ -247,7 +248,7 @@ class TestSecureEnvLoader:
         # Test custom session ID
         loader_with_session = SecureEnvLoader("custom-session")
         security_info = loader_with_session.get_security_info()
-        assert security_info['session_id'] != loader.get_security_info()['session_id']
+        assert security_info["session_id"] != loader.get_security_info()["session_id"]
 
     @pytest.mark.asyncio
     async def test_secure_loading(self, temp_env_file):
@@ -256,6 +257,7 @@ class TestSecureEnvLoader:
 
         # Test with specific file (don't try auto-discovery without .env file)
         from simpleenvs.secure import LoadOptions
+
         options = LoadOptions(path=temp_env_file, strict_validation=True)
         await loader.load_secure(options)
 
@@ -274,9 +276,11 @@ class TestSecureEnvLoader:
 
         # Load synchronously for testing
         import asyncio
+
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         from simpleenvs.secure import LoadOptions
+
         options = LoadOptions(path=temp_env_file)
         loop.run_until_complete(loader.load_secure(options))
 
@@ -309,15 +313,17 @@ class TestSecureEnvLoader:
 
         # Get initial security info
         info = loader.get_security_info()
-        assert 'session_id' in info
-        assert 'creation_time' in info
-        assert 'access_count' in info
+        assert "session_id" in info
+        assert "creation_time" in info
+        assert "access_count" in info
 
         # Load file and check access log
         import asyncio
+
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         from simpleenvs.secure import LoadOptions
+
         options = LoadOptions(path=temp_env_file)
         loop.run_until_complete(loader.load_secure(options))
 
@@ -328,7 +334,7 @@ class TestSecureEnvLoader:
         # Check access log
         access_log = loader.get_access_log()
         assert len(access_log) > 0
-        assert any(log['operation'] == 'get' for log in access_log)
+        assert any(log["operation"] == "get" for log in access_log)
 
         loop.close()
 
@@ -337,9 +343,11 @@ class TestSecureEnvLoader:
         loader = SecureEnvLoader()
 
         import asyncio
+
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         from simpleenvs.secure import LoadOptions
+
         options = LoadOptions(path=temp_env_file)
         loop.run_until_complete(loader.load_secure(options))
 
@@ -356,9 +364,11 @@ class TestSecureEnvLoader:
         loader = SecureEnvLoader()
 
         import asyncio
+
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         from simpleenvs.secure import LoadOptions
+
         options = LoadOptions(path=temp_env_file)
         loop.run_until_complete(loader.load_secure(options))
 
@@ -378,6 +388,7 @@ class TestSecureEnvLoader:
 # =============================================================================
 # UTILITIES TESTS
 # =============================================================================
+
 
 class TestUtils:
     """Test utility functions"""
@@ -534,6 +545,7 @@ class TestUtils:
 # EXCEPTIONS TESTS
 # =============================================================================
 
+
 class TestExceptions:
     """Test exception classes and utilities"""
 
@@ -559,8 +571,10 @@ class TestExceptions:
     def test_exception_utilities(self):
         """Test exception utility functions"""
         from simpleenvs.exceptions import (
-            format_security_error, is_security_critical, get_error_code,
-            handle_simpleenvs_error
+            format_security_error,
+            get_error_code,
+            handle_simpleenvs_error,
+            is_security_critical,
         )
 
         # Test formatting
@@ -586,6 +600,7 @@ class TestExceptions:
 # =============================================================================
 # INTEGRATION TESTS
 # =============================================================================
+
 
 class TestIntegration:
     """Test module integration and global API"""
@@ -636,9 +651,11 @@ class TestIntegration:
         loader = SecureEnvLoader()
 
         import asyncio
+
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         from simpleenvs.secure import LoadOptions
+
         options = LoadOptions(path=temp_env_file)
         loop.run_until_complete(loader.load_secure(options))
 
@@ -662,6 +679,7 @@ class TestIntegration:
 # ERROR HANDLING TESTS
 # =============================================================================
 
+
 class TestErrorHandling:
     """Test error handling and edge cases"""
 
@@ -678,6 +696,7 @@ class TestErrorHandling:
         # Secure loader should be more strict
         secure_loader = SecureEnvLoader()
         from simpleenvs.secure import LoadOptions
+
         options = LoadOptions(path=malformed_env_file, strict_validation=True)
 
         # Should raise exception for dangerous content or malformed data
@@ -690,6 +709,7 @@ class TestErrorHandling:
 
         # Test loading directory instead of file (Windows uses C:\ instead of /)
         import platform
+
         if platform.system() == "Windows":
             invalid_path = "C:\\"
         else:
@@ -705,25 +725,27 @@ class TestErrorHandling:
     def test_constants_and_environment_detection(self):
         """Test constants and environment detection"""
         from simpleenvs.constants import (
-            get_environment_type, get_settings_for_environment,
-            is_feature_enabled, get_max_value_for_environment
+            get_environment_type,
+            get_max_value_for_environment,
+            get_settings_for_environment,
+            is_feature_enabled,
         )
 
         # Test environment detection
         env_type = get_environment_type()
-        assert env_type in ['development', 'production', 'testing', 'staging']
+        assert env_type in ["development", "production", "testing", "staging"]
 
         # Test settings
         settings = get_settings_for_environment()
         assert isinstance(settings, dict)
-        assert 'strict_validation' in settings
+        assert "strict_validation" in settings
 
         # Test feature flags
-        assert isinstance(is_feature_enabled('async_loading'), bool)
-        assert isinstance(is_feature_enabled('nonexistent_feature'), bool)
+        assert isinstance(is_feature_enabled("async_loading"), bool)
+        assert isinstance(is_feature_enabled("nonexistent_feature"), bool)
 
         # Test max values
-        max_size = get_max_value_for_environment('max_file_size')
+        max_size = get_max_value_for_environment("max_file_size")
         assert isinstance(max_size, int)
         assert max_size > 0
 
@@ -738,6 +760,7 @@ class TestErrorHandling:
 # =============================================================================
 # ADDITIONAL COVERAGE TESTS
 # =============================================================================
+
 
 class TestAdditionalCoverage:
     """Additional tests to reach 90% coverage"""
@@ -819,7 +842,7 @@ class TestAdditionalCoverage:
         assert found == []
 
         # Test calculate_file_hash with different algorithms
-        with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
             f.write("test content")
             f.flush()
             temp_file = f.name
@@ -894,8 +917,8 @@ EMPTY_KEY=
     @pytest.mark.asyncio
     async def test_module_level_functions(self, temp_env_file):
         """Test module-level convenience functions"""
+        from simpleenvs.secure import load_from_path_secure, load_secure
         from simpleenvs.simple import load_env, load_env_sync
-        from simpleenvs.secure import load_secure, load_from_path_secure
 
         # Test simple module functions
         loader1 = await load_env(temp_env_file)
@@ -917,9 +940,9 @@ EMPTY_KEY=
         from simpleenvs import constants
 
         # Test that constants are accessible
-        assert hasattr(constants, 'VERSION')
-        assert hasattr(constants, 'MAX_FILE_SIZE')
-        assert hasattr(constants, 'DANGEROUS_PATTERNS')
+        assert hasattr(constants, "VERSION")
+        assert hasattr(constants, "MAX_FILE_SIZE")
+        assert hasattr(constants, "DANGEROUS_PATTERNS")
 
         # Test utility functions
         env_type = constants.get_environment_type()
@@ -944,7 +967,7 @@ EMPTY_KEY=
         assert result == 123.456
 
         # Test large integer out of range (strict mode should raise exception)
-        large_number = str(2 ** 64)  # Larger than 64-bit signed int
+        large_number = str(2**64)  # Larger than 64-bit signed int
         with pytest.raises(TypeConversionError):
             utils.parse_env_value(large_number, strict=True)
 

@@ -3,21 +3,21 @@
 Tests specifically targeting missing coverage areas
 """
 
-import pytest
 import asyncio
-import tempfile
-import os
-from pathlib import Path
 import gc
+import os
+import tempfile
+from pathlib import Path
 
+import pytest
 import simpleenvs
-from simpleenvs import SimpleEnvLoader, SecureEnvLoader
+from simpleenvs import SecureEnvLoader, SimpleEnvLoader
 from simpleenvs.exceptions import *
-
 
 # =============================================================================
 # __INIT__.PY MISSING COVERAGE (54% → 90%+)
 # =============================================================================
+
 
 class TestInitMissingCoverage:
     """Test missing coverage in __init__.py"""
@@ -26,7 +26,7 @@ class TestInitMissingCoverage:
     async def test_load_sync_in_init(self):
         """Test load_sync function in __init__.py"""
         # Create test .env file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False) as f:
             f.write("TEST_VAR=test_value\nDEBUG=true")
             f.flush()
             temp_file = f.name
@@ -89,7 +89,7 @@ class TestInitMissingCoverage:
         # Should return info if any loader exists, None if not
         if security_info is not None:
             assert isinstance(security_info, dict)
-            assert 'session_id' in security_info
+            assert "session_id" in security_info
 
         # Test get_all_secure_loaders
         all_loaders = simpleenvs.get_all_secure_loaders()
@@ -105,7 +105,7 @@ class TestInitMissingCoverage:
         assert isinstance(keys, list)
 
         # Test with only simple loader
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False) as f:
             f.write("SIMPLE_KEY=simple_value")
             f.flush()
             temp_file = f.name
@@ -120,8 +120,8 @@ class TestInitMissingCoverage:
     def test_backward_compatibility_aliases(self):
         """Test backward compatibility aliases"""
         # Test aliases exist
-        assert hasattr(simpleenvs, 'load_env_simple')
-        assert hasattr(simpleenvs, 'load_env_secure')
+        assert hasattr(simpleenvs, "load_env_simple")
+        assert hasattr(simpleenvs, "load_env_secure")
 
         # Test that they're the same as the main functions
         assert simpleenvs.load_env_simple == simpleenvs.load
@@ -131,6 +131,7 @@ class TestInitMissingCoverage:
 # =============================================================================
 # SIMPLE.PY MISSING COVERAGE (68% → 90%+)
 # =============================================================================
+
 
 class TestSimpleMissingCoverage:
     """Test missing coverage in simple.py"""
@@ -178,7 +179,7 @@ class TestSimpleMissingCoverage:
             "BOOL_STR_FALSE": "false",
             "BOOL_ACTUAL_TRUE": True,
             "BOOL_ACTUAL_FALSE": False,
-            "NOT_BOOL": "not_a_boolean"
+            "NOT_BOOL": "not_a_boolean",
         }
 
         # Test string to bool conversion
@@ -199,6 +200,7 @@ class TestSimpleMissingCoverage:
 
         # Test normalize_boolean directly - it has different logic than SimpleEnvLoader.get_bool
         from simpleenvs.utils import normalize_boolean
+
         # normalize_boolean checks if string is in TRUE_VALUES, not just truthy
         assert normalize_boolean("not_a_boolean") is False  # Not in TRUE_VALUES
         assert normalize_boolean("true") is True  # In TRUE_VALUES
@@ -208,6 +210,7 @@ class TestSimpleMissingCoverage:
 # =============================================================================
 # EXCEPTIONS.PY MISSING COVERAGE (69% → 90%+)
 # =============================================================================
+
 
 class TestExceptionsMissingCoverage:
     """Test missing coverage in exceptions.py"""
@@ -261,8 +264,10 @@ class TestExceptionsMissingCoverage:
     def test_exception_utilities_edge_cases(self):
         """Test exception utility functions edge cases"""
         from simpleenvs.exceptions import (
-            format_security_error, is_security_critical, get_error_code,
-            handle_simpleenvs_error
+            format_security_error,
+            get_error_code,
+            handle_simpleenvs_error,
+            is_security_critical,
         )
 
         # Test with non-SimpleEnvsError
@@ -280,6 +285,7 @@ class TestExceptionsMissingCoverage:
 # SECURE.PY MISSING COVERAGE (75% → 90%+)
 # =============================================================================
 
+
 class TestSecureMissingCoverage:
     """Test missing coverage in secure.py"""
 
@@ -292,7 +298,7 @@ class TestSecureMissingCoverage:
         assert loader._SecureEnvLoader__parse_value_secure("123") == 123
 
         # Test deprecated __calculate_file_hash method
-        with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
             f.write("test content")
             f.flush()
             temp_file = f.name
@@ -337,9 +343,7 @@ class TestSecureMissingCoverage:
 
         # Test with custom options
         custom_options = LoadOptions(
-            path="custom.env",
-            max_depth=1,
-            strict_validation=False
+            path="custom.env", max_depth=1, strict_validation=False
         )
         assert custom_options.path == "custom.env"
         assert custom_options.max_depth == 1
@@ -349,6 +353,7 @@ class TestSecureMissingCoverage:
 # =============================================================================
 # CONSTANTS.PY AND UTILS.PY EDGE CASES
 # =============================================================================
+
 
 class TestConstantsUtilsMissingCoverage:
     """Test missing coverage in constants.py and utils.py"""
@@ -360,10 +365,10 @@ class TestConstantsUtilsMissingCoverage:
 
         # Test the utility functions that might be in __main__
         env_type = constants.get_environment_type()
-        assert env_type in ['development', 'production', 'testing', 'staging']
+        assert env_type in ["development", "production", "testing", "staging"]
 
         # Test environment-specific max values
-        max_size = constants.get_max_value_for_environment('max_file_size')
+        max_size = constants.get_max_value_for_environment("max_file_size")
         assert isinstance(max_size, int)
         assert max_size > 0
 
@@ -372,13 +377,13 @@ class TestConstantsUtilsMissingCoverage:
         from simpleenvs import utils
 
         # Test the example content parsing that might be in __main__
-        test_content = '''
+        test_content = """
 # Test .env file
 APP_NAME=SimpleEnvs
 DEBUG=true
 PORT=8080
 DATABASE_URL="postgresql://user:pass@localhost/db"
-'''
+"""
 
         # This tests the main block functionality
         env_data = utils.parse_env_content(test_content, strict=False)
@@ -401,13 +406,16 @@ DATABASE_URL="postgresql://user:pass@localhost/db"
 # FINAL COVERAGE PUSH - TARGET SPECIFIC MISSING LINES
 # =============================================================================
 
+
 class TestFinalCoveragePush:
     """Final push to reach 90% by targeting specific missing lines"""
 
     def test_init_py_missing_lines(self):
         """Test specific missing lines in __init__.py"""
         # Test load_sync without path (line 114-115)
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False, dir='.') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".env", delete=False, dir="."
+        ) as f:
             f.write("FINAL_TEST=value")
             f.flush()
             env_name = os.path.basename(f.name)
@@ -443,8 +451,8 @@ class TestFinalCoveragePush:
 
         # Test session ID validation and access patterns
         info = loader.get_security_info()
-        assert info['access_count'] >= 0
-        assert len(info['session_id']) > 0
+        assert info["access_count"] >= 0
+        assert len(info["session_id"]) > 0
 
         # Test cleanup_handler static method directly
         SecureEnvLoader._SecureEnvLoader__cleanup_handler()  # Should not raise
@@ -459,7 +467,9 @@ class TestFinalCoveragePush:
 
         # Test with a valid Windows path that doesn't exist (FileNotFoundError)
         try:
-            options = LoadOptions(path="completely_invalid_file.env")  # No path traversal
+            options = LoadOptions(
+                path="completely_invalid_file.env"
+            )  # No path traversal
             asyncio.run(loader.load_secure(options))
         except FileNotFoundError:
             # Expected - we're testing the error path
@@ -478,6 +488,7 @@ class TestFinalCoveragePush:
 
         # Test error code for unknown type
         from simpleenvs.exceptions import get_error_code
+
         class UnknownError(Exception):
             pass
 
@@ -493,7 +504,7 @@ class TestFinalCoveragePush:
         assert result == ""
 
         # Test large integer handling
-        large_int = str(2 ** 62)  # Within 64-bit range
+        large_int = str(2**62)  # Within 64-bit range
         result = utils.parse_env_value(large_int, strict=True)
         assert isinstance(result, int)
 
@@ -531,18 +542,22 @@ class TestFinalCoveragePush:
         # Test info when loaders exist but may not be loaded
         info = simpleenvs.get_info()
         assert isinstance(info, dict)
-        assert 'version' in info
+        assert "version" in info
 
 
 if __name__ == "__main__":
     # Run these specific missing coverage tests TOGETHER with comprehensive tests
     import sys
 
-    sys.exit(pytest.main([
-        "tests/test_comprehensive.py",
-        "tests/test_missing_coverage.py",
-        "-v",
-        "--cov=simpleenvs",
-        "--cov-report=term-missing",
-        "--cov-fail-under=90"
-    ]))
+    sys.exit(
+        pytest.main(
+            [
+                "tests/test_comprehensive.py",
+                "tests/test_missing_coverage.py",
+                "-v",
+                "--cov=simpleenvs",
+                "--cov-report=term-missing",
+                "--cov-fail-under=90",
+            ]
+        )
+    )

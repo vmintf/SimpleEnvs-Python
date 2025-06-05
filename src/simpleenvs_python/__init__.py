@@ -21,15 +21,17 @@ Usage:
     await loader.load()
 """
 
-import os
 import gc
-from typing import Union, Optional, Dict, Any, List
+import os
+from typing import Any, Dict, List, Optional, Union
+
+from .constants import LIBRARY_NAME, VERSION, get_environment_type
+from .exceptions import *
+from .secure import SecureEnvLoader
+from .secure import load_secure as _load_secure_func
 
 # Import all classes and exceptions
 from .simple import SimpleEnvLoader, load_env, load_env_sync
-from .secure import SecureEnvLoader, load_secure as _load_secure_func
-from .exceptions import *
-from .constants import VERSION, LIBRARY_NAME, get_environment_type
 
 # Type definitions
 EnvValue = Union[str, int, bool]
@@ -48,6 +50,7 @@ _secure_loader: Optional[SecureEnvLoader] = None
 # =============================================================================
 # SIMPLE API (System-level environment variables)
 # =============================================================================
+
 
 async def load(path: Optional[str] = None, max_depth: int = 2) -> None:
     """
@@ -120,7 +123,7 @@ def get_bool(key: str, default: Optional[bool] = None) -> Optional[bool]:
     value = os.getenv(key)
     if value is None:
         return default
-    return value.lower() in ('true', 'yes', '1', 'on', 'enable', 'enabled')
+    return value.lower() in ("true", "yes", "1", "on", "enable", "enabled")
 
 
 def get_str(key: str, default: Optional[str] = None) -> Optional[str]:
@@ -137,7 +140,10 @@ def is_loaded() -> bool:
 # SECURE API (Memory-isolated environment variables)
 # =============================================================================
 
-async def load_secure(path: Optional[str] = None, strict: bool = True, max_depth: int = 2) -> None:
+
+async def load_secure(
+    path: Optional[str] = None, strict: bool = True, max_depth: int = 2
+) -> None:
     """
     Load environment variables using SecureEnvLoader (memory-isolated)
 
@@ -155,6 +161,7 @@ async def load_secure(path: Optional[str] = None, strict: bool = True, max_depth
         _secure_loader = SecureEnvLoader()
 
     from .secure import LoadOptions
+
     options = LoadOptions(path=path, max_depth=max_depth, strict_validation=strict)
     await _secure_loader.load_secure(options)
 
@@ -242,6 +249,7 @@ def get_security_info() -> Optional[Dict[str, Any]]:
 # MEMORY INTROSPECTION (for finding existing SecureEnvLoader instances)
 # =============================================================================
 
+
 def _find_secure_loader_in_memory() -> Optional[SecureEnvLoader]:
     """
     Find existing SecureEnvLoader instance in memory
@@ -249,9 +257,11 @@ def _find_secure_loader_in_memory() -> Optional[SecureEnvLoader]:
     """
     try:
         for obj in gc.get_objects():
-            if (isinstance(obj, SecureEnvLoader) and
-                    hasattr(obj, '_SecureEnvLoader__env_data') and
-                    obj._SecureEnvLoader__env_data):  # Has loaded data
+            if (
+                isinstance(obj, SecureEnvLoader)
+                and hasattr(obj, "_SecureEnvLoader__env_data")
+                and obj._SecureEnvLoader__env_data
+            ):  # Has loaded data
                 return obj
     except Exception:
         pass  # Silently fail if introspection not possible
@@ -275,6 +285,7 @@ def get_all_secure_loaders() -> List[SecureEnvLoader]:
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
+
 
 def get_all_keys() -> List[str]:
     """Get all available environment variable keys"""
@@ -310,14 +321,14 @@ def clear() -> None:
 def get_info() -> Dict[str, Any]:
     """Get information about loaded environments"""
     return {
-        'version': __version__,
-        'environment_type': get_environment_type(),
-        'simple_loaded': is_loaded(),
-        'secure_loaded': is_loaded_secure(),
-        'total_keys': len(get_all_keys()),
-        'simple_loader': _simple_loader is not None,
-        'secure_loader': _secure_loader is not None,
-        'secure_loaders_in_memory': len(get_all_secure_loaders())
+        "version": __version__,
+        "environment_type": get_environment_type(),
+        "simple_loaded": is_loaded(),
+        "secure_loaded": is_loaded_secure(),
+        "total_keys": len(get_all_keys()),
+        "simple_loader": _simple_loader is not None,
+        "secure_loader": _secure_loader is not None,
+        "secure_loaders_in_memory": len(get_all_secure_loaders()),
     }
 
 
@@ -376,71 +387,66 @@ def load_dotenv_secure(path: Optional[str] = None, strict: bool = True) -> None:
         load_dotenv_secure()  # Maximum security!
     """
     import asyncio
+
     asyncio.run(load_secure(path, strict))
 
 
 # Class exports
 __all__ = [
     # Classes
-    'SimpleEnvLoader',
-    'SecureEnvLoader',
-
+    "SimpleEnvLoader",
+    "SecureEnvLoader",
     # Simple API (system-level)
-    'load',
-    'load_sync',
-    'get',
-    'get_int',
-    'get_bool',
-    'get_str',
-    'is_loaded',
-
+    "load",
+    "load_sync",
+    "get",
+    "get_int",
+    "get_bool",
+    "get_str",
+    "is_loaded",
     # Secure API (memory-isolated)
-    'load_secure',
-    'get_secure',
-    'get_int_secure',
-    'get_bool_secure',
-    'get_str_secure',
-    'is_loaded_secure',
-    'get_security_info',
-
+    "load_secure",
+    "get_secure",
+    "get_int_secure",
+    "get_bool_secure",
+    "get_str_secure",
+    "is_loaded_secure",
+    "get_security_info",
     # Utilities
-    'get_all_keys',
-    'clear',
-    'get_info',
-
+    "get_all_keys",
+    "clear",
+    "get_info",
     # Convenience one-liners (python-dotenv style)
-    'load_dotenv',  # Sync version
-    'aload_dotenv',  # Async version
-    'load_dotenv_secure',  # Secure version
-
+    "load_dotenv",  # Sync version
+    "aload_dotenv",  # Async version
+    "load_dotenv_secure",  # Secure version
     # Backwards compatibility
-    'load_env_simple',
-    'load_env_secure',
-
+    "load_env_simple",
+    "load_env_secure",
     # Exceptions (re-exported)
-    'SimpleEnvsError',
-    'EnvSecurityError',
-    'PathTraversalError',
-    'FileSizeError',
-    'InvalidInputError',
-    'AccessDeniedError',
-    'FileParsingError',
-    'EnvNotLoadedError',
-    'KeyNotFoundError',
-    'TypeConversionError',
-    'ConfigurationError',
-    'IntegrityError',
-    'SessionError',
-    'MemorySecurityError',
-
+    "SimpleEnvsError",
+    "EnvSecurityError",
+    "PathTraversalError",
+    "FileSizeError",
+    "InvalidInputError",
+    "AccessDeniedError",
+    "FileParsingError",
+    "EnvNotLoadedError",
+    "KeyNotFoundError",
+    "TypeConversionError",
+    "ConfigurationError",
+    "IntegrityError",
+    "SessionError",
+    "MemorySecurityError",
     # Constants
-    '__version__',
+    "__version__",
 ]
 
 
 # =============================================================================
 # EXAMPLES AND DOCUMENTATION
 # =============================================================================
+
 
 def _example_usage():
     """Example usage patterns (for documentation)"""
@@ -455,6 +461,7 @@ def _example_usage():
 
         # Also available via os.getenv since it syncs to system
         import os
+
         api_key = os.getenv("API_KEY")
 
     # Secure usage (enterprise/production)
@@ -465,6 +472,7 @@ def _example_usage():
 
         # NOT available via os.getenv (memory-isolated!)
         import os
+
         assert os.getenv("JWT_SECRET") is None  # Not in system environment
 
     # Mixed usage
@@ -502,7 +510,6 @@ if __name__ == "__main__":
     # Example quick test
     import asyncio
 
-
     async def quick_test():
         try:
             print("\nTesting simple loading...")
@@ -512,6 +519,5 @@ if __name__ == "__main__":
             print("No .env file found for testing")
         except Exception as e:
             print(f"Error: {e}")
-
 
     asyncio.run(quick_test())

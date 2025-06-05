@@ -4,28 +4,43 @@ SimpleEnvs: Ultra-secure, high-performance .env file loader
 Secure version - memory-isolated, enterprise-grade security
 """
 
-import os
 import asyncio
-import aiofiles
-from typing import Union, Optional, Dict, Any, List
-from pathlib import Path
-from dataclasses import dataclass
 import hashlib
+import os
 import time
 import weakref
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
-# Import exceptions
-from .exceptions import (
-    EnvSecurityError, PathTraversalError, FileSizeError,
-    InvalidInputError, AccessDeniedError, IntegrityError,
-    FileParsingError, SessionError, MemorySecurityError
-)
+import aiofiles
 
 # Import constants
 from .constants import (
-    MAX_KEY_LENGTH, MAX_VALUE_LENGTH, MAX_LINE_LENGTH,
-    MAX_FILE_SIZE, MAX_ENTRIES_PER_DIRECTORY as MAX_ENTRIES,
-    MAX_SCAN_DEPTH, DANGEROUS_PATTERNS, TRUE_VALUES, FALSE_VALUES
+    DANGEROUS_PATTERNS,
+    FALSE_VALUES,
+)
+from .constants import MAX_ENTRIES_PER_DIRECTORY as MAX_ENTRIES
+from .constants import (
+    MAX_FILE_SIZE,
+    MAX_KEY_LENGTH,
+    MAX_LINE_LENGTH,
+    MAX_SCAN_DEPTH,
+    MAX_VALUE_LENGTH,
+    TRUE_VALUES,
+)
+
+# Import exceptions
+from .exceptions import (
+    AccessDeniedError,
+    EnvSecurityError,
+    FileParsingError,
+    FileSizeError,
+    IntegrityError,
+    InvalidInputError,
+    MemorySecurityError,
+    PathTraversalError,
+    SessionError,
 )
 
 # Type definitions
@@ -60,17 +75,18 @@ class SecureEnvLoader:
         data = f"{time.time()}{os.getpid()}{id(self)}".encode()
         return hashlib.sha256(data).hexdigest()[:16]
 
-    def __log_access(self, operation: str, key: Optional[str] = None,
-                    success: bool = True) -> None:
+    def __log_access(
+        self, operation: str, key: Optional[str] = None, success: bool = True
+    ) -> None:
         """Log access attempts for security monitoring"""
         self.__access_count += 1
         log_entry = {
-            'timestamp': time.time(),
-            'session_id': self.__session_id,
-            'operation': operation,
-            'key': key,
-            'success': success,
-            'access_count': self.__access_count
+            "timestamp": time.time(),
+            "session_id": self.__session_id,
+            "operation": operation,
+            "key": key,
+            "success": success,
+            "access_count": self.__access_count,
         }
         self.__access_log.append(log_entry)
 
@@ -127,7 +143,7 @@ class SecureEnvLoader:
     def __calculate_file_hash(self, file_path: str) -> str:
         """Calculate SHA-256 hash of file for integrity checking"""
         hasher = hashlib.sha256()
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             for chunk in iter(lambda: f.read(4096), b""):
                 hasher.update(chunk)
         return hasher.hexdigest()
@@ -139,7 +155,7 @@ class SecureEnvLoader:
             raise InvalidInputError("Empty key")
         if len(key) > MAX_KEY_LENGTH:
             raise InvalidInputError(f"Key too long: {len(key)} chars")
-        if not key.replace('_', '').replace('-', '').isalnum():
+        if not key.replace("_", "").replace("-", "").isalnum():
             raise InvalidInputError("Key contains invalid characters")
 
         # Value validation
@@ -162,7 +178,7 @@ class SecureEnvLoader:
             return False
 
         # Number parsing with range validation
-        if value.isdigit() or (value.startswith('-') and value[1:].isdigit()):
+        if value.isdigit() or (value.startswith("-") and value[1:].isdigit()):
             try:
                 num = int(value)
                 # Validate integer range (64-bit signed)
@@ -176,7 +192,7 @@ class SecureEnvLoader:
 
         # Default to string with encoding validation
         try:
-            value.encode('utf-8')
+            value.encode("utf-8")
             return value
         except UnicodeEncodeError:
             raise InvalidInputError("Invalid UTF-8 encoding in value")
@@ -202,9 +218,11 @@ class SecureEnvLoader:
             # Recursive search with depth limit
             if max_depth > 0:
                 for entry in entries:
-                    if (entry.is_dir() and
-                        not entry.is_symlink() and
-                        not entry.name.startswith('.')):
+                    if (
+                        entry.is_dir()
+                        and not entry.is_symlink()
+                        and not entry.name.startswith(".")
+                    ):
 
                         result = await self.__scan_directory_secure(
                             str(entry), max_depth - 1
@@ -227,7 +245,7 @@ class SecureEnvLoader:
         line_count = 0
 
         try:
-            async with aiofiles.open(file_path, 'r', encoding='utf-8') as file:
+            async with aiofiles.open(file_path, "r", encoding="utf-8") as file:
                 async for line in file:
                     line_count += 1
 
@@ -241,20 +259,21 @@ class SecureEnvLoader:
 
                     # Process line
                     line = line.strip()
-                    if not line or line.startswith('#'):
+                    if not line or line.startswith("#"):
                         continue
 
                     # Parse key=value
-                    if '=' not in line:
+                    if "=" not in line:
                         continue
 
-                    key, _, value = line.partition('=')
+                    key, _, value = line.partition("=")
                     key = key.strip()
                     value = value.strip()
 
                     # Remove quotes if present
-                    if (value.startswith('"') and value.endswith('"')) or \
-                       (value.startswith("'") and value.endswith("'")):
+                    if (value.startswith('"') and value.endswith('"')) or (
+                        value.startswith("'") and value.endswith("'")
+                    ):
                         value = value[1:-1]
 
                     # Security validation
@@ -326,7 +345,9 @@ class SecureEnvLoader:
                 return default
         return default
 
-    def get_bool_secure(self, key: str, default: Optional[bool] = None) -> Optional[bool]:
+    def get_bool_secure(
+        self, key: str, default: Optional[bool] = None
+    ) -> Optional[bool]:
         """Securely get environment variable as boolean"""
         value = self.get_secure(key)
         if value is None:
@@ -334,7 +355,7 @@ class SecureEnvLoader:
         if isinstance(value, bool):
             return value
         if isinstance(value, str):
-            return value.lower() in ('true', 'yes', '1', 'on')
+            return value.lower() in ("true", "yes", "1", "on")
         return default
 
     def get_str_secure(self, key: str, default: Optional[str] = None) -> Optional[str]:
@@ -361,12 +382,12 @@ class SecureEnvLoader:
     def get_security_info(self) -> Dict[str, Any]:
         """Get security and session information"""
         return {
-            'session_id': self.__session_id,
-            'creation_time': self.__creation_time,
-            'access_count': self.__access_count,
-            'env_count': len(self.__env_data),
-            'file_hashes': len(self.__file_hashes),
-            'log_entries': len(self.__access_log)
+            "session_id": self.__session_id,
+            "creation_time": self.__creation_time,
+            "access_count": self.__access_count,
+            "env_count": len(self.__env_data),
+            "file_hashes": len(self.__file_hashes),
+            "log_entries": len(self.__access_log),
         }
 
     def verify_file_integrity(self, file_path: str) -> bool:
@@ -397,23 +418,25 @@ class SecureEnvLoader:
         """Securely wipe sensitive data"""
         try:
             # Overwrite sensitive data multiple times
-            if hasattr(self, '_SecureEnvLoader__env_data'):
+            if hasattr(self, "_SecureEnvLoader__env_data"):
                 for _ in range(3):
                     for key in list(self.__env_data.keys()):
                         self.__env_data[key] = "WIPED"
                     self.__env_data.clear()
 
-            if hasattr(self, '_SecureEnvLoader__file_hashes'):
+            if hasattr(self, "_SecureEnvLoader__file_hashes"):
                 self.__file_hashes.clear()
 
-            if hasattr(self, '_SecureEnvLoader__access_log'):
+            if hasattr(self, "_SecureEnvLoader__access_log"):
                 self.__access_log.clear()
         except Exception as e:
             raise MemorySecurityError("secure_wipe", str(e))
 
 
 # Convenience functions
-async def load_secure(path: Optional[str] = None, strict: bool = True) -> SecureEnvLoader:
+async def load_secure(
+    path: Optional[str] = None, strict: bool = True
+) -> SecureEnvLoader:
     """Load .env file with maximum security"""
     loader = SecureEnvLoader()
     options = LoadOptions(path=path, strict_validation=strict)
@@ -454,6 +477,7 @@ if __name__ == "__main__":
 
             # Verify these are NOT in system environment
             import os
+
             print(f"DB_HOST in os.environ: {'DB_HOST' in os.environ}")
 
             # Clean up securely

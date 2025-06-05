@@ -3,7 +3,7 @@
 SimpleEnvs: Exception classes for error handling
 """
 
-from typing import Optional, Any
+from typing import Any, Optional
 
 
 class SimpleEnvsError(Exception):
@@ -22,6 +22,7 @@ class SimpleEnvsError(Exception):
 
 class EnvSecurityError(SimpleEnvsError):
     """Base security exception for SecureEnvLoader"""
+
     pass
 
 
@@ -39,7 +40,7 @@ class FileSizeError(EnvSecurityError):
     def __init__(self, file_path: str, size: int, max_size: int):
         super().__init__(
             f"File too large: {size} bytes (max: {max_size})",
-            {"file_path": file_path, "size": size, "max_size": max_size}
+            {"file_path": file_path, "size": size, "max_size": max_size},
         )
         self.file_path = file_path
         self.size = size
@@ -70,8 +71,12 @@ class AccessDeniedError(EnvSecurityError):
 class FileParsingError(SimpleEnvsError):
     """Error occurred during file parsing"""
 
-    def __init__(self, file_path: str, line_number: Optional[int] = None,
-                 original_error: Optional[Exception] = None):
+    def __init__(
+        self,
+        file_path: str,
+        line_number: Optional[int] = None,
+        original_error: Optional[Exception] = None,
+    ):
         message = f"Failed to parse file: {file_path}"
         if line_number:
             message += f" at line {line_number}"
@@ -79,7 +84,7 @@ class FileParsingError(SimpleEnvsError):
         details = {
             "file_path": file_path,
             "line_number": line_number,
-            "original_error": str(original_error) if original_error else None
+            "original_error": str(original_error) if original_error else None,
         }
 
         super().__init__(message, details)
@@ -94,7 +99,7 @@ class EnvNotLoadedError(SimpleEnvsError):
     def __init__(self, operation: str):
         super().__init__(
             f"Environment not loaded. Call load() or load_secure() before {operation}",
-            {"operation": operation}
+            {"operation": operation},
         )
         self.operation = operation
 
@@ -118,7 +123,7 @@ class TypeConversionError(SimpleEnvsError):
     def __init__(self, key: str, value: Any, target_type: str):
         super().__init__(
             f"Cannot convert '{key}' value '{value}' to {target_type}",
-            {"key": key, "value": value, "target_type": target_type}
+            {"key": key, "value": value, "target_type": target_type},
         )
         self.key = key
         self.value = value
@@ -143,8 +148,8 @@ class IntegrityError(EnvSecurityError):
             {
                 "file_path": file_path,
                 "expected_hash": expected_hash,
-                "actual_hash": actual_hash
-            }
+                "actual_hash": actual_hash,
+            },
         )
         self.file_path = file_path
         self.expected_hash = expected_hash
@@ -181,7 +186,7 @@ def is_security_critical(error: Exception) -> bool:
         PathTraversalError,
         AccessDeniedError,
         IntegrityError,
-        MemorySecurityError
+        MemorySecurityError,
     )
     return isinstance(error, critical_errors)
 
@@ -202,7 +207,7 @@ def get_error_code(error: SimpleEnvsError) -> str:
         EnvNotLoadedError: "SE201",
         KeyNotFoundError: "SE202",
         TypeConversionError: "SE203",
-        ConfigurationError: "SE300"
+        ConfigurationError: "SE300",
     }
     return error_codes.get(type(error), "SE000")
 

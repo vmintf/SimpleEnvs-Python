@@ -4,20 +4,27 @@ SimpleEnvs: Common utility functions
 Shared utilities for parsing, validation, and file operations
 """
 
+import hashlib
 import os
 import re
-import hashlib
-from typing import Union, Optional, Dict, Any, List, Tuple, Set
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from .constants import (
-    TRUE_VALUES, FALSE_VALUES, DANGEROUS_PATTERNS,
-    PATH_TRAVERSAL_PATTERNS, SUPPORTED_ENCODINGS,
-    ENV_FILE_PATTERNS, EXCLUDED_DIRECTORIES, DEFAULT_ENCODING
+    DANGEROUS_PATTERNS,
+    DEFAULT_ENCODING,
+    ENV_FILE_PATTERNS,
+    EXCLUDED_DIRECTORIES,
+    FALSE_VALUES,
+    PATH_TRAVERSAL_PATTERNS,
+    SUPPORTED_ENCODINGS,
+    TRUE_VALUES,
 )
 from .exceptions import (
-    InvalidInputError, TypeConversionError, FileParsingError,
-    PathTraversalError
+    FileParsingError,
+    InvalidInputError,
+    PathTraversalError,
+    TypeConversionError,
 )
 
 # Type definitions
@@ -28,6 +35,7 @@ EnvMap = Dict[str, EnvValue]
 # =============================================================================
 # VALUE PARSING UTILITIES
 # =============================================================================
+
 
 def parse_env_value(value: str, strict: bool = False) -> EnvValue:
     """
@@ -66,11 +74,11 @@ def parse_env_value(value: str, strict: bool = False) -> EnvValue:
         return False
 
     # Integer parsing with range validation
-    if value.isdigit() or (value.startswith('-') and value[1:].isdigit()):
+    if value.isdigit() or (value.startswith("-") and value[1:].isdigit()):
         try:
             num = int(value)
             # Validate integer range (64-bit signed)
-            if -(2 ** 63) <= num <= (2 ** 63 - 1):
+            if -(2**63) <= num <= (2**63 - 1):
                 return num
             elif strict:
                 raise TypeConversionError("value", value, "64-bit integer")
@@ -81,7 +89,7 @@ def parse_env_value(value: str, strict: bool = False) -> EnvValue:
                 raise TypeConversionError("value", value, "integer")
 
     # Float parsing (optional)
-    if '.' in value:
+    if "." in value:
         try:
             return float(value)
         except ValueError:
@@ -90,7 +98,7 @@ def parse_env_value(value: str, strict: bool = False) -> EnvValue:
 
     # Default to string with encoding validation
     try:
-        value.encode('utf-8')
+        value.encode("utf-8")
         return value
     except UnicodeEncodeError:
         if strict:
@@ -134,14 +142,14 @@ def normalize_env_key(key: str) -> str:
         raise InvalidInputError("Key must be string", str(key))
 
     # Convert to uppercase and replace hyphens with underscores
-    normalized = key.upper().replace('-', '_')
+    normalized = key.upper().replace("-", "_")
 
     # Remove invalid characters
-    normalized = re.sub(r'[^A-Z0-9_]', '', normalized)
+    normalized = re.sub(r"[^A-Z0-9_]", "", normalized)
 
     # Ensure it starts with a letter or underscore
-    if normalized and not normalized[0].isalpha() and normalized[0] != '_':
-        normalized = '_' + normalized
+    if normalized and not normalized[0].isalpha() and normalized[0] != "_":
+        normalized = "_" + normalized
 
     return normalized
 
@@ -149,6 +157,7 @@ def normalize_env_key(key: str) -> str:
 # =============================================================================
 # SECURITY VALIDATION UTILITIES
 # =============================================================================
+
 
 def validate_value_security(value: str) -> None:
     """
@@ -171,10 +180,12 @@ def validate_value_security(value: str) -> None:
             raise InvalidInputError(f"Dangerous pattern detected: {pattern}", value)
 
     # Check for script injection patterns
-    script_patterns = ['<script', '</script>', 'javascript:', 'vbscript:']
+    script_patterns = ["<script", "</script>", "javascript:", "vbscript:"]
     for pattern in script_patterns:
         if pattern in value_lower:
-            raise InvalidInputError(f"Script injection pattern detected: {pattern}", value)
+            raise InvalidInputError(
+                f"Script injection pattern detected: {pattern}", value
+            )
 
 
 def validate_path_security(path: str) -> None:
@@ -197,7 +208,7 @@ def validate_path_security(path: str) -> None:
             raise PathTraversalError(path)
 
     # Additional checks
-    if '\x00' in path:
+    if "\x00" in path:
         raise InvalidInputError("Null byte in path", path)
 
     if len(path) > 1024:
@@ -220,17 +231,18 @@ def validate_key_format(key: str, strict: bool = True) -> None:
 
     if strict:
         # Strict validation: alphanumeric + underscore + hyphen only
-        if not re.match(r'^[a-zA-Z][a-zA-Z0-9_-]*$', key):
+        if not re.match(r"^[a-zA-Z][a-zA-Z0-9_-]*$", key):
             raise InvalidInputError("Key contains invalid characters", key)
     else:
         # Relaxed validation: just check for dangerous characters
-        if any(char in key for char in ['=', '\n', '\r', '\x00']):
+        if any(char in key for char in ["=", "\n", "\r", "\x00"]):
             raise InvalidInputError("Key contains dangerous characters", key)
 
 
 # =============================================================================
 # FILE OPERATIONS UTILITIES
 # =============================================================================
+
 
 def find_env_files(start_path: str = "./", max_depth: int = 3) -> List[str]:
     """
@@ -256,14 +268,20 @@ def find_env_files(start_path: str = "./", max_depth: int = 3) -> List[str]:
             # Check for env files in current directory
             for pattern in ENV_FILE_PATTERNS:
                 env_file = path / pattern
-                if env_file.exists() and env_file.is_file() and not env_file.is_symlink():
+                if (
+                    env_file.exists()
+                    and env_file.is_file()
+                    and not env_file.is_symlink()
+                ):
                     found_files.append(str(env_file))
 
             # Search subdirectories
             for item in path.iterdir():
-                if (item.is_dir() and
-                        not item.is_symlink() and
-                        item.name not in EXCLUDED_DIRECTORIES):
+                if (
+                    item.is_dir()
+                    and not item.is_symlink()
+                    and item.name not in EXCLUDED_DIRECTORIES
+                ):
                     _search_directory(item, depth - 1)
 
         except (OSError, PermissionError):
@@ -288,7 +306,7 @@ def detect_file_encoding(file_path: str) -> str:
     """
     for encoding in SUPPORTED_ENCODINGS:
         try:
-            with open(file_path, 'r', encoding=encoding) as f:
+            with open(file_path, "r", encoding=encoding) as f:
                 # Try to read a chunk to verify encoding
                 f.read(1024)
             return encoding
@@ -297,10 +315,12 @@ def detect_file_encoding(file_path: str) -> str:
         except Exception:
             break
 
-    raise FileParsingError(file_path, original_error=Exception("No supported encoding found"))
+    raise FileParsingError(
+        file_path, original_error=Exception("No supported encoding found")
+    )
 
 
-def calculate_file_hash(file_path: str, algorithm: str = 'sha256') -> str:
+def calculate_file_hash(file_path: str, algorithm: str = "sha256") -> str:
     """
     Calculate file hash for integrity checking
 
@@ -323,7 +343,7 @@ def calculate_file_hash(file_path: str, algorithm: str = 'sha256') -> str:
     except ValueError:
         raise ValueError(f"Unsupported hash algorithm: {algorithm}")
 
-    with open(file_path, 'rb') as f:
+    with open(file_path, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
             hasher.update(chunk)
 
@@ -353,13 +373,15 @@ def safe_file_read(file_path: str, max_size: int = 10 * 1024 * 1024) -> Tuple[st
     if file_size > max_size:
         raise FileParsingError(
             file_path,
-            original_error=Exception(f"File too large: {file_size} bytes (max: {max_size})")
+            original_error=Exception(
+                f"File too large: {file_size} bytes (max: {max_size})"
+            ),
         )
 
     encoding = detect_file_encoding(file_path)
 
     try:
-        with open(file_path, 'r', encoding=encoding) as f:
+        with open(file_path, "r", encoding=encoding) as f:
             content = f.read()
         return content, encoding
     except Exception as e:
@@ -370,7 +392,10 @@ def safe_file_read(file_path: str, max_size: int = 10 * 1024 * 1024) -> Tuple[st
 # PARSING UTILITIES
 # =============================================================================
 
-def parse_env_line(line: str, line_number: int = 0, strict: bool = False) -> Optional[Tuple[str, EnvValue]]:
+
+def parse_env_line(
+    line: str, line_number: int = 0, strict: bool = False
+) -> Optional[Tuple[str, EnvValue]]:
     """
     Parse a single line from .env file
 
@@ -388,17 +413,19 @@ def parse_env_line(line: str, line_number: int = 0, strict: bool = False) -> Opt
     line = line.strip()
 
     # Skip empty lines and comments
-    if not line or line.startswith('#'):
+    if not line or line.startswith("#"):
         return None
 
     # Must contain '='
-    if '=' not in line:
+    if "=" not in line:
         if strict:
-            raise FileParsingError("", line_number, Exception("Line missing '=' separator"))
+            raise FileParsingError(
+                "", line_number, Exception("Line missing '=' separator")
+            )
         return None
 
     # Split on first '='
-    key, _, value = line.partition('=')
+    key, _, value = line.partition("=")
     key = key.strip()
     value = value.strip()
 
@@ -413,8 +440,9 @@ def parse_env_line(line: str, line_number: int = 0, strict: bool = False) -> Opt
 
     # Remove quotes if present
     if len(value) >= 2:
-        if (value.startswith('"') and value.endswith('"')) or \
-                (value.startswith("'") and value.endswith("'")):
+        if (value.startswith('"') and value.endswith('"')) or (
+            value.startswith("'") and value.endswith("'")
+        ):
             value = value[1:-1]
 
     # Parse value
@@ -465,6 +493,7 @@ def parse_env_content(content: str, strict: bool = False) -> EnvMap:
 # DEBUGGING AND INTROSPECTION UTILITIES
 # =============================================================================
 
+
 def get_env_info(env_data: EnvMap) -> Dict[str, Any]:
     """
     Get information about environment data
@@ -488,7 +517,9 @@ def get_env_info(env_data: EnvMap) -> Dict[str, Any]:
         "types": type_counts,
         "keys": sorted(env_data.keys()),
         "max_key_length": max(len(k) for k in env_data.keys()) if env_data else 0,
-        "max_value_length": max(len(str(v)) for v in env_data.values()) if env_data else 0
+        "max_value_length": (
+            max(len(str(v)) for v in env_data.values()) if env_data else 0
+        ),
     }
 
 
@@ -509,7 +540,8 @@ def format_env_summary(env_data: EnvMap, show_values: bool = False) -> str:
         f"Environment Variables Summary:",
         f"  Total: {info['count']} variables",
         f"  Types: {info['types']}",
-        f"  Keys: {', '.join(info['keys'][:10])}" + ("..." if len(info['keys']) > 10 else "")
+        f"  Keys: {', '.join(info['keys'][:10])}"
+        + ("..." if len(info["keys"]) > 10 else ""),
     ]
 
     if show_values and env_data:
@@ -538,6 +570,7 @@ def validate_env_completeness(env_data: EnvMap, required_keys: List[str]) -> Lis
 # EXPORT UTILITIES
 # =============================================================================
 
+
 def export_to_shell_format(env_data: EnvMap, quote_values: bool = True) -> str:
     """
     Export environment variables to shell format
@@ -554,8 +587,8 @@ def export_to_shell_format(env_data: EnvMap, quote_values: bool = True) -> str:
         if quote_values:
             lines.append(f'export {key}="{value}"')
         else:
-            lines.append(f'export {key}={value}')
-    return '\n'.join(lines)
+            lines.append(f"export {key}={value}")
+    return "\n".join(lines)
 
 
 def export_to_env_format(env_data: EnvMap) -> str:
@@ -570,24 +603,24 @@ def export_to_env_format(env_data: EnvMap) -> str:
     """
     lines = []
     for key, value in sorted(env_data.items()):
-        if isinstance(value, str) and (' ' in value or '"' in value or "'" in value):
+        if isinstance(value, str) and (" " in value or '"' in value or "'" in value):
             # Quote values with spaces or quotes
             escaped_value = value.replace('"', '\\"')
             lines.append(f'{key}="{escaped_value}"')
         else:
-            lines.append(f'{key}={value}')
-    return '\n'.join(lines)
+            lines.append(f"{key}={value}")
+    return "\n".join(lines)
 
 
 if __name__ == "__main__":
     # Example usage and testing
-    test_content = '''
+    test_content = """
 # Test .env file
 APP_NAME=SimpleEnvs
 DEBUG=true
 PORT=8080
 DATABASE_URL="postgresql://user:pass@localhost/db"
-'''
+"""
 
     print("Testing utility functions:")
 

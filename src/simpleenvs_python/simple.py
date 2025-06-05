@@ -4,29 +4,42 @@ SimpleEnvs: Simple and fast .env file loader
 Simple version - syncs to system environment variables
 """
 
-import os
 import asyncio
-import aiofiles
-from typing import Union, Optional, Dict, Any, List
+import os
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
-# Import exceptions
-from .exceptions import (
-    SimpleEnvsError, FileParsingError, EnvNotLoadedError,
-    KeyNotFoundError, TypeConversionError, InvalidInputError
-)
+import aiofiles
 
 # Import constants
 from .constants import (
-    MAX_SCAN_DEPTH, TRUE_VALUES, FALSE_VALUES,
-    ENV_FILE_PATTERNS, EXCLUDED_DIRECTORIES,
-    DEFAULT_ENCODING, SUPPORTED_ENCODINGS
+    DEFAULT_ENCODING,
+    ENV_FILE_PATTERNS,
+    EXCLUDED_DIRECTORIES,
+    FALSE_VALUES,
+    MAX_SCAN_DEPTH,
+    SUPPORTED_ENCODINGS,
+    TRUE_VALUES,
+)
+
+# Import exceptions
+from .exceptions import (
+    EnvNotLoadedError,
+    FileParsingError,
+    InvalidInputError,
+    KeyNotFoundError,
+    SimpleEnvsError,
+    TypeConversionError,
 )
 
 # Import utilities
 from .utils import (
-    parse_env_value, find_env_files, safe_file_read,
-    parse_env_content, validate_key_format, detect_file_encoding
+    detect_file_encoding,
+    find_env_files,
+    parse_env_content,
+    parse_env_value,
+    safe_file_read,
+    validate_key_format,
 )
 
 # Type definitions
@@ -46,7 +59,9 @@ class SimpleEnvLoader:
         # Use utils function for consistency
         return parse_env_value(value, strict=False)
 
-    async def _find_env_file(self, start_path: str = "./", max_depth: int = 2) -> Optional[str]:
+    async def _find_env_file(
+        self, start_path: str = "./", max_depth: int = 2
+    ) -> Optional[str]:
         """Find .env file in directory tree"""
         if not isinstance(start_path, str):
             raise InvalidInputError("start_path must be string", start_path)
@@ -55,7 +70,9 @@ class SimpleEnvLoader:
         found_files = find_env_files(start_path, max_depth)
         return found_files[0] if found_files else None
 
-    def _find_env_file_sync(self, start_path: str = "./", max_depth: int = 2) -> Optional[str]:
+    def _find_env_file_sync(
+        self, start_path: str = "./", max_depth: int = 2
+    ) -> Optional[str]:
         """Find .env file in directory tree synchronously"""
         if not isinstance(start_path, str):
             raise InvalidInputError("start_path must be string", start_path)
@@ -102,7 +119,9 @@ class SimpleEnvLoader:
         """Load environment variables from .env file and sync to system"""
         # Validate max_depth
         if max_depth < 0 or max_depth > MAX_SCAN_DEPTH:
-            raise InvalidInputError(f"max_depth must be between 0 and {MAX_SCAN_DEPTH}", str(max_depth))
+            raise InvalidInputError(
+                f"max_depth must be between 0 and {MAX_SCAN_DEPTH}", str(max_depth)
+            )
 
         try:
             if path:
@@ -127,13 +146,18 @@ class SimpleEnvLoader:
         except (FileNotFoundError, FileParsingError, InvalidInputError):
             raise  # Re-raise these specific exceptions
         except Exception as e:
-            raise SimpleEnvsError(f"Failed to load environment: {e}", {"path": path, "max_depth": max_depth})
+            raise SimpleEnvsError(
+                f"Failed to load environment: {e}",
+                {"path": path, "max_depth": max_depth},
+            )
 
     def load_sync(self, path: Optional[str] = None, max_depth: int = 2) -> None:
         """Load environment variables synchronously and sync to system"""
         # Validate max_depth
         if max_depth < 0 or max_depth > MAX_SCAN_DEPTH:
-            raise InvalidInputError(f"max_depth must be between 0 and {MAX_SCAN_DEPTH}", str(max_depth))
+            raise InvalidInputError(
+                f"max_depth must be between 0 and {MAX_SCAN_DEPTH}", str(max_depth)
+            )
 
         try:
             if path:
@@ -158,7 +182,10 @@ class SimpleEnvLoader:
         except (FileNotFoundError, FileParsingError, InvalidInputError):
             raise  # Re-raise these specific exceptions
         except Exception as e:
-            raise SimpleEnvsError(f"Failed to load environment: {e}", {"path": path, "max_depth": max_depth})
+            raise SimpleEnvsError(
+                f"Failed to load environment: {e}",
+                {"path": path, "max_depth": max_depth},
+            )
 
     def get(self, key: str) -> Optional[EnvValue]:
         """Get environment variable from local data"""
@@ -212,6 +239,7 @@ class SimpleEnvLoader:
         if isinstance(value, str):
             # Use utils function for consistent boolean parsing
             from .utils import normalize_boolean
+
             try:
                 return normalize_boolean(value)
             except Exception:
@@ -281,8 +309,9 @@ if __name__ == "__main__":
 
             # 2. Through system environment (since we sync)
             import os
+
             db_port = int(os.getenv("DB_PORT", "5432"))
-            debug = os.getenv("DEBUG", "false").lower() in ('true', '1', 'yes', 'on')
+            debug = os.getenv("DEBUG", "false").lower() in ("true", "1", "yes", "on")
 
             print(f"DB_HOST: {db_host}")
             print(f"DB_PORT: {db_port}")
@@ -292,6 +321,5 @@ if __name__ == "__main__":
             print(f"Error: {e}")
         except Exception as e:
             print(f"Unexpected error: {e}")
-
 
     asyncio.run(main())
