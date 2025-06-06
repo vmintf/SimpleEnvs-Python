@@ -64,7 +64,7 @@ jobs:
       timeout-minutes: 1
       run: |
         echo "🧪 Quick import test..."
-        python -c "import simpleenvs_python; print('✅ Works!')"
+        python -c "import simpleenvs; print('✅ Works!')"
         echo "🎉 Success!"
 
     - name: Run tests
