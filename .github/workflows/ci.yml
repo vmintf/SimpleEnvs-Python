@@ -1,3 +1,4 @@
+
 # .github/workflows/ci.yml
 name: CI Pipeline
 
@@ -33,7 +34,49 @@ jobs:
 
     - name: Run tests
       run: |
-        python -c "import simpleenvs; print('✅ Import successful!')"
+        echo "🧪 Starting import test..."
+        python -c "
+        print('Python import test starting...')
+        
+        try:
+            print('Attempting to import simpleenvs...')
+            import simpleenvs
+            print('✅ Import simpleenvs successful!')
+            
+            # Check what's available
+            print('Available attributes:', [x for x in dir(simpleenvs) if not x.startswith('_')][:10])
+            
+            # Try to get version info
+            if hasattr(simpleenvs, '__version__'):
+                print(f'Version: {simpleenvs.__version__}')
+            else:
+                print('No __version__ found')
+                
+        except ImportError as e:
+            print(f'❌ Import failed: {e}')
+            
+            # Debug info
+            import sys
+            print(f'Python path: {sys.path[:3]}...')
+            
+            import os
+            print('Checking installation...')
+            try:
+                import subprocess
+                result = subprocess.run(['pip', 'show', 'simpleenvs-python'], capture_output=True, text=True)
+                print('Pip show output:')
+                print(result.stdout)
+            except:
+                print('Could not run pip show')
+                
+            raise
+            
+        except Exception as e:
+            print(f'❌ Unexpected error: {e}')
+            raise
+            
+        print('🎉 All tests completed successfully!')
+        "
         echo "🎉 All tests passed!"
 
   build:
