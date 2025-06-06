@@ -49,7 +49,7 @@ For contributing or development:
 
 ```bash
 # Clone repository
-git clone https://github.com/simpleenvs/simpleenvs.git
+git clone https://github.com/vmintf/SimpleEnvs-Python.git
 cd simpleenvs
 
 # Install in development mode
@@ -240,7 +240,8 @@ services:
 Run the built-in benchmark to verify performance improvements:
 
 ```bash
-python -m simpleenvs.benchmark
+# at project root folder
+python benchmark.py
 ```
 
 Expected output:
@@ -285,7 +286,7 @@ If you encounter any installation issues:
 
 1. 🐛 [Report a bug](https://github.com/vmintf/SimpleEnvs-Python/issues)
 2. 💬 [Join discussions](https://github.com/vmintf/SimpleEnvs-Python/discussions)
-3. 📧 [Contact support](mailto:support@simpleenvs.com)
+3. 📧 [Contact support](mailto:vmintf@gmail.com)
 
 ---
 
