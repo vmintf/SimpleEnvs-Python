@@ -1,0 +1,153 @@
+/* docs/_static/custom.css */
+
+/* SimpleEnvs branding colors */
+:root {
+  --simpleenvs-primary: #2980B9;
+  --simpleenvs-secondary: #27AE60;
+  --simpleenvs-accent: #E74C3C;
+  --simpleenvs-dark: #2C3E50;
+}
+
+/* Logo styling */
+.wy-side-nav-search {
+  background-color: var(--simpleenvs-primary) !important;
+}
+
+.wy-side-nav-search > a {
+  color: #fff !important;
+  font-size: 24px !important;
+  font-weight: bold !important;
+}
+
+/* Navigation improvements */
+.wy-menu-vertical li.current a {
+  border-right: 3px solid var(--simpleenvs-secondary) !important;
+}
+
+.wy-menu-vertical li.current > a {
+  background-color: #e8f4fd !important;
+  color: var(--simpleenvs-dark) !important;
+}
+
+/* Code blocks */
+.highlight {
+  border-left: 4px solid var(--simpleenvs-secondary) !important;
+  border-radius: 4px !important;
+}
+
+/* Admonitions styling */
+.admonition.note {
+  border-left: 4px solid var(--simpleenvs-primary) !important;
+}
+
+.admonition.warning {
+  border-left: 4px solid var(--simpleenvs-accent) !important;
+}
+
+.admonition.tip {
+  border-left: 4px solid var(--simpleenvs-secondary) !important;
+}
+
+/* Performance badges */
+.performance-badge {
+  display: inline-block;
+  background: linear-gradient(45deg, var(--simpleenvs-secondary), #2ECC71);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+/* Security badges */
+.security-badge {
+  display: inline-block;
+  background: linear-gradient(45deg, var(--simpleenvs-primary), #3498DB);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+/* Custom table styling */
+table.docutils {
+  border: 1px solid #e1e4e5 !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+}
+
+table.docutils thead th {
+  background-color: var(--simpleenvs-primary) !important;
+  color: white !important;
+  border-bottom: 2px solid #1f6391 !important;
+}
+
+table.docutils tbody tr:nth-child(even) {
+  background-color: #f8f9fa !important;
+}
+
+/* Links */
+a {
+  color: var(--simpleenvs-primary) !important;
+}
+
+a:hover {
+  color: var(--simpleenvs-dark) !important;
+}
+
+/* Version selector */
+.rst-versions {
+  border-top: 3px solid var(--simpleenvs-secondary) !important;
+}
+
+/* Search box */
+.wy-side-nav-search input[type=text] {
+  border: 2px solid rgba(255,255,255,0.3) !important;
+  border-radius: 6px !important;
+}
+
+.wy-side-nav-search input[type=text]:focus {
+  border-color: var(--simpleenvs-secondary) !important;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .wy-nav-side {
+    left: -300px;
+  }
+
+  .wy-nav-side.shift {
+    left: 0;
+  }
+}
+
+/* Custom content boxes */
+.highlight-box {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  border-left: 4px solid var(--simpleenvs-primary);
+}
+
+.performance-box {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border: 1px solid #c3e6cb;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  border-left: 4px solid var(--simpleenvs-secondary);
+}
+
+.security-box {
+  background: linear-gradient(135deg, #cce5ff 0%, #b3d9ff 100%);
+  border: 1px solid #b3d9ff;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  border-left: 4px solid var(--simpleenvs-primary);
+}

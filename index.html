@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SimpleEnvs Documentation &mdash; SimpleEnvs 1.0.5 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation Guide" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            SimpleEnvs
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security.html">Security Guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">SimpleEnvs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">SimpleEnvs Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/vmintf/SimpleEnvs-Python/blob/main/docs/index.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="simpleenvs-documentation">
+<h1>SimpleEnvs Documentation<a class="headerlink" href="#simpleenvs-documentation" title="Permalink to this heading"></a></h1>
+<p>Welcome to SimpleEnvs - the ultra-secure, high-performance .env file loader for Python!</p>
+<a class="reference external image-reference" href="https://badge.fury.io/py/simpleenvs-python"><img alt="PyPI version" src="https://badge.fury.io/py/simpleenvs-python.svg" /></a>
+<a class="reference external image-reference" href="https://pypi.org/project/simpleenvs-python/"><img alt="Python versions" src="https://img.shields.io/pypi/pyversions/simpleenvs-python.svg" /></a>
+<a class="reference external image-reference" href="https://github.com/vmintf/SimpleEnvs-Python/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue.svg" /></a>
+<a class="reference external image-reference" href="https://github.com/vmintf/SimpleEnvs-Python/releases"><img alt="Current Version" src="https://img.shields.io/badge/version-|release|-blue.svg" /></a>
+<section id="why-simpleenvs">
+<h2>🚀 Why SimpleEnvs?<a class="headerlink" href="#why-simpleenvs" title="Permalink to this heading"></a></h2>
+<p>SimpleEnvs is a <strong>drop-in replacement</strong> for python-dotenv with proven improvements:</p>
+<ul class="simple">
+<li><p>🏃‍♂️ <strong>2-4x faster</strong> loading performance</p></li>
+<li><p>🔒 <strong>Enterprise-grade security</strong> with memory isolation</p></li>
+<li><p>🎯 <strong>Automatic type conversion</strong> (int, bool, float)</p></li>
+<li><p>💾 <strong>Memory efficient</strong> with optimized parsing</p></li>
+<li><p>⚡ <strong>Zero configuration</strong> - works out of the box</p></li>
+<li><p>🔄 <strong>100% python-dotenv compatible</strong> API</p></li>
+</ul>
+</section>
+<section id="quick-example">
+<h2>⚡ Quick Example<a class="headerlink" href="#quick-example" title="Permalink to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create .env file</span>
+<span class="n">echo</span> <span class="s2">&quot;APP_NAME=MyApp</span><span class="se">\n</span><span class="s2">DEBUG=true</span><span class="se">\n</span><span class="s2">PORT=8080&quot;</span> <span class="o">&gt;</span> <span class="o">.</span><span class="n">env</span>
+
+<span class="c1"># Load environment variables (just like python-dotenv!)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="n">load_dotenv</span><span class="p">()</span>
+
+<span class="c1"># Access variables</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;APP_NAME&#39;</span><span class="p">))</span>  <span class="c1"># &quot;MyApp&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;DEBUG&#39;</span><span class="p">))</span>     <span class="c1"># &quot;True&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PORT&#39;</span><span class="p">))</span>      <span class="c1"># &quot;8080&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="security-mode">
+<h2>🔒 Security Mode<a class="headerlink" href="#security-mode" title="Permalink to this heading"></a></h2>
+<p>For sensitive data that should never touch <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv_secure</span><span class="p">,</span> <span class="n">get_secure</span>
+
+<span class="c1"># Load with maximum security (memory-isolated)</span>
+<span class="n">load_dotenv_secure</span><span class="p">()</span>
+
+<span class="c1"># Access secure variables (NOT in os.environ!)</span>
+<span class="n">jwt_secret</span> <span class="o">=</span> <span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;JWT_SECRET&#39;</span><span class="p">)</span>
+<span class="n">db_password</span> <span class="o">=</span> <span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;DB_PASSWORD&#39;</span><span class="p">)</span>
+
+<span class="c1"># Verify security</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;JWT_SECRET&#39;</span><span class="p">))</span>  <span class="c1"># None - properly isolated! 🔒</span>
+</pre></div>
+</div>
+</section>
+<section id="performance">
+<h2>📊 Performance<a class="headerlink" href="#performance" title="Permalink to this heading"></a></h2>
+<p>Consistent 2-4x performance improvements over python-dotenv:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variables</p></th>
+<th class="head"><p>SimpleEnvs</p></th>
+<th class="head"><p>python-dotenv</p></th>
+<th class="head"><p><strong>Speedup</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>100 vars</p></td>
+<td><p>2.17ms</p></td>
+<td><p>8.04ms</p></td>
+<td><p><strong>3.7x faster</strong> ⚡</p></td>
+</tr>
+<tr class="row-odd"><td><p>500 vars</p></td>
+<td><p>14.3ms</p></td>
+<td><p>43.1ms</p></td>
+<td><p><strong>3.0x faster</strong> ⚡</p></td>
+</tr>
+<tr class="row-even"><td><p>1000 vars</p></td>
+<td><p>43.4ms</p></td>
+<td><p>102ms</p></td>
+<td><p><strong>2.4x faster</strong> ⚡</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="documentation">
+<h2>📚 Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#python-version">Python Version</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#system-requirements">System Requirements</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-methods">Installation Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#pypi-recommended">📦 PyPI (Recommended)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#requirements-txt">📋 Requirements.txt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#poetry">🔒 Poetry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#pipenv">📝 Pipenv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#development-installation">🔧 Development Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#verification">Verification</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#quick-test">Quick Test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#advanced-test">Advanced Test</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#migration-from-python-dotenv">Migration from python-dotenv</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#before-python-dotenv">Before (python-dotenv)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#after-simpleenvs">After (SimpleEnvs)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#optional-dependencies">Optional Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#for-development">For Development</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#for-testing">For Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#common-issues-solutions">Common Issues &amp; Solutions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#issue-module-not-found">Issue: “Module not found”</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#issue-import-error">Issue: Import Error</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#issue-permission-error-windows">Issue: Permission Error (Windows)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#issue-ssl-certificate-error">Issue: SSL Certificate Error</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#virtual-environment-setup">Virtual Environment Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#using-venv-recommended">Using venv (Recommended)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#using-conda">Using conda</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#docker-installation">Docker Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#dockerfile">Dockerfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#docker-compose">Docker Compose</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#performance-verification">Performance Verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#environment-specific-installation">Environment-Specific Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#production">Production</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#development">Development</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#ci-cd">CI/CD</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#getting-help">Getting Help</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#second-setup">30-Second Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#install">1. Install</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#create-env-file">2. Create .env file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#load-and-use">3. Load and use</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#basic-usage-patterns">Basic Usage Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#drop-in-replacement-for-python-dotenv">🔄 Drop-in Replacement for python-dotenv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#type-safe-access">🎯 Type-Safe Access</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#async-loading">⚡ Async Loading</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#secure-mode-enterprise">🔒 Secure Mode (Enterprise)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#common-use-cases">Common Use Cases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#web-application">🌐 Web Application</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#docker-application">🐳 Docker Application</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#development-vs-production">🔧 Development vs Production</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#smart-directory-scanning">Smart Directory Scanning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#environment-file-examples">Environment File Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#basic-env">Basic .env</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#development-env-development">Development .env.development</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#production-env-production">Production .env.production</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#debugging-and-inspection">Debugging and Inspection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#framework-integration">Framework Integration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#fastapi">FastAPI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#django">Django</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#flask">Flask</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#do-s">✅ Do’s</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#don-ts">❌ Don’ts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#need-help">Need Help?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#table-of-contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#loading-functions">Loading Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#load-dotenv-path-none"><code class="docutils literal notranslate"><span class="pre">load_dotenv(path=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#aload-dotenv-path-none"><code class="docutils literal notranslate"><span class="pre">aload_dotenv(path=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#load-dotenv-secure-path-none-strict-true"><code class="docutils literal notranslate"><span class="pre">load_dotenv_secure(path=None,</span> <span class="pre">strict=True)</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#simple-api-system-environment">Simple API (System Environment)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#load-path-none-max-depth-2"><code class="docutils literal notranslate"><span class="pre">load(path=None,</span> <span class="pre">max_depth=2)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#load-sync-path-none-max-depth-2"><code class="docutils literal notranslate"><span class="pre">load_sync(path=None,</span> <span class="pre">max_depth=2)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#get-key-default-none"><code class="docutils literal notranslate"><span class="pre">get(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#get-int-key-default-none"><code class="docutils literal notranslate"><span class="pre">get_int(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#get-bool-key-default-none"><code class="docutils literal notranslate"><span class="pre">get_bool(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#get-str-key-default-none"><code class="docutils literal notranslate"><span class="pre">get_str(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#is-loaded"><code class="docutils literal notranslate"><span class="pre">is_loaded()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#secure-api-memory-isolated">Secure API (Memory-Isolated)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#load-secure-path-none-strict-true-max-depth-2"><code class="docutils literal notranslate"><span class="pre">load_secure(path=None,</span> <span class="pre">strict=True,</span> <span class="pre">max_depth=2)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#get-secure-key-default-none"><code class="docutils literal notranslate"><span class="pre">get_secure(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#get-int-secure-key-default-none"><code class="docutils literal notranslate"><span class="pre">get_int_secure(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#get-bool-secure-key-default-none"><code class="docutils literal notranslate"><span class="pre">get_bool_secure(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#get-str-secure-key-default-none"><code class="docutils literal notranslate"><span class="pre">get_str_secure(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#is-loaded-secure"><code class="docutils literal notranslate"><span class="pre">is_loaded_secure()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#get-security-info"><code class="docutils literal notranslate"><span class="pre">get_security_info()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#type-safe-getters">Type-Safe Getters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#boolean-values">Boolean Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#integer-values">Integer Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#string-values">String Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#get-all-secure-loaders"><code class="docutils literal notranslate"><span class="pre">get_all_secure_loaders()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#cross-module-access">Cross-Module Access</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#how-it-works">How It Works</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#memory-discovery">Memory Discovery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#security-properties">Security Properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#usage-patterns">Usage Patterns</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api-reference.html#web-application-startup">Web Application Startup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api-reference.html#service-layer-pattern">Service Layer Pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api-reference.html#module-testing">Module Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#fallback-behavior">Fallback Behavior</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#utility-functions">Utility Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#get-all-keys"><code class="docutils literal notranslate"><span class="pre">get_all_keys()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#clear"><code class="docutils literal notranslate"><span class="pre">clear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#get-info"><code class="docutils literal notranslate"><span class="pre">get_info()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#simpleenvloader"><code class="docutils literal notranslate"><span class="pre">SimpleEnvLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api-reference.html#methods">Methods</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#init"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#async-load-path-none-max-depth-2"><code class="docutils literal notranslate"><span class="pre">async</span> <span class="pre">load(path=None,</span> <span class="pre">max_depth=2)</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#id1"><code class="docutils literal notranslate"><span class="pre">load_sync(path=None,</span> <span class="pre">max_depth=2)</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#get-key"><code class="docutils literal notranslate"><span class="pre">get(key)</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#id2"><code class="docutils literal notranslate"><span class="pre">get_int(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#id3"><code class="docutils literal notranslate"><span class="pre">get_bool(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#id4"><code class="docutils literal notranslate"><span class="pre">get_str(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#id5"><code class="docutils literal notranslate"><span class="pre">is_loaded()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#id6"><code class="docutils literal notranslate"><span class="pre">clear()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#secureenvloader"><code class="docutils literal notranslate"><span class="pre">SecureEnvLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api-reference.html#id7">Methods</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#init-session-id-none"><code class="docutils literal notranslate"><span class="pre">__init__(session_id=None)</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#async-load-secure-options-loadoptions"><code class="docutils literal notranslate"><span class="pre">async</span> <span class="pre">load_secure(options=LoadOptions())</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#get-secure-key"><code class="docutils literal notranslate"><span class="pre">get_secure(key)</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#id8"><code class="docutils literal notranslate"><span class="pre">get_int_secure(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#id9"><code class="docutils literal notranslate"><span class="pre">get_bool_secure(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#id10"><code class="docutils literal notranslate"><span class="pre">get_str_secure(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#id11"><code class="docutils literal notranslate"><span class="pre">get_security_info()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#verify-file-integrity-file-path"><code class="docutils literal notranslate"><span class="pre">verify_file_integrity(file_path)</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api-reference.html#secure-wipe"><code class="docutils literal notranslate"><span class="pre">secure_wipe()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#loadoptions"><code class="docutils literal notranslate"><span class="pre">LoadOptions</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api-reference.html#attributes">Attributes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#exceptions">Exceptions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#simpleenvserror"><code class="docutils literal notranslate"><span class="pre">SimpleEnvsError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#envsecurityerror"><code class="docutils literal notranslate"><span class="pre">EnvSecurityError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#pathtraversalerror"><code class="docutils literal notranslate"><span class="pre">PathTraversalError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#filesizeerror"><code class="docutils literal notranslate"><span class="pre">FileSizeError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#invalidinputerror"><code class="docutils literal notranslate"><span class="pre">InvalidInputError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#accessdeniederror"><code class="docutils literal notranslate"><span class="pre">AccessDeniedError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#fileparsingerror"><code class="docutils literal notranslate"><span class="pre">FileParsingError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#envnotloadederror"><code class="docutils literal notranslate"><span class="pre">EnvNotLoadedError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#keynotfounderror"><code class="docutils literal notranslate"><span class="pre">KeyNotFoundError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#typeconversionerror"><code class="docutils literal notranslate"><span class="pre">TypeConversionError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#configurationerror"><code class="docutils literal notranslate"><span class="pre">ConfigurationError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#integrityerror"><code class="docutils literal notranslate"><span class="pre">IntegrityError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#sessionerror"><code class="docutils literal notranslate"><span class="pre">SessionError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#memorysecurityerror"><code class="docutils literal notranslate"><span class="pre">MemorySecurityError</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#constants">Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#version-information">Version Information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#security-limits">Security Limits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-reference.html#environment-types">Environment Types</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#type-definitions">Type Definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#need-help">Need Help?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="security.html">Security Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="security.html#table-of-contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security.html#security-overview">Security Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security.html#simple-vs-secure-mode">Simple vs Secure Mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="security.html#simple-mode-default">Simple Mode (Default)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#secure-mode-enterprise">Secure Mode (Enterprise)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="security.html#memory-isolation">Memory Isolation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="security.html#the-problem">The Problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#simpleenvs-solution">SimpleEnvs Solution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#memory-protection-features">Memory Protection Features</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="security.html#input-validation">Input Validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="security.html#dangerous-pattern-detection">Dangerous Pattern Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#key-validation">Key Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#value-length-limits">Value Length Limits</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="security.html#file-security">File Security</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="security.html#file-type-validation">File Type Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#symbolic-link-protection">Symbolic Link Protection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#file-size-limits">File Size Limits</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="security.html#path-traversal-protection">Path Traversal Protection</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="security.html#attack-prevention">Attack Prevention</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#safe-directory-scanning">Safe Directory Scanning</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="security.html#integrity-checking">Integrity Checking</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="security.html#file-hash-verification">File Hash Verification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#hash-algorithm">Hash Algorithm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#tamper-detection">Tamper Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="security.html#access-logging">Access Logging</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="security.html#security-monitoring">Security Monitoring</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#log-entry-format">Log Entry Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#logged-operations">Logged Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#session-tracking">Session Tracking</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="security.html#security-best-practices">Security Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="security.html#use-secure-mode-for-sensitive-data">1. Use Secure Mode for Sensitive Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#enable-strict-validation-in-production">2. Enable Strict Validation in Production</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#implement-required-variable-checks">3. Implement Required Variable Checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#regular-security-audits">4. Regular Security Audits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#secure-cleanup">5. Secure Cleanup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#environment-specific-configuration">6. Environment-Specific Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="security.html#threat-model">Threat Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="security.html#protected-against">Protected Against</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#not-protected-against">Not Protected Against</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#assumptions">Assumptions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="security.html#compliance">Compliance</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="security.html#industry-standards">Industry Standards</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#security-certifications">Security Certifications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#audit-trail">Audit Trail</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="security.html#security-configuration">Security Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="security.html#environment-specific-settings">Environment-Specific Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#runtime-configuration">Runtime Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="security.html#incident-response">Incident Response</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="security.html#security-event-detection">Security Event Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#recovery-procedures">Recovery Procedures</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="security.html#advanced-security-features">Advanced Security Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="security.html#cross-module-access">Cross-Module Access</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="security.html#automatic-discovery">Automatic Discovery</a></li>
+<li class="toctree-l4"><a class="reference internal" href="security.html#memory-introspection">Memory Introspection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="security.html#security-guarantees">Security Guarantees</a></li>
+<li class="toctree-l4"><a class="reference internal" href="security.html#web-application-pattern">Web Application Pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="security.html#multiple-loader-discovery">Multiple Loader Discovery</a></li>
+<li class="toctree-l4"><a class="reference internal" href="security.html#best-practices">Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#custom-security-hooks">Custom Security Hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="security.html#integration-with-security-tools">Integration with Security Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="security.html#need-help">Need Help?</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="links">
+<h2>🔗 Links<a class="headerlink" href="#links" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>📦 <a class="reference external" href="https://pypi.org/project/simpleenvs-python/">PyPI Package</a></p></li>
+<li><p>🐛 <a class="reference external" href="https://github.com/vmintf/SimpleEnvs-Python/issues">Issue Tracker</a></p></li>
+<li><p>💬 <a class="reference external" href="https://github.com/vmintf/SimpleEnvs-Python/discussions">Discussions</a></p></li>
+<li><p>📧 <a class="reference external" href="mailto:vmintf&#37;&#52;&#48;gmail&#46;com">Contact</a></p></li>
+</ul>
+</section>
+<section id="license">
+<h2>📄 License<a class="headerlink" href="#license" title="Permalink to this heading"></a></h2>
+<p>MIT License - see <a class="reference external" href="https://github.com/vmintf/SimpleEnvs-Python/blob/main/LICENSE">LICENSE</a> file for details.</p>
+<hr class="docutils" />
+<p><strong>Ready to get started?</strong> Check out the <a class="reference internal" href="installation.html"><span class="std std-doc">Installation Guide</span></a>! 🎉</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, vmintf.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

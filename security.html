@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Security Guide &mdash; SimpleEnvs 1.0.5 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="API Reference" href="api-reference.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SimpleEnvs
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Security Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#table-of-contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#security-overview">Security Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#simple-vs-secure-mode">Simple vs Secure Mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#simple-mode-default">Simple Mode (Default)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#secure-mode-enterprise">Secure Mode (Enterprise)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#memory-isolation">Memory Isolation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-problem">The Problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simpleenvs-solution">SimpleEnvs Solution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#memory-protection-features">Memory Protection Features</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#input-validation">Input Validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dangerous-pattern-detection">Dangerous Pattern Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#key-validation">Key Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#value-length-limits">Value Length Limits</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#file-security">File Security</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#file-type-validation">File Type Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#symbolic-link-protection">Symbolic Link Protection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-size-limits">File Size Limits</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#path-traversal-protection">Path Traversal Protection</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#attack-prevention">Attack Prevention</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#safe-directory-scanning">Safe Directory Scanning</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#integrity-checking">Integrity Checking</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#file-hash-verification">File Hash Verification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hash-algorithm">Hash Algorithm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tamper-detection">Tamper Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#access-logging">Access Logging</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#security-monitoring">Security Monitoring</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#log-entry-format">Log Entry Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logged-operations">Logged Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#session-tracking">Session Tracking</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#security-best-practices">Security Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#use-secure-mode-for-sensitive-data">1. Use Secure Mode for Sensitive Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#enable-strict-validation-in-production">2. Enable Strict Validation in Production</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implement-required-variable-checks">3. Implement Required Variable Checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#regular-security-audits">4. Regular Security Audits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#secure-cleanup">5. Secure Cleanup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#environment-specific-configuration">6. Environment-Specific Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#threat-model">Threat Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#protected-against">Protected Against</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#not-protected-against">Not Protected Against</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#assumptions">Assumptions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#compliance">Compliance</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#industry-standards">Industry Standards</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#security-certifications">Security Certifications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#audit-trail">Audit Trail</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#security-configuration">Security Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#environment-specific-settings">Environment-Specific Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#runtime-configuration">Runtime Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#incident-response">Incident Response</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#security-event-detection">Security Event Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#recovery-procedures">Recovery Procedures</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-security-features">Advanced Security Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cross-module-access">Cross-Module Access</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#automatic-discovery">Automatic Discovery</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#memory-introspection">Memory Introspection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#security-guarantees">Security Guarantees</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#web-application-pattern">Web Application Pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#multiple-loader-discovery">Multiple Loader Discovery</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#best-practices">Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-security-hooks">Custom Security Hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integration-with-security-tools">Integration with Security Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#need-help">Need Help?</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SimpleEnvs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Security Guide</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/vmintf/SimpleEnvs-Python/blob/main/docs/security.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="security-guide">
+<h1>Security Guide<a class="headerlink" href="#security-guide" title="Permalink to this heading"></a></h1>
+<p>SimpleEnvs provides enterprise-grade security features to protect your sensitive environment variables and prevent common attack vectors.</p>
+<section id="table-of-contents">
+<h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#security-overview"><span class="xref myst">Security Overview</span></a></p></li>
+<li><p><a class="reference internal" href="#simple-vs-secure-mode"><span class="xref myst">Simple vs Secure Mode</span></a></p></li>
+<li><p><a class="reference internal" href="#memory-isolation"><span class="xref myst">Memory Isolation</span></a></p></li>
+<li><p><a class="reference internal" href="#input-validation"><span class="xref myst">Input Validation</span></a></p></li>
+<li><p><a class="reference internal" href="#file-security"><span class="xref myst">File Security</span></a></p></li>
+<li><p><a class="reference internal" href="#path-traversal-protection"><span class="xref myst">Path Traversal Protection</span></a></p></li>
+<li><p><a class="reference internal" href="#integrity-checking"><span class="xref myst">Integrity Checking</span></a></p></li>
+<li><p><a class="reference internal" href="#access-logging"><span class="xref myst">Access Logging</span></a></p></li>
+<li><p><a class="reference internal" href="#security-best-practices"><span class="xref myst">Security Best Practices</span></a></p></li>
+<li><p><a class="reference internal" href="#threat-model"><span class="xref myst">Threat Model</span></a></p></li>
+<li><p><a class="reference internal" href="#compliance"><span class="xref myst">Compliance</span></a></p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="security-overview">
+<h2>Security Overview<a class="headerlink" href="#security-overview" title="Permalink to this heading"></a></h2>
+<p>SimpleEnvs implements a <strong>defense-in-depth</strong> security model with multiple layers of protection:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>🛡️ Defense Layers
+├── Input Validation      → Prevent injection attacks
+├── Path Security        → Block traversal attacks  
+├── Memory Isolation     → Isolate sensitive data
+├── File Integrity      → Detect tampering
+├── Access Logging      → Monitor usage
+└── Secure Cleanup      → Prevent data leaks
+</pre></div>
+</div>
+</section>
+<section id="simple-vs-secure-mode">
+<h2>Simple vs Secure Mode<a class="headerlink" href="#simple-vs-secure-mode" title="Permalink to this heading"></a></h2>
+<section id="simple-mode-default">
+<h3>Simple Mode (Default)<a class="headerlink" href="#simple-mode-default" title="Permalink to this heading"></a></h3>
+<p>Perfect for development and most production use cases:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="n">load_dotenv</span><span class="p">()</span>  <span class="c1"># Variables stored in os.environ</span>
+</pre></div>
+</div>
+<p><strong>Security Features:</strong></p>
+<ul class="simple">
+<li><p>✅ Input validation</p></li>
+<li><p>✅ Path traversal protection</p></li>
+<li><p>✅ File size limits</p></li>
+<li><p>❌ Memory isolation</p></li>
+<li><p>❌ Access logging</p></li>
+</ul>
+</section>
+<section id="secure-mode-enterprise">
+<h3>Secure Mode (Enterprise)<a class="headerlink" href="#secure-mode-enterprise" title="Permalink to this heading"></a></h3>
+<p>Memory-isolated environment variables that never touch <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv_secure</span><span class="p">,</span> <span class="n">get_secure</span>
+
+<span class="n">load_dotenv_secure</span><span class="p">()</span>  <span class="c1"># Memory-isolated loading</span>
+
+<span class="c1"># Secure access (not in os.environ!)</span>
+<span class="n">jwt_secret</span> <span class="o">=</span> <span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;JWT_SECRET&#39;</span><span class="p">)</span>
+<span class="n">db_password</span> <span class="o">=</span> <span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;DB_PASSWORD&#39;</span><span class="p">)</span>
+
+<span class="c1"># Verify isolation</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;JWT_SECRET&#39;</span><span class="p">))</span>  <span class="c1"># None - properly isolated! 🔒</span>
+</pre></div>
+</div>
+<p><strong>Security Features:</strong></p>
+<ul class="simple">
+<li><p>✅ All Simple Mode features</p></li>
+<li><p>✅ <strong>Memory isolation</strong></p></li>
+<li><p>✅ <strong>Access logging</strong></p></li>
+<li><p>✅ <strong>Session tracking</strong></p></li>
+<li><p>✅ <strong>Integrity verification</strong></p></li>
+<li><p>✅ <strong>Secure cleanup</strong></p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="memory-isolation">
+<h2>Memory Isolation<a class="headerlink" href="#memory-isolation" title="Permalink to this heading"></a></h2>
+<section id="the-problem">
+<h3>The Problem<a class="headerlink" href="#the-problem" title="Permalink to this heading"></a></h3>
+<p>Traditional environment loaders store secrets in <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>, making them visible to:</p>
+<ul class="simple">
+<li><p>All processes in the system</p></li>
+<li><p>Subprocess calls</p></li>
+<li><p>Process inspection tools</p></li>
+<li><p>Memory dumps</p></li>
+<li><p>Third-party libraries</p></li>
+</ul>
+</section>
+<section id="simpleenvs-solution">
+<h3>SimpleEnvs Solution<a class="headerlink" href="#simpleenvs-solution" title="Permalink to this heading"></a></h3>
+<p>Secure mode keeps sensitive data in <strong>memory-isolated storage</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="c1"># Load sensitive data securely</span>
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv_secure</span><span class="p">()</span>
+
+<span class="c1"># Access through secure API</span>
+<span class="n">api_key</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;API_KEY&#39;</span><span class="p">)</span>
+<span class="n">db_password</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;DATABASE_PASSWORD&#39;</span><span class="p">)</span>
+
+<span class="c1"># ✅ Data is accessible through SimpleEnvs</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;API Key loaded: </span><span class="si">{</span><span class="n">api_key</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="kc">None</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># 🔒 Data is NOT in system environment</span>
+<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;API_KEY&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;DATABASE_PASSWORD&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+
+<span class="c1"># 🔒 Not visible to subprocesses</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;env&#39;</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">assert</span> <span class="s1">&#39;API_KEY&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span>
+</pre></div>
+</div>
+</section>
+<section id="memory-protection-features">
+<h3>Memory Protection Features<a class="headerlink" href="#memory-protection-features" title="Permalink to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Private Storage</strong>: Uses Python’s name mangling (<code class="docutils literal notranslate"><span class="pre">__env_data</span></code>)</p></li>
+<li><p><strong>Weak References</strong>: Automatic cleanup when loader is destroyed</p></li>
+<li><p><strong>Secure Wipe</strong>: Multiple-pass overwriting of sensitive data</p></li>
+<li><p><strong>Isolation</strong>: No cross-contamination between loaders</p></li>
+</ol>
+</section>
+</section>
+<hr class="docutils" />
+<section id="input-validation">
+<h2>Input Validation<a class="headerlink" href="#input-validation" title="Permalink to this heading"></a></h2>
+<section id="dangerous-pattern-detection">
+<h3>Dangerous Pattern Detection<a class="headerlink" href="#dangerous-pattern-detection" title="Permalink to this heading"></a></h3>
+<p>SimpleEnvs automatically detects and blocks dangerous patterns:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># .env file with dangerous content</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">SAFE_VAR=hello_world</span>
+<span class="sd">DANGEROUS_VAR=$(cat /etc/passwd)</span>
+<span class="sd">SCRIPT_VAR=&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># Strict mode (recommended for production)</span>
+    <span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_secure</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">InvalidInputError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Blocked dangerous pattern: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Detected Patterns:</strong></p>
+<ul class="simple">
+<li><p>Command injection: <code class="docutils literal notranslate"><span class="pre">$(</span></code>, <code class="docutils literal notranslate"><span class="pre">`</span></code>, <code class="docutils literal notranslate"><span class="pre">${</span></code></p></li>
+<li><p>Script injection: <code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">javascript:</span></code></p></li>
+<li><p>Code execution: <code class="docutils literal notranslate"><span class="pre">eval(</span></code>, <code class="docutils literal notranslate"><span class="pre">exec(</span></code>, <code class="docutils literal notranslate"><span class="pre">__import__</span></code></p></li>
+<li><p>System access: <code class="docutils literal notranslate"><span class="pre">subprocess</span></code>, <code class="docutils literal notranslate"><span class="pre">os.system</span></code></p></li>
+</ul>
+</section>
+<section id="key-validation">
+<h3>Key Validation<a class="headerlink" href="#key-validation" title="Permalink to this heading"></a></h3>
+<p>Environment variable keys must follow secure naming conventions:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ✅ Valid keys</span>
+<span class="n">APP_NAME</span><span class="o">=</span><span class="n">MyApp</span>          <span class="c1"># Alphanumeric + underscore</span>
+<span class="n">API_KEY</span><span class="o">=</span><span class="n">secret</span>         <span class="c1"># Starts with letter</span>
+<span class="n">DB_HOST_1</span><span class="o">=</span><span class="n">localhost</span>    <span class="c1"># Numbers allowed</span>
+
+<span class="c1"># ❌ Invalid keys (blocked in strict mode)</span>
+<span class="mi">123</span><span class="n">_INVALID</span><span class="o">=</span><span class="n">value</span>      <span class="c1"># Cannot start with number</span>
+<span class="n">APP</span><span class="o">-</span><span class="n">NAME</span><span class="o">=</span><span class="n">value</span>         <span class="c1"># Hyphens only in relaxed mode</span>
+<span class="n">KEY</span> <span class="n">WITH</span> <span class="n">SPACES</span><span class="o">=</span><span class="n">value</span>  <span class="c1"># Spaces not allowed</span>
+<span class="n">KEY</span><span class="o">=</span><span class="n">WITH</span><span class="o">=</span><span class="n">EQUALS</span><span class="o">=</span><span class="n">value</span>  <span class="c1"># Multiple equals signs</span>
+</pre></div>
+</div>
+</section>
+<section id="value-length-limits">
+<h3>Value Length Limits<a class="headerlink" href="#value-length-limits" title="Permalink to this heading"></a></h3>
+<p>Prevents buffer overflow and DoS attacks:</p>
+<ul class="simple">
+<li><p><strong>Keys</strong>: Maximum 128 characters</p></li>
+<li><p><strong>Values</strong>: Maximum 1,024 characters</p></li>
+<li><p><strong>Lines</strong>: Maximum 4,096 characters</p></li>
+<li><p><strong>Files</strong>: Maximum 10MB</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="file-security">
+<h2>File Security<a class="headerlink" href="#file-security" title="Permalink to this heading"></a></h2>
+<section id="file-type-validation">
+<h3>File Type Validation<a class="headerlink" href="#file-type-validation" title="Permalink to this heading"></a></h3>
+<p>Only text files are accepted:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ✅ Allowed files</span>
+<span class="o">.</span><span class="n">env</span>
+<span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">production</span>
+<span class="n">config</span><span class="o">.</span><span class="n">txt</span>
+<span class="n">settings</span><span class="o">.</span><span class="n">conf</span>
+
+<span class="c1"># ❌ Blocked files</span>
+<span class="n">malicious</span><span class="o">.</span><span class="n">exe</span>
+<span class="n">script</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">binary</span><span class="o">.</span><span class="n">jpg</span>
+</pre></div>
+</div>
+</section>
+<section id="symbolic-link-protection">
+<h3>Symbolic Link Protection<a class="headerlink" href="#symbolic-link-protection" title="Permalink to this heading"></a></h3>
+<p>Prevents symbolic link attacks:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create malicious symlink</span>
+<span class="c1"># ln -s /etc/passwd .env</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv_secure</span><span class="p">()</span>
+<span class="k">except</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">InvalidInputError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Symbolic link blocked!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="file-size-limits">
+<h3>File Size Limits<a class="headerlink" href="#file-size-limits" title="Permalink to this heading"></a></h3>
+<p>Prevents resource exhaustion:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Environment-specific limits</span>
+<span class="n">Production</span><span class="p">:</span>  <span class="mi">8</span><span class="n">MB</span> <span class="p">(</span><span class="mi">80</span><span class="o">%</span> <span class="n">of</span> <span class="n">base</span> <span class="n">limit</span><span class="p">)</span>
+<span class="n">Testing</span><span class="p">:</span>     <span class="mi">5</span><span class="n">MB</span> <span class="p">(</span><span class="mi">50</span><span class="o">%</span> <span class="n">of</span> <span class="n">base</span> <span class="n">limit</span><span class="p">)</span>  
+<span class="n">Development</span><span class="p">:</span> <span class="mi">10</span><span class="n">MB</span> <span class="p">(</span><span class="mi">100</span><span class="o">%</span> <span class="n">of</span> <span class="n">base</span> <span class="n">limit</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="path-traversal-protection">
+<h2>Path Traversal Protection<a class="headerlink" href="#path-traversal-protection" title="Permalink to this heading"></a></h2>
+<section id="attack-prevention">
+<h3>Attack Prevention<a class="headerlink" href="#attack-prevention" title="Permalink to this heading"></a></h3>
+<p>SimpleEnvs blocks all path traversal attempts:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ❌ Blocked attempts</span>
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv</span><span class="p">(</span><span class="s1">&#39;../../../etc/passwd&#39;</span><span class="p">)</span>
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv</span><span class="p">(</span><span class="s1">&#39;..</span><span class="se">\\</span><span class="s1">..</span><span class="se">\\</span><span class="s1">windows</span><span class="se">\\</span><span class="s1">system32</span><span class="se">\\</span><span class="s1">config&#39;</span><span class="p">)</span>
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv</span><span class="p">(</span><span class="s1">&#39;/absolute/path/attack&#39;</span><span class="p">)</span>
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv</span><span class="p">(</span><span class="s1">&#39;path/with/null</span><span class="se">\x00</span><span class="s1">byte&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Protected Patterns:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">..</span></code> (directory traversal)</p></li>
+<li><p>Null bytes (<code class="docutils literal notranslate"><span class="pre">\x00</span></code>)</p></li>
+<li><p>Absolute paths (<code class="docutils literal notranslate"><span class="pre">/</span></code>, <code class="docutils literal notranslate"><span class="pre">C:\</span></code>)</p></li>
+<li><p>URL encoding (<code class="docutils literal notranslate"><span class="pre">%2e%2e</span></code>)</p></li>
+<li><p>Unicode variations</p></li>
+</ul>
+</section>
+<section id="safe-directory-scanning">
+<h3>Safe Directory Scanning<a class="headerlink" href="#safe-directory-scanning" title="Permalink to this heading"></a></h3>
+<p>Auto-discovery only searches safe locations:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ✅ Safe directories</span>
+<span class="o">./</span>
+<span class="o">./</span><span class="n">config</span><span class="o">/</span>
+<span class="o">./</span><span class="n">environments</span><span class="o">/</span>
+<span class="o">./</span><span class="n">settings</span><span class="o">/</span>
+
+<span class="c1"># ❌ Excluded directories</span>
+<span class="n">__pycache__</span><span class="o">/</span>
+<span class="o">.</span><span class="n">git</span><span class="o">/</span>
+<span class="n">node_modules</span><span class="o">/</span>
+<span class="o">.</span><span class="n">venv</span><span class="o">/</span>
+<span class="n">build</span><span class="o">/</span>
+<span class="n">dist</span><span class="o">/</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="integrity-checking">
+<h2>Integrity Checking<a class="headerlink" href="#integrity-checking" title="Permalink to this heading"></a></h2>
+<section id="file-hash-verification">
+<h3>File Hash Verification<a class="headerlink" href="#file-hash-verification" title="Permalink to this heading"></a></h3>
+<p>Secure mode automatically calculates and stores file hashes:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">SecureEnvLoader</span>
+
+<span class="n">loader</span> <span class="o">=</span> <span class="n">SecureEnvLoader</span><span class="p">()</span>
+<span class="k">await</span> <span class="n">loader</span><span class="o">.</span><span class="n">load_secure</span><span class="p">()</span>
+
+<span class="c1"># Verify file hasn&#39;t been tampered with</span>
+<span class="n">is_valid</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">verify_file_integrity</span><span class="p">(</span><span class="s1">&#39;.env&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;⚠️ File may have been modified!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="hash-algorithm">
+<h3>Hash Algorithm<a class="headerlink" href="#hash-algorithm" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Algorithm</strong>: SHA-256</p></li>
+<li><p><strong>Storage</strong>: In-memory only</p></li>
+<li><p><strong>Verification</strong>: On-demand or periodic</p></li>
+</ul>
+</section>
+<section id="tamper-detection">
+<h3>Tamper Detection<a class="headerlink" href="#tamper-detection" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="c1"># Initial load</span>
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv_secure</span><span class="p">()</span>
+
+<span class="c1"># ... time passes, file might be modified ...</span>
+
+<span class="c1"># Check integrity</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">security_info</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_security_info</span><span class="p">()</span>
+    <span class="c1"># Verify using stored hash</span>
+<span class="k">except</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">IntegrityError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File tampered: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">expected_hash</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Actual: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">actual_hash</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="access-logging">
+<h2>Access Logging<a class="headerlink" href="#access-logging" title="Permalink to this heading"></a></h2>
+<section id="security-monitoring">
+<h3>Security Monitoring<a class="headerlink" href="#security-monitoring" title="Permalink to this heading"></a></h3>
+<p>Secure mode logs all access attempts for security auditing:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">SecureEnvLoader</span>
+
+<span class="n">loader</span> <span class="o">=</span> <span class="n">SecureEnvLoader</span><span class="p">()</span>
+<span class="k">await</span> <span class="n">loader</span><span class="o">.</span><span class="n">load_secure</span><span class="p">()</span>
+
+<span class="c1"># Access some variables</span>
+<span class="n">api_key</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;API_KEY&#39;</span><span class="p">)</span>
+<span class="n">db_url</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;DATABASE_URL&#39;</span><span class="p">)</span>
+
+<span class="c1"># Review access log</span>
+<span class="n">access_log</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_access_log</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">access_log</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;operation&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="log-entry-format">
+<h3>Log Entry Format<a class="headerlink" href="#log-entry-format" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="mf">1640995200.0</span><span class="p">,</span>
+    <span class="s2">&quot;session_id&quot;</span><span class="p">:</span> <span class="s2">&quot;a1b2c3d4e5f6&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;operation&quot;</span><span class="p">:</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;API_KEY&quot;</span><span class="p">,</span> 
+    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;access_count&quot;</span><span class="p">:</span> <span class="mi">15</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="logged-operations">
+<h3>Logged Operations<a class="headerlink" href="#logged-operations" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">load</span></code> - File loading</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get</span></code> - Variable access</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">path_validation</span></code> - Path security checks</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">file_parse</span></code> - File parsing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">integrity_check</span></code> - Hash verification</p></li>
+</ul>
+</section>
+<section id="session-tracking">
+<h3>Session Tracking<a class="headerlink" href="#session-tracking" title="Permalink to this heading"></a></h3>
+<p>Each SecureEnvLoader instance has a unique session:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">loader</span> <span class="o">=</span> <span class="n">SecureEnvLoader</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="s2">&quot;prod-001&quot;</span><span class="p">)</span>
+<span class="n">security_info</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_security_info</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Session ID: </span><span class="si">{</span><span class="n">security_info</span><span class="p">[</span><span class="s1">&#39;session_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created: </span><span class="si">{</span><span class="n">security_info</span><span class="p">[</span><span class="s1">&#39;creation_time&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Access Count: </span><span class="si">{</span><span class="n">security_info</span><span class="p">[</span><span class="s1">&#39;access_count&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="security-best-practices">
+<h2>Security Best Practices<a class="headerlink" href="#security-best-practices" title="Permalink to this heading"></a></h2>
+<section id="use-secure-mode-for-sensitive-data">
+<h3>1. Use Secure Mode for Sensitive Data<a class="headerlink" href="#use-secure-mode-for-sensitive-data" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ✅ Recommended: Separate public and private config</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="c1"># Public configuration (can be in os.environ)</span>
+<span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;config.env&#39;</span><span class="p">)</span>
+<span class="n">app_name</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s1">&#39;APP_NAME&#39;</span><span class="p">)</span>
+
+<span class="c1"># Sensitive secrets (memory-isolated)</span>
+<span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_secure</span><span class="p">(</span><span class="s1">&#39;secrets.env&#39;</span><span class="p">)</span>
+<span class="n">jwt_secret</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;JWT_SECRET&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="enable-strict-validation-in-production">
+<h3>2. Enable Strict Validation in Production<a class="headerlink" href="#enable-strict-validation-in-production" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Production configuration</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;ENVIRONMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;development&#39;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">env</span> <span class="o">==</span> <span class="s1">&#39;production&#39;</span><span class="p">:</span>
+    <span class="c1"># Maximum security</span>
+    <span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_secure</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Development flexibility</span>
+    <span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="implement-required-variable-checks">
+<h3>3. Implement Required Variable Checks<a class="headerlink" href="#implement-required-variable-checks" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">validate_environment</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate all required environment variables are present&quot;&quot;&quot;</span>
+    <span class="n">required_vars</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;DATABASE_URL&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;JWT_SECRET&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;API_KEY&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;SMTP_PASSWORD&#39;</span>
+    <span class="p">]</span>
+    
+    <span class="n">missing</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">required_vars</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="n">var</span><span class="p">):</span>
+            <span class="n">missing</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required variables: </span><span class="si">{</span><span class="n">missing</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Call during application startup</span>
+<span class="n">validate_environment</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="regular-security-audits">
+<h3>4. Regular Security Audits<a class="headerlink" href="#regular-security-audits" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">security_audit</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform security audit of environment configuration&quot;&quot;&quot;</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_security_info</span><span class="p">()</span>
+    
+    <span class="c1"># Check access patterns</span>
+    <span class="k">if</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;access_count&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;⚠️ High access count - investigate&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Verify loader integrity</span>
+    <span class="n">loaders</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_all_secure_loaders</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="n">loaders</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loader</span><span class="o">.</span><span class="n">verify_file_integrity</span><span class="p">(</span><span class="s1">&#39;.env&#39;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;⚠️ File integrity compromised&quot;</span><span class="p">)</span>
+
+<span class="c1"># Run periodically</span>
+<span class="n">security_audit</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="secure-cleanup">
+<h3>5. Secure Cleanup<a class="headerlink" href="#secure-cleanup" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">atexit</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cleanup_secrets</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Securely wipe sensitive data on exit&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">simpleenvs</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ Secrets cleaned up&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⚠️ Cleanup error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Register cleanup handler</span>
+<span class="n">atexit</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">cleanup_secrets</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="environment-specific-configuration">
+<h3>6. Environment-Specific Configuration<a class="headerlink" href="#environment-specific-configuration" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SecureConfig</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_environment_type</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">env</span> <span class="o">==</span> <span class="s1">&#39;production&#39;</span><span class="p">:</span>
+            <span class="c1"># Maximum security settings</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strict_validation</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">require_integrity_check</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log_access</span> <span class="o">=</span> <span class="kc">True</span>
+            
+        <span class="k">elif</span> <span class="n">env</span> <span class="o">==</span> <span class="s1">&#39;development&#39;</span><span class="p">:</span>
+            <span class="c1"># Development convenience</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strict_validation</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">require_integrity_check</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log_access</span> <span class="o">=</span> <span class="kc">False</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_environment</span><span class="p">()</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_environment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="n">LoadOptions</span><span class="p">(</span>
+            <span class="n">strict_validation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">strict_validation</span>
+        <span class="p">)</span>
+        <span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_secure</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="threat-model">
+<h2>Threat Model<a class="headerlink" href="#threat-model" title="Permalink to this heading"></a></h2>
+<section id="protected-against">
+<h3>Protected Against<a class="headerlink" href="#protected-against" title="Permalink to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Attack Vector</p></th>
+<th class="head"><p>Protection</p></th>
+<th class="head"><p>Implementation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Code Injection</strong></p></td>
+<td><p>Input validation</p></td>
+<td><p>Pattern detection</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Path Traversal</strong></p></td>
+<td><p>Path validation</p></td>
+<td><p>Traversal blocking</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Data Exposure</strong></p></td>
+<td><p>Memory isolation</p></td>
+<td><p>Private storage</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>File Tampering</strong></p></td>
+<td><p>Integrity checks</p></td>
+<td><p>SHA-256 hashing</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Privilege Escalation</strong></p></td>
+<td><p>Access controls</p></td>
+<td><p>Permission validation</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Resource Exhaustion</strong></p></td>
+<td><p>Size limits</p></td>
+<td><p>Configurable limits</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Information Leakage</strong></p></td>
+<td><p>Secure cleanup</p></td>
+<td><p>Memory wiping</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="not-protected-against">
+<h3>Not Protected Against<a class="headerlink" href="#not-protected-against" title="Permalink to this heading"></a></h3>
+<p>⚠️ <strong>Important limitations:</strong></p>
+<ul class="simple">
+<li><p><strong>Physical access</strong> to the machine</p></li>
+<li><p><strong>Root/Administrator</strong> privilege escalation</p></li>
+<li><p><strong>Memory dumps</strong> by privileged processes</p></li>
+<li><p><strong>Debugger attachment</strong> by system admin</p></li>
+<li><p><strong>Side-channel attacks</strong> (timing, power analysis)</p></li>
+<li><p><strong>Social engineering</strong> attacks</p></li>
+</ul>
+</section>
+<section id="assumptions">
+<h3>Assumptions<a class="headerlink" href="#assumptions" title="Permalink to this heading"></a></h3>
+<p>SimpleEnvs security model assumes:</p>
+<ul class="simple">
+<li><p>Application runs in <strong>trusted environment</strong></p></li>
+<li><p>System is <strong>not compromised</strong> at OS level</p></li>
+<li><p>Python interpreter is <strong>secure and trusted</strong></p></li>
+<li><p>File system has <strong>basic access controls</strong></p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="compliance">
+<h2>Compliance<a class="headerlink" href="#compliance" title="Permalink to this heading"></a></h2>
+<section id="industry-standards">
+<h3>Industry Standards<a class="headerlink" href="#industry-standards" title="Permalink to this heading"></a></h3>
+<p>SimpleEnvs helps meet various compliance requirements:</p>
+<p><strong>OWASP Top 10:</strong></p>
+<ul class="simple">
+<li><p>✅ A03 - Injection (Input validation)</p></li>
+<li><p>✅ A01 - Broken Access Control (Memory isolation)</p></li>
+<li><p>✅ A09 - Security Logging (Access monitoring)</p></li>
+</ul>
+<p><strong>NIST Cybersecurity Framework:</strong></p>
+<ul class="simple">
+<li><p>✅ Identify - Asset inventory (environment variables)</p></li>
+<li><p>✅ Protect - Access controls (secure mode)</p></li>
+<li><p>✅ Detect - Monitoring (access logs)</p></li>
+<li><p>✅ Respond - Incident handling (integrity checks)</p></li>
+</ul>
+</section>
+<section id="security-certifications">
+<h3>Security Certifications<a class="headerlink" href="#security-certifications" title="Permalink to this heading"></a></h3>
+<p>While not certified, SimpleEnvs implements security practices aligned with:</p>
+<ul class="simple">
+<li><p><strong>ISO 27001</strong> - Information Security Management</p></li>
+<li><p><strong>SOC 2 Type II</strong> - Security controls</p></li>
+<li><p><strong>PCI DSS</strong> - Data protection (for payment systems)</p></li>
+</ul>
+</section>
+<section id="audit-trail">
+<h3>Audit Trail<a class="headerlink" href="#audit-trail" title="Permalink to this heading"></a></h3>
+<p>For compliance auditing, SecureEnvLoader provides:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_audit_report</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate compliance audit report&quot;&quot;&quot;</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_security_info</span><span class="p">()</span>
+    <span class="n">access_log</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_access_log</span><span class="p">()</span>
+    
+    <span class="n">report</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;session_id&#39;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;session_id&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;total_accesses&#39;</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;access_count&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;security_events&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">access_log</span> 
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;file_integrity&#39;</span><span class="p">:</span> <span class="s1">&#39;verified&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;memory_isolation&#39;</span><span class="p">:</span> <span class="s1">&#39;enabled&#39;</span>
+    <span class="p">}</span>
+    
+    <span class="k">return</span> <span class="n">report</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="security-configuration">
+<h2>Security Configuration<a class="headerlink" href="#security-configuration" title="Permalink to this heading"></a></h2>
+<section id="environment-specific-settings">
+<h3>Environment-Specific Settings<a class="headerlink" href="#environment-specific-settings" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Production (Maximum Security)</span>
+<span class="n">ENVIRONMENT</span><span class="o">=</span><span class="n">production</span>
+<span class="n">SIMPLEENVS_STRICT_VALIDATION</span><span class="o">=</span><span class="n">true</span>
+<span class="n">SIMPLEENVS_REQUIRE_INTEGRITY</span><span class="o">=</span><span class="n">true</span>
+<span class="n">SIMPLEENVS_LOG_ACCESS</span><span class="o">=</span><span class="n">true</span>
+
+<span class="c1"># Development (Balanced)</span>
+<span class="n">ENVIRONMENT</span><span class="o">=</span><span class="n">development</span>  
+<span class="n">SIMPLEENVS_STRICT_VALIDATION</span><span class="o">=</span><span class="n">false</span>
+<span class="n">SIMPLEENVS_REQUIRE_INTEGRITY</span><span class="o">=</span><span class="n">false</span>
+<span class="n">SIMPLEENVS_LOG_ACCESS</span><span class="o">=</span><span class="n">false</span>
+</pre></div>
+</div>
+</section>
+<section id="runtime-configuration">
+<h3>Runtime Configuration<a class="headerlink" href="#runtime-configuration" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs.secure</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoadOptions</span>
+
+<span class="c1"># Custom security configuration</span>
+<span class="n">options</span> <span class="o">=</span> <span class="n">LoadOptions</span><span class="p">(</span>
+    <span class="n">path</span><span class="o">=</span><span class="s1">&#39;.env.production&#39;</span><span class="p">,</span>
+    <span class="n">max_depth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># Restrict search depth</span>
+    <span class="n">strict_validation</span><span class="o">=</span><span class="kc">True</span>  <span class="c1"># Enable all validations</span>
+<span class="p">)</span>
+
+<span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_secure</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="incident-response">
+<h2>Incident Response<a class="headerlink" href="#incident-response" title="Permalink to this heading"></a></h2>
+<section id="security-event-detection">
+<h3>Security Event Detection<a class="headerlink" href="#security-event-detection" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">monitor_security_events</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Monitor for security incidents&quot;&quot;&quot;</span>
+    <span class="n">access_log</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_access_log</span><span class="p">()</span>
+    
+    <span class="c1"># Check for failed access attempts</span>
+    <span class="n">failed_attempts</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">access_log</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">:]</span>  <span class="c1"># Last 10 entries</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]</span>
+    <span class="p">]</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">failed_attempts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">alert_security_team</span><span class="p">(</span><span class="s2">&quot;Multiple failed access attempts detected&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Check for unusual access patterns</span>
+    <span class="n">recent_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">access_log</span><span class="p">[</span><span class="o">-</span><span class="mi">50</span><span class="p">:]]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">recent_keys</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">:</span>  <span class="c1"># Accessing many different keys</span>
+        <span class="n">alert_security_team</span><span class="p">(</span><span class="s2">&quot;Unusual access pattern detected&quot;</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">alert_security_team</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alert security team of potential incident&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🚨 SECURITY ALERT: </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Implement your alerting mechanism here</span>
+</pre></div>
+</div>
+</section>
+<section id="recovery-procedures">
+<h3>Recovery Procedures<a class="headerlink" href="#recovery-procedures" title="Permalink to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Isolate the affected system</strong></p></li>
+<li><p><strong>Review access logs</strong> for unauthorized access</p></li>
+<li><p><strong>Verify file integrity</strong> of environment files</p></li>
+<li><p><strong>Rotate compromised secrets</strong> immediately</p></li>
+<li><p><strong>Update security policies</strong> if needed</p></li>
+</ol>
+</section>
+</section>
+<hr class="docutils" />
+<section id="advanced-security-features">
+<h2>Advanced Security Features<a class="headerlink" href="#advanced-security-features" title="Permalink to this heading"></a></h2>
+<section id="cross-module-access">
+<h3>Cross-Module Access<a class="headerlink" href="#cross-module-access" title="Permalink to this heading"></a></h3>
+<p>SimpleEnvs automatically enables secure environment variables loaded in one module to be accessed from other modules without re-loading, while maintaining full memory isolation.</p>
+<section id="automatic-discovery">
+<h4>Automatic Discovery<a class="headerlink" href="#automatic-discovery" title="Permalink to this heading"></a></h4>
+<p>When you load secure environment variables in a parent module, child modules can automatically access the same data:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># main.py (parent module)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">startup</span><span class="p">():</span>
+    <span class="c1"># Load secrets once in main module</span>
+    <span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_secure</span><span class="p">(</span><span class="s1">&#39;.env.production&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ Secrets loaded in main module&quot;</span><span class="p">)</span>
+
+<span class="c1"># database.py (child module)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DatabaseConfig</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Automatically finds SecureEnvLoader from main.py!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;DATABASE_URL&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;DB_PASSWORD&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ Database config loaded from parent module&quot;</span><span class="p">)</span>
+
+<span class="c1"># services.py (another child module)  </span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">APIClient</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Also uses the same SecureEnvLoader automatically</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;API_KEY&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">secret</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;API_SECRET&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="memory-introspection">
+<h4>Memory Introspection<a class="headerlink" href="#memory-introspection" title="Permalink to this heading"></a></h4>
+<p>The discovery mechanism uses Python’s garbage collector to safely find existing SecureEnvLoader instances:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_find_secure_loader_in_memory</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SecureEnvLoader</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find existing SecureEnvLoader instance in memory&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">gc</span><span class="o">.</span><span class="n">get_objects</span><span class="p">():</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">SecureEnvLoader</span><span class="p">)</span> 
+                <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;_SecureEnvLoader__env_data&quot;</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">_SecureEnvLoader__env_data</span><span class="p">):</span>  <span class="c1"># Has loaded data</span>
+                <span class="k">return</span> <span class="n">obj</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+</div>
+</section>
+<section id="security-guarantees">
+<h4>Security Guarantees<a class="headerlink" href="#security-guarantees" title="Permalink to this heading"></a></h4>
+<p>Cross-module access maintains all security properties:</p>
+<ul class="simple">
+<li><p>✅ <strong>Memory Isolation</strong>: Data still not in <code class="docutils literal notranslate"><span class="pre">os.environ</span></code></p></li>
+<li><p>✅ <strong>Access Logging</strong>: All access attempts logged</p></li>
+<li><p>✅ <strong>Session Tracking</strong>: Same session ID across modules</p></li>
+<li><p>✅ <strong>Integrity</strong>: File hashes preserved</p></li>
+</ul>
+</section>
+<section id="web-application-pattern">
+<h4>Web Application Pattern<a class="headerlink" href="#web-application-pattern" title="Permalink to this heading"></a></h4>
+<p>Perfect for web applications with multiple modules:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># app.py - FastAPI application</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">on_event</span><span class="p">(</span><span class="s2">&quot;startup&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">startup</span><span class="p">():</span>
+    <span class="c1"># Load secrets once at startup</span>
+    <span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_secure</span><span class="p">(</span><span class="s1">&#39;.env.secrets&#39;</span><span class="p">)</span>
+
+<span class="c1"># models/user.py - Database models</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">UserModel</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Automatically uses secrets from app.py</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_url</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;DATABASE_URL&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jwt_secret</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;JWT_SECRET&#39;</span><span class="p">)</span>
+
+<span class="c1"># services/email.py - Email service</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">EmailService</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Also uses secrets from app.py</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smtp_password</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;SMTP_PASSWORD&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;EMAIL_API_KEY&#39;</span><span class="p">)</span>
+
+<span class="c1"># routes/auth.py - Authentication routes</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">verify_token</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+    <span class="c1"># JWT secret available here too</span>
+    <span class="n">secret</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;JWT_SECRET&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jwt</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">secret</span><span class="p">,</span> <span class="n">algorithms</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;HS256&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
+<section id="multiple-loader-discovery">
+<h4>Multiple Loader Discovery<a class="headerlink" href="#multiple-loader-discovery" title="Permalink to this heading"></a></h4>
+<p>If multiple SecureEnvLoaders exist, the system finds the first one with loaded data:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check all loaders in memory</span>
+<span class="n">loaders</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_all_secure_loaders</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">loaders</span><span class="p">)</span><span class="si">}</span><span class="s2"> SecureEnvLoader instances&quot;</span><span class="p">)</span>
+
+<span class="c1"># Get security info from active loader</span>
+<span class="k">if</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">is_loaded_secure</span><span class="p">():</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_security_info</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Active session: </span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;session_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="best-practices">
+<h4>Best Practices<a class="headerlink" href="#best-practices" title="Permalink to this heading"></a></h4>
+<ol class="arabic simple">
+<li><p><strong>Load Once</strong>: Load secrets in main module during startup</p></li>
+<li><p><strong>Check Availability</strong>: Verify loader exists before accessing</p></li>
+<li><p><strong>Consistent Access</strong>: Use same getter functions across modules</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Defensive programming</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_database_config</span><span class="p">():</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">is_loaded_secure</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Secure environment not loaded&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;DATABASE_URL&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;DB_PASSWORD&#39;</span><span class="p">)</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="custom-security-hooks">
+<h3>Custom Security Hooks<a class="headerlink" href="#custom-security-hooks" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">CustomSecureLoader</span><span class="p">(</span><span class="n">SecureEnvLoader</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">security_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">security_callback</span> <span class="o">=</span> <span class="n">security_callback</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">__log_access</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">success</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_SecureEnvLoader__log_access</span><span class="p">(</span><span class="n">operation</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">success</span><span class="p">)</span>
+        
+        <span class="c1"># Custom security monitoring</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">security_callback</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">security_callback</span><span class="p">(</span><span class="n">operation</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">success</span><span class="p">)</span>
+
+<span class="c1"># Usage</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">security_alert</span><span class="p">(</span><span class="n">operation</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">success</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🚨 Security event: </span><span class="si">{</span><span class="n">operation</span><span class="si">}</span><span class="s2"> failed for key </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">loader</span> <span class="o">=</span> <span class="n">CustomSecureLoader</span><span class="p">(</span><span class="n">security_callback</span><span class="o">=</span><span class="n">security_alert</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="integration-with-security-tools">
+<h3>Integration with Security Tools<a class="headerlink" href="#integration-with-security-tools" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Integration with security monitoring systems</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="c1"># Configure security logger</span>
+<span class="n">security_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;simpleenvs.security&#39;</span><span class="p">)</span>
+<span class="n">security_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+<span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+<span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span>
+    <span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - SECURITY - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
+<span class="p">))</span>
+<span class="n">security_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
+<span class="c1"># Log security events</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">log_security_event</span><span class="p">(</span><span class="n">event_type</span><span class="p">,</span> <span class="n">details</span><span class="p">):</span>
+    <span class="n">security_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">event_type</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">details</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="need-help">
+<h2>Need Help?<a class="headerlink" href="#need-help" title="Permalink to this heading"></a></h2>
+<p><strong>Security Questions:</strong></p>
+<ul class="simple">
+<li><p>🐛 <a class="reference external" href="https://github.com/vmintf/SimpleEnvs-Python/security">Report security issues</a></p></li>
+<li><p>📧 <a class="reference external" href="mailto:vmintf&#37;&#52;&#48;gmail&#46;com">Contact security team</a></p></li>
+<li><p>💬 <a class="reference external" href="https://github.com/vmintf/SimpleEnvs-Python/discussions">Security discussions</a></p></li>
+</ul>
+<p><strong>Resources:</strong></p>
+<ul class="simple">
+<li><p>📚 <a class="reference internal" href="api-reference.html"><span class="std std-doc">API Reference</span></a></p></li>
+<li><p>🚀 <a class="reference internal" href="quickstart.html"><span class="std std-doc">Quick Start</span></a></p></li>
+<li><p>🏗️ <a class="reference internal" href="#best-practices.md"><span class="xref myst">Best Practices</span></a></p></li>
+</ul>
+<hr class="docutils" />
+<p><strong>Remember:</strong> Security is a process, not a product. Regularly review and update your security practices! 🔒</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api-reference.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, vmintf.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

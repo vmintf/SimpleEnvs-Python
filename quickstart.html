@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quick Start Guide &mdash; SimpleEnvs 1.0.5 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api-reference.html" />
+    <link rel="prev" title="Installation Guide" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SimpleEnvs
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick Start Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#second-setup">30-Second Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install">1. Install</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-env-file">2. Create .env file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load-and-use">3. Load and use</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-usage-patterns">Basic Usage Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#drop-in-replacement-for-python-dotenv">🔄 Drop-in Replacement for python-dotenv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#type-safe-access">🎯 Type-Safe Access</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#async-loading">⚡ Async Loading</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#secure-mode-enterprise">🔒 Secure Mode (Enterprise)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#common-use-cases">Common Use Cases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#web-application">🌐 Web Application</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-application">🐳 Docker Application</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#development-vs-production">🔧 Development vs Production</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#smart-directory-scanning">Smart Directory Scanning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#environment-file-examples">Environment File Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-env">Basic .env</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#development-env-development">Development .env.development</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#production-env-production">Production .env.production</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#debugging-and-inspection">Debugging and Inspection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#framework-integration">Framework Integration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fastapi">FastAPI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#django">Django</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flask">Flask</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#do-s">✅ Do’s</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#don-ts">❌ Don’ts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#need-help">Need Help?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security.html">Security Guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SimpleEnvs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Quick Start Guide</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/vmintf/SimpleEnvs-Python/blob/main/docs/quickstart.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="quick-start-guide">
+<h1>Quick Start Guide<a class="headerlink" href="#quick-start-guide" title="Permalink to this heading"></a></h1>
+<p>Get started with SimpleEnvs in under 5 minutes! 🚀</p>
+<section id="second-setup">
+<h2>30-Second Setup<a class="headerlink" href="#second-setup" title="Permalink to this heading"></a></h2>
+<section id="install">
+<h3>1. Install<a class="headerlink" href="#install" title="Permalink to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>simpleenvs-python
+</pre></div>
+</div>
+</section>
+<section id="create-env-file">
+<h3>2. Create .env file<a class="headerlink" href="#create-env-file" title="Permalink to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;APP_NAME=MyApp</span>
+<span class="s2">DEBUG=true</span>
+<span class="s2">PORT=8080</span>
+<span class="s2">DATABASE_URL=postgresql://user:pass@localhost/db&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>.env
+</pre></div>
+</div>
+</section>
+<section id="load-and-use">
+<h3>3. Load and use<a class="headerlink" href="#load-and-use" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="n">load_dotenv</span><span class="p">()</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;App: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;APP_NAME&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># MyApp</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Debug: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;DEBUG&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># True</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Port: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PORT&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>     <span class="c1"># 8080</span>
+</pre></div>
+</div>
+<p><strong>That’s it!</strong> You’re now using SimpleEnvs. 🎉</p>
+</section>
+</section>
+<section id="basic-usage-patterns">
+<h2>Basic Usage Patterns<a class="headerlink" href="#basic-usage-patterns" title="Permalink to this heading"></a></h2>
+<section id="drop-in-replacement-for-python-dotenv">
+<h3>🔄 Drop-in Replacement for python-dotenv<a class="headerlink" href="#drop-in-replacement-for-python-dotenv" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Before (python-dotenv)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="n">load_dotenv</span><span class="p">()</span>
+
+<span class="c1"># After (SimpleEnvs) - Only change the import!</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="n">load_dotenv</span><span class="p">()</span>  <span class="c1"># Same API, 2-4x faster! ⚡</span>
+</pre></div>
+</div>
+</section>
+<section id="type-safe-access">
+<h3>🎯 Type-Safe Access<a class="headerlink" href="#type-safe-access" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv</span><span class="p">()</span>
+
+<span class="c1"># Type-safe getters with defaults</span>
+<span class="n">app_name</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s1">&#39;APP_NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;DefaultApp&#39;</span><span class="p">)</span>  <span class="c1"># str</span>
+<span class="n">debug</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s1">&#39;DEBUG&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>             <span class="c1"># bool  </span>
+<span class="n">port</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_int</span><span class="p">(</span><span class="s1">&#39;PORT&#39;</span><span class="p">,</span> <span class="mi">8080</span><span class="p">)</span>                 <span class="c1"># int</span>
+<span class="n">timeout</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span><span class="s1">&#39;TIMEOUT&#39;</span><span class="p">,</span> <span class="mf">30.0</span><span class="p">)</span>         <span class="c1"># float</span>
+</pre></div>
+</div>
+</section>
+<section id="async-loading">
+<h3>⚡ Async Loading<a class="headerlink" href="#async-loading" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="c1"># Async loading (recommended for web apps)</span>
+<span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;.env&#39;</span><span class="p">)</span>
+
+<span class="c1"># Or one-liner</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">aload_dotenv</span>
+<span class="k">await</span> <span class="n">aload_dotenv</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="secure-mode-enterprise">
+<h3>🔒 Secure Mode (Enterprise)<a class="headerlink" href="#secure-mode-enterprise" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv_secure</span><span class="p">,</span> <span class="n">get_secure</span>
+
+<span class="c1"># Memory-isolated loading (NOT in os.environ!)</span>
+<span class="n">load_dotenv_secure</span><span class="p">()</span>
+
+<span class="c1"># Secure access</span>
+<span class="n">jwt_secret</span> <span class="o">=</span> <span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;JWT_SECRET&#39;</span><span class="p">)</span>
+<span class="n">db_password</span> <span class="o">=</span> <span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;DB_PASSWORD&#39;</span><span class="p">)</span>
+
+<span class="c1"># Verify isolation</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;JWT_SECRET&#39;</span><span class="p">))</span>  <span class="c1"># None - properly isolated! 🔒</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="common-use-cases">
+<h2>Common Use Cases<a class="headerlink" href="#common-use-cases" title="Permalink to this heading"></a></h2>
+<section id="web-application">
+<h3>🌐 Web Application<a class="headerlink" href="#web-application" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># app.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
+
+<span class="c1"># Load config</span>
+<span class="n">load_dotenv</span><span class="p">()</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_root</span><span class="p">():</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;app&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;APP_NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;MyApp&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;VERSION&quot;</span><span class="p">,</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;debug&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="docker-application">
+<h3>🐳 Docker Application<a class="headerlink" href="#docker-application" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># config.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="c1"># Auto-detect environment and load appropriate file</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;ENVIRONMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;development&#39;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">env</span> <span class="o">==</span> <span class="s1">&#39;production&#39;</span><span class="p">:</span>
+    <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv_secure</span><span class="p">(</span><span class="s1">&#39;.env.production&#39;</span><span class="p">)</span>  <span class="c1"># Secure mode</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;.env.</span><span class="si">{</span><span class="n">env</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># Simple mode</span>
+
+<span class="c1"># Configuration class</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+    <span class="n">APP_NAME</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s1">&#39;APP_NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;MyApp&#39;</span><span class="p">)</span>
+    <span class="n">DATABASE_URL</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;DATABASE_URL&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">env</span> <span class="o">==</span> <span class="s1">&#39;production&#39;</span> <span class="k">else</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s1">&#39;DATABASE_URL&#39;</span><span class="p">)</span>
+    <span class="n">DEBUG</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s1">&#39;DEBUG&#39;</span><span class="p">,</span> <span class="n">env</span> <span class="o">!=</span> <span class="s1">&#39;production&#39;</span><span class="p">)</span>
+    <span class="n">PORT</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_int</span><span class="p">(</span><span class="s1">&#39;PORT&#39;</span><span class="p">,</span> <span class="mi">8000</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="development-vs-production">
+<h3>🔧 Development vs Production<a class="headerlink" href="#development-vs-production" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># settings.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="c1"># Load based on environment</span>
+<span class="n">environment</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;ENVIRONMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;development&#39;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">environment</span> <span class="o">==</span> <span class="s1">&#39;production&#39;</span><span class="p">:</span>
+    <span class="c1"># Maximum security for production</span>
+    <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv_secure</span><span class="p">(</span><span class="s1">&#39;.env.production&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Access sensitive data securely</span>
+    <span class="n">DATABASE_PASSWORD</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;DATABASE_PASSWORD&#39;</span><span class="p">)</span>
+    <span class="n">JWT_SECRET</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;JWT_SECRET&#39;</span><span class="p">)</span>
+    
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Simple loading for development</span>
+    <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv</span><span class="p">(</span><span class="s1">&#39;.env.development&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Regular access for non-sensitive data</span>
+    <span class="n">DATABASE_PASSWORD</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s1">&#39;DATABASE_PASSWORD&#39;</span><span class="p">)</span>
+    <span class="n">JWT_SECRET</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s1">&#39;JWT_SECRET&#39;</span><span class="p">)</span>
+
+<span class="c1"># Common settings (always available)</span>
+<span class="n">APP_NAME</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s1">&#39;APP_NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;MyApp&#39;</span><span class="p">)</span>
+<span class="n">DEBUG</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s1">&#39;DEBUG&#39;</span><span class="p">,</span> <span class="n">environment</span> <span class="o">==</span> <span class="s1">&#39;development&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="smart-directory-scanning">
+<h2>Smart Directory Scanning<a class="headerlink" href="#smart-directory-scanning" title="Permalink to this heading"></a></h2>
+<p>SimpleEnvs automatically finds your .env files! 🔍</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Your project structure</span>
+my-project/
+├──<span class="w"> </span>app.py<span class="w">                    </span><span class="c1"># Run from here</span>
+├──<span class="w"> </span>config/
+│<span class="w">   </span>└──<span class="w"> </span>.env<span class="w">                 </span><span class="c1"># ✅ Found automatically!</span>
+├──<span class="w"> </span>environments/
+│<span class="w">   </span>├──<span class="w"> </span>.env.development<span class="w">     </span><span class="c1"># ✅ Found automatically!</span>
+│<span class="w">   </span>└──<span class="w"> </span>.env.production<span class="w">      </span><span class="c1"># ✅ Found automatically!</span>
+└──<span class="w"> </span>docker/
+<span class="w">    </span>└──<span class="w"> </span>.env.docker<span class="w">          </span><span class="c1"># ✅ Found automatically!</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Zero configuration - finds first .env automatically</span>
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv</span><span class="p">()</span>
+
+<span class="c1"># Or control the search</span>
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>          <span class="c1"># Search 3 levels deep</span>
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>          <span class="c1"># Current directory only</span>
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;custom.env&#39;</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Exact file, no search</span>
+</pre></div>
+</div>
+</section>
+<section id="environment-file-examples">
+<h2>Environment File Examples<a class="headerlink" href="#environment-file-examples" title="Permalink to this heading"></a></h2>
+<section id="basic-env">
+<h3>Basic .env<a class="headerlink" href="#basic-env" title="Permalink to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Application settings</span>
+<span class="nv">APP_NAME</span><span class="o">=</span>SimpleEnvs<span class="w"> </span>Demo
+<span class="nv">VERSION</span><span class="o">=</span><span class="m">1</span>.0.0
+<span class="nv">DEBUG</span><span class="o">=</span><span class="nb">true</span>
+
+<span class="c1"># Database</span>
+<span class="nv">DATABASE_URL</span><span class="o">=</span>postgresql://user:password@localhost:5432/mydb
+<span class="nv">DATABASE_POOL_SIZE</span><span class="o">=</span><span class="m">10</span>
+
+<span class="c1"># API Keys (keep these secret!)</span>
+<span class="nv">JWT_SECRET</span><span class="o">=</span>your-super-secret-jwt-key
+<span class="nv">API_KEY</span><span class="o">=</span>your-api-key-here
+
+<span class="c1"># Feature flags</span>
+<span class="nv">ENABLE_LOGGING</span><span class="o">=</span><span class="nb">true</span>
+<span class="nv">ENABLE_CACHE</span><span class="o">=</span><span class="nb">false</span>
+</pre></div>
+</div>
+</section>
+<section id="development-env-development">
+<h3>Development .env.development<a class="headerlink" href="#development-env-development" title="Permalink to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">DEBUG</span><span class="o">=</span><span class="nb">true</span>
+<span class="nv">DATABASE_URL</span><span class="o">=</span>postgresql://dev:dev@localhost:5432/myapp_dev
+<span class="nv">LOG_LEVEL</span><span class="o">=</span>DEBUG
+<span class="nv">CACHE_TTL</span><span class="o">=</span><span class="m">60</span>
+</pre></div>
+</div>
+</section>
+<section id="production-env-production">
+<h3>Production .env.production<a class="headerlink" href="#production-env-production" title="Permalink to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">DEBUG</span><span class="o">=</span><span class="nb">false</span>
+<span class="nv">DATABASE_URL</span><span class="o">=</span>postgresql://prod_user:secure_pass@prod-db:5432/myapp
+<span class="nv">LOG_LEVEL</span><span class="o">=</span>ERROR
+<span class="nv">CACHE_TTL</span><span class="o">=</span><span class="m">3600</span>
+<span class="nv">JWT_SECRET</span><span class="o">=</span>super-secure-production-secret
+</pre></div>
+</div>
+</section>
+</section>
+<section id="error-handling">
+<h2>Error Handling<a class="headerlink" href="#error-handling" title="Permalink to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleEnvsError</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv</span><span class="p">()</span>
+    
+    <span class="c1"># Required environment variables</span>
+    <span class="n">database_url</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s1">&#39;DATABASE_URL&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">database_url</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;DATABASE_URL is required&quot;</span><span class="p">)</span>
+        
+<span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No .env file found - using defaults&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">SimpleEnvsError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="debugging-and-inspection">
+<h2>Debugging and Inspection<a class="headerlink" href="#debugging-and-inspection" title="Permalink to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="c1"># Load environment</span>
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv</span><span class="p">()</span>
+
+<span class="c1"># Check what&#39;s loaded</span>
+<span class="n">info</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_info</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded </span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;total_keys&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> environment variables&quot;</span><span class="p">)</span>
+
+<span class="c1"># List all keys</span>
+<span class="n">all_keys</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_all_keys</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available keys: </span><span class="si">{</span><span class="n">all_keys</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Security info (for secure mode)</span>
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv_secure</span><span class="p">()</span>
+<span class="n">security_info</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_security_info</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Security session: </span><span class="si">{</span><span class="n">security_info</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="framework-integration">
+<h2>Framework Integration<a class="headerlink" href="#framework-integration" title="Permalink to this heading"></a></h2>
+<section id="fastapi">
+<h3>FastAPI<a class="headerlink" href="#fastapi" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">on_event</span><span class="p">(</span><span class="s2">&quot;startup&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">startup</span><span class="p">():</span>
+    <span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;.env&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Environment loaded!&quot;</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/config&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_config</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;app_name&quot;</span><span class="p">:</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;APP_NAME&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;debug&quot;</span><span class="p">:</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;VERSION&quot;</span><span class="p">,</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="django">
+<h3>Django<a class="headerlink" href="#django" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># settings.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="c1"># Load environment at the top</span>
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv</span><span class="p">()</span>
+
+<span class="c1"># Use in Django settings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="n">DEBUG</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;DEBUG&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span>
+<span class="n">SECRET_KEY</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;SECRET_KEY&#39;</span><span class="p">)</span>
+<span class="n">DATABASE_URL</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;DATABASE_URL&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="flask">
+<h3>Flask<a class="headerlink" href="#flask" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flask</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+
+<span class="c1"># Load environment</span>
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv</span><span class="p">()</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># Configure from environment</span>
+<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">from_object</span><span class="p">(</span><span class="s1">&#39;config.Config&#39;</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">():</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Hello from </span><span class="si">{</span><span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s1">&#39;APP_NAME&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">!&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Permalink to this heading"></a></h2>
+<section id="do-s">
+<h3>✅ Do’s<a class="headerlink" href="#do-s" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">.env</span></code> for local development</p></li>
+<li><p>Use secure mode for production secrets</p></li>
+<li><p>Set sensible defaults with <code class="docutils literal notranslate"><span class="pre">get_*</span></code> functions</p></li>
+<li><p>Keep <code class="docutils literal notranslate"><span class="pre">.env</span></code> files out of version control</p></li>
+<li><p>Use environment-specific files (<code class="docutils literal notranslate"><span class="pre">.env.production</span></code>, <code class="docutils literal notranslate"><span class="pre">.env.development</span></code>)</p></li>
+</ul>
+</section>
+<section id="don-ts">
+<h3>❌ Don’ts<a class="headerlink" href="#don-ts" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>Don’t commit <code class="docutils literal notranslate"><span class="pre">.env</span></code> files to git</p></li>
+<li><p>Don’t put production secrets in simple mode</p></li>
+<li><p>Don’t use overly long variable names</p></li>
+<li><p>Don’t forget to validate required variables</p></li>
+</ul>
+</section>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Permalink to this heading"></a></h2>
+<p>Ready to dive deeper? 📚</p>
+<ol class="arabic simple">
+<li><p><strong><a class="reference internal" href="api-reference.html"><span class="std std-doc">API Reference</span></a></strong> - Complete function documentation</p></li>
+<li><p><strong><a class="reference internal" href="security.html"><span class="std std-doc">Security Guide</span></a></strong> - Advanced security features</p></li>
+<li><p><strong><a class="reference internal" href="#../examples/"><span class="xref myst">Examples</span></a></strong> - Real-world usage examples</p></li>
+<li><p><strong><a class="reference internal" href="#migration.md"><span class="xref myst">Migration Guide</span></a></strong> - Moving from python-dotenv</p></li>
+</ol>
+</section>
+<section id="need-help">
+<h2>Need Help?<a class="headerlink" href="#need-help" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>🐛 <a class="reference external" href="https://github.com/vmintf/SimpleEnvs-Python/issues">Report Issues</a></p></li>
+<li><p>💬 <a class="reference external" href="https://github.com/vmintf/SimpleEnvs-Python/discussions">Ask Questions</a></p></li>
+<li><p>📖 <a class="reference external" href="https://vmintf.github.io/SimpleEnvs-Python">Read Full Documentation</a></p></li>
+</ul>
+<hr class="docutils" />
+<p><strong>Happy coding with SimpleEnvs!</strong> 🚀✨</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api-reference.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, vmintf.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; SimpleEnvs 1.0.5 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Security Guide" href="security.html" />
+    <link rel="prev" title="Quick Start Guide" href="quickstart.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SimpleEnvs
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#table-of-contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#loading-functions">Loading Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#load-dotenv-path-none"><code class="docutils literal notranslate"><span class="pre">load_dotenv(path=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#aload-dotenv-path-none"><code class="docutils literal notranslate"><span class="pre">aload_dotenv(path=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load-dotenv-secure-path-none-strict-true"><code class="docutils literal notranslate"><span class="pre">load_dotenv_secure(path=None,</span> <span class="pre">strict=True)</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#simple-api-system-environment">Simple API (System Environment)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#load-path-none-max-depth-2"><code class="docutils literal notranslate"><span class="pre">load(path=None,</span> <span class="pre">max_depth=2)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load-sync-path-none-max-depth-2"><code class="docutils literal notranslate"><span class="pre">load_sync(path=None,</span> <span class="pre">max_depth=2)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-key-default-none"><code class="docutils literal notranslate"><span class="pre">get(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-int-key-default-none"><code class="docutils literal notranslate"><span class="pre">get_int(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-bool-key-default-none"><code class="docutils literal notranslate"><span class="pre">get_bool(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-str-key-default-none"><code class="docutils literal notranslate"><span class="pre">get_str(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#is-loaded"><code class="docutils literal notranslate"><span class="pre">is_loaded()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#secure-api-memory-isolated">Secure API (Memory-Isolated)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#load-secure-path-none-strict-true-max-depth-2"><code class="docutils literal notranslate"><span class="pre">load_secure(path=None,</span> <span class="pre">strict=True,</span> <span class="pre">max_depth=2)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-secure-key-default-none"><code class="docutils literal notranslate"><span class="pre">get_secure(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-int-secure-key-default-none"><code class="docutils literal notranslate"><span class="pre">get_int_secure(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-bool-secure-key-default-none"><code class="docutils literal notranslate"><span class="pre">get_bool_secure(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-str-secure-key-default-none"><code class="docutils literal notranslate"><span class="pre">get_str_secure(key,</span> <span class="pre">default=None)</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#is-loaded-secure"><code class="docutils literal notranslate"><span class="pre">is_loaded_secure()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-security-info"><code class="docutils literal notranslate"><span class="pre">get_security_info()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#type-safe-getters">Type-Safe Getters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#boolean-values">Boolean Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integer-values">Integer Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#string-values">String Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-all-secure-loaders"><code class="docutils literal notranslate"><span class="pre">get_all_secure_loaders()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cross-module-access">Cross-Module Access</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#how-it-works">How It Works</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#memory-discovery">Memory Discovery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#security-properties">Security Properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usage-patterns">Usage Patterns</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#web-application-startup">Web Application Startup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#service-layer-pattern">Service Layer Pattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-testing">Module Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#fallback-behavior">Fallback Behavior</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#utility-functions">Utility Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#get-all-keys"><code class="docutils literal notranslate"><span class="pre">get_all_keys()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clear"><code class="docutils literal notranslate"><span class="pre">clear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-info"><code class="docutils literal notranslate"><span class="pre">get_info()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#classes">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#simpleenvloader"><code class="docutils literal notranslate"><span class="pre">SimpleEnvLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#methods">Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#secureenvloader"><code class="docutils literal notranslate"><span class="pre">SecureEnvLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id7">Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#loadoptions"><code class="docutils literal notranslate"><span class="pre">LoadOptions</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#attributes">Attributes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#exceptions">Exceptions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#simpleenvserror"><code class="docutils literal notranslate"><span class="pre">SimpleEnvsError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#envsecurityerror"><code class="docutils literal notranslate"><span class="pre">EnvSecurityError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pathtraversalerror"><code class="docutils literal notranslate"><span class="pre">PathTraversalError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#filesizeerror"><code class="docutils literal notranslate"><span class="pre">FileSizeError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#invalidinputerror"><code class="docutils literal notranslate"><span class="pre">InvalidInputError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#accessdeniederror"><code class="docutils literal notranslate"><span class="pre">AccessDeniedError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fileparsingerror"><code class="docutils literal notranslate"><span class="pre">FileParsingError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#envnotloadederror"><code class="docutils literal notranslate"><span class="pre">EnvNotLoadedError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#keynotfounderror"><code class="docutils literal notranslate"><span class="pre">KeyNotFoundError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#typeconversionerror"><code class="docutils literal notranslate"><span class="pre">TypeConversionError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configurationerror"><code class="docutils literal notranslate"><span class="pre">ConfigurationError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integrityerror"><code class="docutils literal notranslate"><span class="pre">IntegrityError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sessionerror"><code class="docutils literal notranslate"><span class="pre">SessionError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#memorysecurityerror"><code class="docutils literal notranslate"><span class="pre">MemorySecurityError</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#constants">Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#version-information">Version Information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#security-limits">Security Limits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#environment-types">Environment Types</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#type-definitions">Type Definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#need-help">Need Help?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="security.html">Security Guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SimpleEnvs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/vmintf/SimpleEnvs-Python/blob/main/docs/api-reference.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this heading"></a></h1>
+<p>Complete reference for all SimpleEnvs functions and classes.</p>
+<section id="table-of-contents">
+<h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#loading-functions"><span class="xref myst">Loading Functions</span></a></p></li>
+<li><p><a class="reference internal" href="#simple-api-system-environment"><span class="xref myst">Simple API (System Environment)</span></a></p></li>
+<li><p><a class="reference internal" href="#secure-api-memory-isolated"><span class="xref myst">Secure API (Memory-Isolated)</span></a></p></li>
+<li><p><a class="reference internal" href="#type-safe-getters"><span class="xref myst">Type-Safe Getters</span></a></p></li>
+<li><p><a class="reference internal" href="#utility-functions"><span class="xref myst">Utility Functions</span></a></p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#classes" title="Python 3.13"><span class="xref myst">Classes</span></a></p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/pdb.html#pdbcommand-exceptions" title="Python 3.13"><span class="xref myst">Exceptions</span></a></p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/winreg.html#constants" title="Python 3.13"><span class="xref myst">Constants</span></a></p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="loading-functions">
+<h2>Loading Functions<a class="headerlink" href="#loading-functions" title="Permalink to this heading"></a></h2>
+<section id="load-dotenv-path-none">
+<h3><code class="docutils literal notranslate"><span class="pre">load_dotenv(path=None)</span></code><a class="headerlink" href="#load-dotenv-path-none" title="Permalink to this heading"></a></h3>
+<p>One-liner to load .env file synchronously (python-dotenv compatible).</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">path</span></code> (str, optional): Path to .env file, or None for auto-discovery</p></li>
+</ul>
+<p><strong>Returns:</strong> None</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="n">load_dotenv</span><span class="p">()</span>  <span class="c1"># Auto-discover .env file</span>
+<span class="n">load_dotenv</span><span class="p">(</span><span class="s1">&#39;.env.production&#39;</span><span class="p">)</span>  <span class="c1"># Specific file</span>
+</pre></div>
+</div>
+</section>
+<section id="aload-dotenv-path-none">
+<h3><code class="docutils literal notranslate"><span class="pre">aload_dotenv(path=None)</span></code><a class="headerlink" href="#aload-dotenv-path-none" title="Permalink to this heading"></a></h3>
+<p>One-liner to load .env file asynchronously.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">path</span></code> (str, optional): Path to .env file, or None for auto-discovery</p></li>
+</ul>
+<p><strong>Returns:</strong> None</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">aload_dotenv</span>
+<span class="k">await</span> <span class="n">aload_dotenv</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="load-dotenv-secure-path-none-strict-true">
+<h3><code class="docutils literal notranslate"><span class="pre">load_dotenv_secure(path=None,</span> <span class="pre">strict=True)</span></code><a class="headerlink" href="#load-dotenv-secure-path-none-strict-true" title="Permalink to this heading"></a></h3>
+<p>One-liner to load .env file with maximum security (memory-isolated).</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">path</span></code> (str, optional): Path to .env file, or None for auto-discovery</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">strict</span></code> (bool): Enable strict security validation</p></li>
+</ul>
+<p><strong>Returns:</strong> None</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv_secure</span>
+<span class="n">load_dotenv_secure</span><span class="p">()</span>  <span class="c1"># Maximum security!</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="simple-api-system-environment">
+<h2>Simple API (System Environment)<a class="headerlink" href="#simple-api-system-environment" title="Permalink to this heading"></a></h2>
+<p>Functions that sync environment variables to <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>.</p>
+<section id="load-path-none-max-depth-2">
+<h3><code class="docutils literal notranslate"><span class="pre">load(path=None,</span> <span class="pre">max_depth=2)</span></code><a class="headerlink" href="#load-path-none-max-depth-2" title="Permalink to this heading"></a></h3>
+<p>Load environment variables asynchronously using SimpleEnvLoader.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">path</span></code> (str, optional): Specific .env file path, or None for auto-discovery</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_depth</span></code> (int): Maximum directory depth to search for .env files</p></li>
+</ul>
+<p><strong>Returns:</strong> None</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+<span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+<span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;.env.production&#39;</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="load-sync-path-none-max-depth-2">
+<h3><code class="docutils literal notranslate"><span class="pre">load_sync(path=None,</span> <span class="pre">max_depth=2)</span></code><a class="headerlink" href="#load-sync-path-none-max-depth-2" title="Permalink to this heading"></a></h3>
+<p>Load environment variables synchronously using SimpleEnvLoader.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">path</span></code> (str, optional): Specific .env file path, or None for auto-discovery</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_depth</span></code> (int): Maximum directory depth to search for .env files</p></li>
+</ul>
+<p><strong>Returns:</strong> None</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+<span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_sync</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="get-key-default-none">
+<h3><code class="docutils literal notranslate"><span class="pre">get(key,</span> <span class="pre">default=None)</span></code><a class="headerlink" href="#get-key-default-none" title="Permalink to this heading"></a></h3>
+<p>Get environment variable from system environment.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">key</span></code> (str): Environment variable name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default</span></code> (EnvValue, optional): Default value if not found</p></li>
+</ul>
+<p><strong>Returns:</strong> Optional[EnvValue]</p>
+<p><strong>Note:</strong> Uses <code class="docutils literal notranslate"><span class="pre">os.getenv()</span></code> since SimpleEnvLoader syncs to system environment.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">db_host</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;DB_HOST&#39;</span><span class="p">,</span> <span class="s1">&#39;localhost&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="get-int-key-default-none">
+<h3><code class="docutils literal notranslate"><span class="pre">get_int(key,</span> <span class="pre">default=None)</span></code><a class="headerlink" href="#get-int-key-default-none" title="Permalink to this heading"></a></h3>
+<p>Get environment variable as integer.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">key</span></code> (str): Environment variable name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default</span></code> (int, optional): Default value if not found</p></li>
+</ul>
+<p><strong>Returns:</strong> Optional[int]</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">port</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_int</span><span class="p">(</span><span class="s1">&#39;PORT&#39;</span><span class="p">,</span> <span class="mi">8080</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="get-bool-key-default-none">
+<h3><code class="docutils literal notranslate"><span class="pre">get_bool(key,</span> <span class="pre">default=None)</span></code><a class="headerlink" href="#get-bool-key-default-none" title="Permalink to this heading"></a></h3>
+<p>Get environment variable as boolean.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">key</span></code> (str): Environment variable name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default</span></code> (bool, optional): Default value if not found</p></li>
+</ul>
+<p><strong>Returns:</strong> Optional[bool]</p>
+<p><strong>Note:</strong> Recognizes: “true”, “yes”, “1”, “on”, “enable”, “enabled” as True</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">debug</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s1">&#39;DEBUG&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="get-str-key-default-none">
+<h3><code class="docutils literal notranslate"><span class="pre">get_str(key,</span> <span class="pre">default=None)</span></code><a class="headerlink" href="#get-str-key-default-none" title="Permalink to this heading"></a></h3>
+<p>Get environment variable as string.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">key</span></code> (str): Environment variable name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default</span></code> (str, optional): Default value if not found</p></li>
+</ul>
+<p><strong>Returns:</strong> Optional[str]</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">app_name</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s1">&#39;APP_NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;MyApp&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="is-loaded">
+<h3><code class="docutils literal notranslate"><span class="pre">is_loaded()</span></code><a class="headerlink" href="#is-loaded" title="Permalink to this heading"></a></h3>
+<p>Check if simple environment is loaded.</p>
+<p><strong>Returns:</strong> bool</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">is_loaded</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Environment loaded successfully&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="secure-api-memory-isolated">
+<h2>Secure API (Memory-Isolated)<a class="headerlink" href="#secure-api-memory-isolated" title="Permalink to this heading"></a></h2>
+<p>Functions that keep environment variables in memory, <strong>NOT</strong> in <code class="docutils literal notranslate"><span class="pre">os.environ</span></code>.</p>
+<section id="load-secure-path-none-strict-true-max-depth-2">
+<h3><code class="docutils literal notranslate"><span class="pre">load_secure(path=None,</span> <span class="pre">strict=True,</span> <span class="pre">max_depth=2)</span></code><a class="headerlink" href="#load-secure-path-none-strict-true-max-depth-2" title="Permalink to this heading"></a></h3>
+<p>Load environment variables using SecureEnvLoader (memory-isolated).</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">path</span></code> (str, optional): Specific .env file path, or None for auto-discovery</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">strict</span></code> (bool): Enable strict security validation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_depth</span></code> (int): Maximum directory depth to search for .env files</p></li>
+</ul>
+<p><strong>Returns:</strong> None</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_secure</span><span class="p">()</span>
+<span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_secure</span><span class="p">(</span><span class="s1">&#39;.env.secrets&#39;</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="get-secure-key-default-none">
+<h3><code class="docutils literal notranslate"><span class="pre">get_secure(key,</span> <span class="pre">default=None)</span></code><a class="headerlink" href="#get-secure-key-default-none" title="Permalink to this heading"></a></h3>
+<p>Get secure environment variable (memory-isolated, NOT in os.environ).</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">key</span></code> (str): Environment variable name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default</span></code> (EnvValue, optional): Default value if not found</p></li>
+</ul>
+<p><strong>Returns:</strong> Optional[EnvValue]</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">api_key</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;API_KEY&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="get-int-secure-key-default-none">
+<h3><code class="docutils literal notranslate"><span class="pre">get_int_secure(key,</span> <span class="pre">default=None)</span></code><a class="headerlink" href="#get-int-secure-key-default-none" title="Permalink to this heading"></a></h3>
+<p>Get secure environment variable as integer.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">key</span></code> (str): Environment variable name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default</span></code> (int, optional): Default value if not found</p></li>
+</ul>
+<p><strong>Returns:</strong> Optional[int]</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">timeout</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_int_secure</span><span class="p">(</span><span class="s1">&#39;TIMEOUT&#39;</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="get-bool-secure-key-default-none">
+<h3><code class="docutils literal notranslate"><span class="pre">get_bool_secure(key,</span> <span class="pre">default=None)</span></code><a class="headerlink" href="#get-bool-secure-key-default-none" title="Permalink to this heading"></a></h3>
+<p>Get secure environment variable as boolean.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">key</span></code> (str): Environment variable name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default</span></code> (bool, optional): Default value if not found</p></li>
+</ul>
+<p><strong>Returns:</strong> Optional[bool]</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">secure_mode</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_bool_secure</span><span class="p">(</span><span class="s1">&#39;SECURE_MODE&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="get-str-secure-key-default-none">
+<h3><code class="docutils literal notranslate"><span class="pre">get_str_secure(key,</span> <span class="pre">default=None)</span></code><a class="headerlink" href="#get-str-secure-key-default-none" title="Permalink to this heading"></a></h3>
+<p>Get secure environment variable as string.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">key</span></code> (str): Environment variable name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default</span></code> (str, optional): Default value if not found</p></li>
+</ul>
+<p><strong>Returns:</strong> Optional[str]</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">jwt_secret</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_str_secure</span><span class="p">(</span><span class="s1">&#39;JWT_SECRET&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="is-loaded-secure">
+<h3><code class="docutils literal notranslate"><span class="pre">is_loaded_secure()</span></code><a class="headerlink" href="#is-loaded-secure" title="Permalink to this heading"></a></h3>
+<p>Check if secure environment is loaded.</p>
+<p><strong>Returns:</strong> bool</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">is_loaded_secure</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Secure environment loaded&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="get-security-info">
+<h3><code class="docutils literal notranslate"><span class="pre">get_security_info()</span></code><a class="headerlink" href="#get-security-info" title="Permalink to this heading"></a></h3>
+<p>Get security information from secure loader.</p>
+<p><strong>Returns:</strong> Optional[Dict[str, Any]]</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">info</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_security_info</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Session ID: </span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;session_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Access count: </span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;access_count&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="type-safe-getters">
+<h2>Type-Safe Getters<a class="headerlink" href="#type-safe-getters" title="Permalink to this heading"></a></h2>
+<p>All getter functions support type conversion with validation:</p>
+<section id="boolean-values">
+<h3>Boolean Values<a class="headerlink" href="#boolean-values" title="Permalink to this heading"></a></h3>
+<p><strong>True values:</strong> “true”, “yes”, “1”, “on”, “enable”, “enabled”, “active”, “ok”, “y”, “t”
+<strong>False values:</strong> “false”, “no”, “0”, “off”, “disable”, “disabled”, “inactive”, “n”, “f”, “null”, “none”, “”</p>
+</section>
+<section id="integer-values">
+<h3>Integer Values<a class="headerlink" href="#integer-values" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>Supports positive and negative integers</p></li>
+<li><p>Range: -2^63 to 2^63-1 (64-bit signed)</p></li>
+<li><p>Out-of-range values remain as strings</p></li>
+</ul>
+</section>
+<section id="string-values">
+<h3>String Values<a class="headerlink" href="#string-values" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>All values can be converted to strings</p></li>
+<li><p>UTF-8 encoding validation in strict mode</p></li>
+</ul>
+</section>
+<section id="get-all-secure-loaders">
+<h3><code class="docutils literal notranslate"><span class="pre">get_all_secure_loaders()</span></code><a class="headerlink" href="#get-all-secure-loaders" title="Permalink to this heading"></a></h3>
+<p>Get all SecureEnvLoader instances in memory.</p>
+<p><strong>Returns:</strong> List[SecureEnvLoader]</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">loaders</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_all_secure_loaders</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">loaders</span><span class="p">)</span><span class="si">}</span><span class="s2"> secure loaders in memory&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="cross-module-access">
+<h2>Cross-Module Access<a class="headerlink" href="#cross-module-access" title="Permalink to this heading"></a></h2>
+<p>SimpleEnvs provides automatic cross-module access to secure environment variables through memory introspection.</p>
+<section id="how-it-works">
+<h3>How It Works<a class="headerlink" href="#how-it-works" title="Permalink to this heading"></a></h3>
+<p>When you load secure environment variables in one module, other modules can automatically access the same data without re-loading:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># main.py - Load secrets once</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+<span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_secure</span><span class="p">(</span><span class="s1">&#39;.env.production&#39;</span><span class="p">)</span>
+
+<span class="c1"># utils.py - Automatic access  </span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+<span class="n">api_key</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;API_KEY&#39;</span><span class="p">)</span>  <span class="c1"># Finds loader from main.py!</span>
+</pre></div>
+</div>
+</section>
+<section id="memory-discovery">
+<h3>Memory Discovery<a class="headerlink" href="#memory-discovery" title="Permalink to this heading"></a></h3>
+<p>The system uses <code class="docutils literal notranslate"><span class="pre">gc.get_objects()</span></code> to find existing SecureEnvLoader instances:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_find_secure_loader_in_memory</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SecureEnvLoader</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find existing SecureEnvLoader instance in memory&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">gc</span><span class="o">.</span><span class="n">get_objects</span><span class="p">():</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">SecureEnvLoader</span><span class="p">)</span> 
+                <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;_SecureEnvLoader__env_data&quot;</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">_SecureEnvLoader__env_data</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">obj</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+</div>
+</section>
+<section id="security-properties">
+<h3>Security Properties<a class="headerlink" href="#security-properties" title="Permalink to this heading"></a></h3>
+<p>Cross-module access maintains all security guarantees:</p>
+<ul class="simple">
+<li><p>Memory isolation preserved</p></li>
+<li><p>Access logging continues</p></li>
+<li><p>Session tracking maintained</p></li>
+<li><p>No data in <code class="docutils literal notranslate"><span class="pre">os.environ</span></code></p></li>
+</ul>
+</section>
+<section id="usage-patterns">
+<h3>Usage Patterns<a class="headerlink" href="#usage-patterns" title="Permalink to this heading"></a></h3>
+<section id="web-application-startup">
+<h4>Web Application Startup<a class="headerlink" href="#web-application-startup" title="Permalink to this heading"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># app.py</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">startup</span><span class="p">():</span>
+    <span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_secure</span><span class="p">()</span>
+
+<span class="c1"># Any other module</span>
+<span class="n">database_url</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;DATABASE_URL&#39;</span><span class="p">)</span>  <span class="c1"># Works automatically</span>
+</pre></div>
+</div>
+</section>
+<section id="service-layer-pattern">
+<h4>Service Layer Pattern<a class="headerlink" href="#service-layer-pattern" title="Permalink to this heading"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># config.py - Central configuration</span>
+<span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_secure</span><span class="p">(</span><span class="s1">&#39;.env.secrets&#39;</span><span class="p">)</span>
+
+<span class="c1"># services/auth.py</span>
+<span class="n">jwt_secret</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;JWT_SECRET&#39;</span><span class="p">)</span>
+
+<span class="c1"># services/database.py  </span>
+<span class="n">db_password</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;DB_PASSWORD&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="module-testing">
+<h4>Module Testing<a class="headerlink" href="#module-testing" title="Permalink to this heading"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># test_utils.py</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_api_client</span><span class="p">():</span>
+    <span class="c1"># Test can access secrets loaded in conftest.py</span>
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;TEST_API_KEY&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">api_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="fallback-behavior">
+<h3>Fallback Behavior<a class="headerlink" href="#fallback-behavior" title="Permalink to this heading"></a></h3>
+<p>If no SecureEnvLoader is found in memory, functions return default values:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># No secure loader loaded yet</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;API_KEY&#39;</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  <span class="c1"># &#39;default&#39;</span>
+
+<span class="c1"># After loading in another module</span>
+<span class="k">await</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_secure</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;API_KEY&#39;</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">)</span> 
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  <span class="c1"># Actual API key value</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="utility-functions">
+<h2>Utility Functions<a class="headerlink" href="#utility-functions" title="Permalink to this heading"></a></h2>
+<section id="get-all-keys">
+<h3><code class="docutils literal notranslate"><span class="pre">get_all_keys()</span></code><a class="headerlink" href="#get-all-keys" title="Permalink to this heading"></a></h3>
+<p>Get all available environment variable keys.</p>
+<p><strong>Returns:</strong> List[str]</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">keys</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_all_keys</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available variables: </span><span class="si">{</span><span class="n">keys</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="clear">
+<h3><code class="docutils literal notranslate"><span class="pre">clear()</span></code><a class="headerlink" href="#clear" title="Permalink to this heading"></a></h3>
+<p>Clear all loaded environment data.</p>
+<p><strong>Returns:</strong> None</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simpleenvs</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>  <span class="c1"># Clean up all data</span>
+</pre></div>
+</div>
+</section>
+<section id="get-info">
+<h3><code class="docutils literal notranslate"><span class="pre">get_info()</span></code><a class="headerlink" href="#get-info" title="Permalink to this heading"></a></h3>
+<p>Get information about loaded environments.</p>
+<p><strong>Returns:</strong> Dict[str, Any]</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">info</span> <span class="o">=</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_info</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Version: </span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Simple loaded: </span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;simple_loaded&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Secure loaded: </span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;secure_loaded&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this heading"></a></h2>
+<section id="simpleenvloader">
+<h3><code class="docutils literal notranslate"><span class="pre">SimpleEnvLoader</span></code><a class="headerlink" href="#simpleenvloader" title="Permalink to this heading"></a></h3>
+<p>Simple, fast .env loader that syncs to system environment variables.</p>
+<section id="methods">
+<h4>Methods<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h4>
+<section id="init">
+<h5><code class="docutils literal notranslate"><span class="pre">__init__()</span></code><a class="headerlink" href="#init" title="Permalink to this heading"></a></h5>
+<p>Initialize simple loader.</p>
+</section>
+<section id="async-load-path-none-max-depth-2">
+<h5><code class="docutils literal notranslate"><span class="pre">async</span> <span class="pre">load(path=None,</span> <span class="pre">max_depth=2)</span></code><a class="headerlink" href="#async-load-path-none-max-depth-2" title="Permalink to this heading"></a></h5>
+<p>Load environment variables from .env file and sync to system.</p>
+</section>
+<section id="id1">
+<h5><code class="docutils literal notranslate"><span class="pre">load_sync(path=None,</span> <span class="pre">max_depth=2)</span></code><a class="headerlink" href="#id1" title="Permalink to this heading"></a></h5>
+<p>Load environment variables synchronously and sync to system.</p>
+</section>
+<section id="get-key">
+<h5><code class="docutils literal notranslate"><span class="pre">get(key)</span></code><a class="headerlink" href="#get-key" title="Permalink to this heading"></a></h5>
+<p>Get environment variable from local data.</p>
+</section>
+<section id="id2">
+<h5><code class="docutils literal notranslate"><span class="pre">get_int(key,</span> <span class="pre">default=None)</span></code><a class="headerlink" href="#id2" title="Permalink to this heading"></a></h5>
+<p>Get environment variable as integer.</p>
+</section>
+<section id="id3">
+<h5><code class="docutils literal notranslate"><span class="pre">get_bool(key,</span> <span class="pre">default=None)</span></code><a class="headerlink" href="#id3" title="Permalink to this heading"></a></h5>
+<p>Get environment variable as boolean.</p>
+</section>
+<section id="id4">
+<h5><code class="docutils literal notranslate"><span class="pre">get_str(key,</span> <span class="pre">default=None)</span></code><a class="headerlink" href="#id4" title="Permalink to this heading"></a></h5>
+<p>Get environment variable as string.</p>
+</section>
+<section id="id5">
+<h5><code class="docutils literal notranslate"><span class="pre">is_loaded()</span></code><a class="headerlink" href="#id5" title="Permalink to this heading"></a></h5>
+<p>Check if environment variables are loaded.</p>
+</section>
+<section id="id6">
+<h5><code class="docutils literal notranslate"><span class="pre">clear()</span></code><a class="headerlink" href="#id6" title="Permalink to this heading"></a></h5>
+<p>Clear all loaded environment variables.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleEnvLoader</span>
+
+<span class="n">loader</span> <span class="o">=</span> <span class="n">SimpleEnvLoader</span><span class="p">()</span>
+<span class="k">await</span> <span class="n">loader</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;.env&#39;</span><span class="p">)</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;KEY&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="secureenvloader">
+<h3><code class="docutils literal notranslate"><span class="pre">SecureEnvLoader</span></code><a class="headerlink" href="#secureenvloader" title="Permalink to this heading"></a></h3>
+<p>Ultra-secure environment variable loader with defense-in-depth.</p>
+<section id="id7">
+<h4>Methods<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h4>
+<section id="init-session-id-none">
+<h5><code class="docutils literal notranslate"><span class="pre">__init__(session_id=None)</span></code><a class="headerlink" href="#init-session-id-none" title="Permalink to this heading"></a></h5>
+<p>Initialize secure loader with optional session ID.</p>
+</section>
+<section id="async-load-secure-options-loadoptions">
+<h5><code class="docutils literal notranslate"><span class="pre">async</span> <span class="pre">load_secure(options=LoadOptions())</span></code><a class="headerlink" href="#async-load-secure-options-loadoptions" title="Permalink to this heading"></a></h5>
+<p>Securely load environment variables (memory-isolated).</p>
+</section>
+<section id="get-secure-key">
+<h5><code class="docutils literal notranslate"><span class="pre">get_secure(key)</span></code><a class="headerlink" href="#get-secure-key" title="Permalink to this heading"></a></h5>
+<p>Securely retrieve environment variable.</p>
+</section>
+<section id="id8">
+<h5><code class="docutils literal notranslate"><span class="pre">get_int_secure(key,</span> <span class="pre">default=None)</span></code><a class="headerlink" href="#id8" title="Permalink to this heading"></a></h5>
+<p>Securely get environment variable as integer.</p>
+</section>
+<section id="id9">
+<h5><code class="docutils literal notranslate"><span class="pre">get_bool_secure(key,</span> <span class="pre">default=None)</span></code><a class="headerlink" href="#id9" title="Permalink to this heading"></a></h5>
+<p>Securely get environment variable as boolean.</p>
+</section>
+<section id="id10">
+<h5><code class="docutils literal notranslate"><span class="pre">get_str_secure(key,</span> <span class="pre">default=None)</span></code><a class="headerlink" href="#id10" title="Permalink to this heading"></a></h5>
+<p>Securely get environment variable as string.</p>
+</section>
+<section id="id11">
+<h5><code class="docutils literal notranslate"><span class="pre">get_security_info()</span></code><a class="headerlink" href="#id11" title="Permalink to this heading"></a></h5>
+<p>Get security and session information.</p>
+</section>
+<section id="verify-file-integrity-file-path">
+<h5><code class="docutils literal notranslate"><span class="pre">verify_file_integrity(file_path)</span></code><a class="headerlink" href="#verify-file-integrity-file-path" title="Permalink to this heading"></a></h5>
+<p>Verify file integrity using stored hash.</p>
+</section>
+<section id="secure-wipe">
+<h5><code class="docutils literal notranslate"><span class="pre">secure_wipe()</span></code><a class="headerlink" href="#secure-wipe" title="Permalink to this heading"></a></h5>
+<p>Securely wipe sensitive data.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">SecureEnvLoader</span>
+
+<span class="n">loader</span> <span class="o">=</span> <span class="n">SecureEnvLoader</span><span class="p">()</span>
+<span class="k">await</span> <span class="n">loader</span><span class="o">.</span><span class="n">load_secure</span><span class="p">()</span>
+<span class="n">secret</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_secure</span><span class="p">(</span><span class="s1">&#39;SECRET_KEY&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="loadoptions">
+<h3><code class="docutils literal notranslate"><span class="pre">LoadOptions</span></code><a class="headerlink" href="#loadoptions" title="Permalink to this heading"></a></h3>
+<p>Configuration options for secure loading.</p>
+<section id="attributes">
+<h4>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">path</span></code> (str, optional): File path</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_depth</span></code> (int): Maximum search depth</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">strict_validation</span></code> (bool): Enable strict validation</p></li>
+</ul>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs.secure</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoadOptions</span>
+
+<span class="n">options</span> <span class="o">=</span> <span class="n">LoadOptions</span><span class="p">(</span>
+    <span class="n">path</span><span class="o">=</span><span class="s1">&#39;.env.production&#39;</span><span class="p">,</span>
+    <span class="n">max_depth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">strict_validation</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="k">await</span> <span class="n">loader</span><span class="o">.</span><span class="n">load_secure</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<hr class="docutils" />
+<section id="exceptions">
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this heading"></a></h2>
+<section id="simpleenvserror">
+<h3><code class="docutils literal notranslate"><span class="pre">SimpleEnvsError</span></code><a class="headerlink" href="#simpleenvserror" title="Permalink to this heading"></a></h3>
+<p>Base exception for all SimpleEnvs errors.</p>
+</section>
+<section id="envsecurityerror">
+<h3><code class="docutils literal notranslate"><span class="pre">EnvSecurityError</span></code><a class="headerlink" href="#envsecurityerror" title="Permalink to this heading"></a></h3>
+<p>Base security exception for SecureEnvLoader.</p>
+</section>
+<section id="pathtraversalerror">
+<h3><code class="docutils literal notranslate"><span class="pre">PathTraversalError</span></code><a class="headerlink" href="#pathtraversalerror" title="Permalink to this heading"></a></h3>
+<p>Path traversal attack detected.</p>
+</section>
+<section id="filesizeerror">
+<h3><code class="docutils literal notranslate"><span class="pre">FileSizeError</span></code><a class="headerlink" href="#filesizeerror" title="Permalink to this heading"></a></h3>
+<p>File size exceeds security limits.</p>
+</section>
+<section id="invalidinputerror">
+<h3><code class="docutils literal notranslate"><span class="pre">InvalidInputError</span></code><a class="headerlink" href="#invalidinputerror" title="Permalink to this heading"></a></h3>
+<p>Input validation failed.</p>
+</section>
+<section id="accessdeniederror">
+<h3><code class="docutils literal notranslate"><span class="pre">AccessDeniedError</span></code><a class="headerlink" href="#accessdeniederror" title="Permalink to this heading"></a></h3>
+<p>Access to internal methods denied.</p>
+</section>
+<section id="fileparsingerror">
+<h3><code class="docutils literal notranslate"><span class="pre">FileParsingError</span></code><a class="headerlink" href="#fileparsingerror" title="Permalink to this heading"></a></h3>
+<p>Error occurred during file parsing.</p>
+</section>
+<section id="envnotloadederror">
+<h3><code class="docutils literal notranslate"><span class="pre">EnvNotLoadedError</span></code><a class="headerlink" href="#envnotloadederror" title="Permalink to this heading"></a></h3>
+<p>Environment variables not loaded yet.</p>
+</section>
+<section id="keynotfounderror">
+<h3><code class="docutils literal notranslate"><span class="pre">KeyNotFoundError</span></code><a class="headerlink" href="#keynotfounderror" title="Permalink to this heading"></a></h3>
+<p>Environment variable key not found.</p>
+</section>
+<section id="typeconversionerror">
+<h3><code class="docutils literal notranslate"><span class="pre">TypeConversionError</span></code><a class="headerlink" href="#typeconversionerror" title="Permalink to this heading"></a></h3>
+<p>Type conversion failed.</p>
+</section>
+<section id="configurationerror">
+<h3><code class="docutils literal notranslate"><span class="pre">ConfigurationError</span></code><a class="headerlink" href="#configurationerror" title="Permalink to this heading"></a></h3>
+<p>Configuration or setup error.</p>
+</section>
+<section id="integrityerror">
+<h3><code class="docutils literal notranslate"><span class="pre">IntegrityError</span></code><a class="headerlink" href="#integrityerror" title="Permalink to this heading"></a></h3>
+<p>File integrity check failed.</p>
+</section>
+<section id="sessionerror">
+<h3><code class="docutils literal notranslate"><span class="pre">SessionError</span></code><a class="headerlink" href="#sessionerror" title="Permalink to this heading"></a></h3>
+<p>Session-related security error.</p>
+</section>
+<section id="memorysecurityerror">
+<h3><code class="docutils literal notranslate"><span class="pre">MemorySecurityError</span></code><a class="headerlink" href="#memorysecurityerror" title="Permalink to this heading"></a></h3>
+<p>Memory security violation.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">simpleenvs</span><span class="o">.</span><span class="n">load_dotenv</span><span class="p">(</span><span class="s1">&#39;nonexistent.env&#39;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">FileNotFoundError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;File not found&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">simpleenvs</span><span class="o">.</span><span class="n">SimpleEnvsError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="constants">
+<h2>Constants<a class="headerlink" href="#constants" title="Permalink to this heading"></a></h2>
+<section id="version-information">
+<h3>Version Information<a class="headerlink" href="#version-information" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">__version__</span></code>: Library version string</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VERSION</span></code>: Same as <strong>version</strong></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">API_VERSION</span></code>: API version</p></li>
+</ul>
+</section>
+<section id="security-limits">
+<h3>Security Limits<a class="headerlink" href="#security-limits" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">MAX_FILE_SIZE</span></code>: 10MB maximum file size</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAX_KEY_LENGTH</span></code>: 128 characters maximum key length</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAX_VALUE_LENGTH</span></code>: 1024 characters maximum value length</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAX_SCAN_DEPTH</span></code>: 3 levels maximum search depth</p></li>
+</ul>
+</section>
+<section id="environment-types">
+<h3>Environment Types<a class="headerlink" href="#environment-types" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">get_environment_type()</span></code>: Returns current environment type</p></li>
+<li><p>Supported: “development”, “production”, “testing”, “staging”</p></li>
+</ul>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Version: </span><span class="si">{</span><span class="n">simpleenvs</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Environment: </span><span class="si">{</span><span class="n">simpleenvs</span><span class="o">.</span><span class="n">get_environment_type</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="type-definitions">
+<h2>Type Definitions<a class="headerlink" href="#type-definitions" title="Permalink to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="n">EnvValue</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span>
+<span class="n">EnvMap</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EnvValue</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="need-help">
+<h2>Need Help?<a class="headerlink" href="#need-help" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>🐛 <a class="reference external" href="https://github.com/vmintf/SimpleEnvs-Python/issues">Report issues</a></p></li>
+<li><p>💬 <a class="reference external" href="https://github.com/vmintf/SimpleEnvs-Python/discussions">Join discussions</a></p></li>
+<li><p>📧 <a class="reference external" href="mailto:vmintf&#37;&#52;&#48;gmail&#46;com">Contact support</a></p></li>
+<li><p>📚 <a class="reference external" href="https://github.com/vmintf/SimpleEnvs-Python">Full documentation</a></p></li>
+</ul>
+<hr class="docutils" />
+<p><strong>Next:</strong> Learn about <a class="reference internal" href="security.html"><span class="std std-doc">Security Features</span></a> for enterprise-grade protection! 🔒</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quick Start Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="security.html" class="btn btn-neutral float-right" title="Security Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, vmintf.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
