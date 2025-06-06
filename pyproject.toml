@@ -82,7 +82,7 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["simpleenvs_python*"]  # 변경
+include = ["simpleenvs*"]  # 변경
 
 [tool.setuptools.package-data]
 simpleenvs = ["py.typed"]
