@@ -493,7 +493,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 📚 Learn More
 
-- 📖 [Full Documentation](https://simpleenvs.github.io/simpleenvs)
+- 📖 [Full Documentation](https://vmintf.github.io/SimpleEnvs-Python)
 - 🐛 [Issue Tracker](https://github.com/vmintf/SimpleEnvs-Python/simpleenvs/issues)
 - 💬 [Discussions](https://github.com/vmintf/SimpleEnvs-Python/simpleenvs/discussions)
 - 📦 [PyPI Package](https://pypi.org/project/simpleenvs-python/)
