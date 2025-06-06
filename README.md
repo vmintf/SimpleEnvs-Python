@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/simpleenvs.svg)](https://badge.fury.io/py/simpleenvs)
 [![Python](https://img.shields.io/pypi/pyversions/simpleenvs.svg)](https://pypi.org/project/simpleenvs/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Tests](https://github.com/simpleenvs/simpleenvs/workflows/tests/badge.svg)](https://github.com/simpleenvs/simpleenvs/actions)
+[![Tests](https://github.com/vmintf/SimpleEnvs-Python/simpleenvs/workflows/tests/badge.svg)](https://github.com/vmintf/SimpleEnvs-Python/simpleenvs/actions)
 
 > **Ultra-secure, high-performance .env file loader for Python**  
 > *Simple to use, enterprise-grade security, 2-4x faster performance*
@@ -465,7 +465,7 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 ### Development Setup
 ```bash
 # Clone repository
-git clone https://github.com/simpleenvs/simpleenvs.git
+git clone https://github.com/vmintf/SimpleEnvs-Python/simpleenvs.git
 cd simpleenvs
 
 # Install in development mode
@@ -494,8 +494,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## 📚 Learn More
 
 - 📖 [Full Documentation](https://simpleenvs.github.io/simpleenvs)
-- 🐛 [Issue Tracker](https://github.com/simpleenvs/simpleenvs/issues)
-- 💬 [Discussions](https://github.com/simpleenvs/simpleenvs/discussions)
+- 🐛 [Issue Tracker](https://github.com/vmintf/SimpleEnvs-Python/simpleenvs/issues)
+- 💬 [Discussions](https://github.com/vmintf/SimpleEnvs-Python/simpleenvs/discussions)
 - 📦 [PyPI Package](https://pypi.org/project/simpleenvs-python/)
 
 ---
