@@ -45,7 +45,6 @@ jobs:
   pull_request:
     branches: [ main ]
 
-jobs:
   test:
     name: Test Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
