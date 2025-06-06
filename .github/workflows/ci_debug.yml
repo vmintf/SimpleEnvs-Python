@@ -1,5 +1,5 @@
 # .github/workflows/ci.yml
-name: CI Pipeline
+name: CI Debug Pipeline
 
 on:
   push:
@@ -38,16 +38,16 @@ jobs:
         print('Python import test starting...')
         
         try:
-            print('Attempting to import simpleenvs_python...')
-            import simpleenvs_python
-            print('✅ Import simpleenvs_python successful!')
+            print('Attempting to import simpleenvs...')
+            import simpleenvs
+            print('✅ Import simpleenvs successful!')
             
             # Check what's available
-            print('Available attributes:', [x for x in dir(simpleenvs_python) if not x.startswith('_')][:10])
+            print('Available attributes:', [x for x in dir(simpleenvs) if not x.startswith('_')][:10])
             
             # Try to get version info
-            if hasattr(simpleenvs_python, '__version__'):
-                print(f'Version: {simpleenvs_python.__version__}')
+            if hasattr(simpleenvs, '__version__'):
+                print(f'Version: {simpleenvs.__version__}')
             else:
                 print('No __version__ found')
                 
