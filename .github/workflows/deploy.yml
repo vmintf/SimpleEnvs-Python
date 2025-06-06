@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Deployment environment'
+        description: 'Deployment target'
         required: true
         default: 'testpypi'
         type: choice
@@ -19,6 +19,7 @@ jobs:
   deploy:
     name: Deploy to ${{ github.event.inputs.environment || 'PyPI' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: ${{ github.event.inputs.environment || 'pypi' }}
 
     steps:
@@ -30,29 +31,59 @@ jobs:
       with:
         python-version: "3.11"
 
-    - name: Install build tools
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install build twine
+        pip install build twine aiofiles
 
-    - name: Install dependencies and test
+    - name: Pre-deployment test
       run: |
-        pip install aiofiles
-        pip install -e .
-        python -c "import simpleenvs; print(f'✅ Package test successful: v{simpleenvs.__version__}')"
+        export PYTHONPATH="$PYTHONPATH:$(pwd)/src"
+        python -c "
+        import sys
+        sys.path.insert(0, './src')
+        import simpleenvs
+        
+        # Get version
+        if hasattr(simpleenvs, '__version__'):
+            version = simpleenvs.__version__
+        elif hasattr(simpleenvs, 'constants'):
+            version = simpleenvs.constants.VERSION
+        else:
+            version = 'unknown'
+            
+        print(f'📦 Deploying SimpleEnvs version: {version}')
+        
+        # Basic functionality test
+        import tempfile, os
+        if hasattr(simpleenvs, 'load_dotenv'):
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+                f.write('DEPLOY_TEST=works\\n')
+                env_file = f.name
+            
+            try:
+                simpleenvs.load_dotenv(env_file)
+                if os.getenv('DEPLOY_TEST') == 'works':
+                    print('✅ Pre-deployment test passed!')
+                else:
+                    print('❌ Pre-deployment test failed!')
+                    exit(1)
+            finally:
+                os.unlink(env_file)
+        "
 
     - name: Build package
       run: |
         python -m build
-        echo "✅ Package built successfully!"
+        echo "✅ Package built for deployment!"
 
     - name: Check package
       run: |
         twine check dist/*
-        echo "✅ Package check passed!"
+        echo "✅ Package validation passed!"
 
-    - name: Publish to Test PyPI
-      if: github.event.inputs.environment == 'testpypi' || github.event_name == 'workflow_dispatch'
+    - name: Deploy to Test PyPI
+      if: github.event.inputs.environment == 'testpypi'
       env:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
@@ -60,7 +91,7 @@ jobs:
         twine upload --repository testpypi dist/*
         echo "🧪 Successfully deployed to Test PyPI!"
 
-    - name: Publish to PyPI
+    - name: Deploy to PyPI
       if: github.event.inputs.environment == 'pypi' || github.event_name == 'release'
       env:
         TWINE_USERNAME: __token__
@@ -68,3 +99,10 @@ jobs:
       run: |
         twine upload dist/*
         echo "🚀 Successfully deployed to PyPI!"
+
+    - name: Create deployment summary
+      run: |
+        echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Target**: ${{ github.event.inputs.environment || 'PyPI' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY

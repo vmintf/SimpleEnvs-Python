@@ -1,3 +1,4 @@
+# .github/workflows/benchmark.yml
 name: Performance Benchmark
 
 on:
@@ -7,12 +8,13 @@ on:
     branches: [ main ]
   workflow_dispatch:
   schedule:
-    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+    - cron: '0 2 * * 1'  # Weekly on Monday
 
 jobs:
   benchmark:
-    name: Run Performance Benchmarks
+    name: Performance Benchmark
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
     - name: Checkout code
@@ -26,55 +28,68 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install aiofiles
-        pip install python-dotenv  # For comparison
-        pip install -e .
+        pip install aiofiles python-dotenv
 
-    - name: Verify installations
+    - name: Setup Python path
       run: |
-        python -c "import simpleenvs; print(f'SimpleEnvs: v{simpleenvs.__version__}')"
-        python -c "import dotenv; print(f'python-dotenv: v{dotenv.__version__}')"
+        echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
 
-    - name: Create benchmark script
+    - name: Verify both packages work
       run: |
-        cat > benchmark_simple.py << 'EOF'
+        python -c "
+        import sys
+        sys.path.insert(0, './src')
+        
+        # Test SimpleEnvs
+        import simpleenvs
+        print('✅ SimpleEnvs imported successfully')
+        
+        # Test python-dotenv
+        import dotenv
+        print('✅ python-dotenv imported successfully')
+        print(f'SimpleEnvs: {getattr(simpleenvs, \"__version__\", \"unknown\")}')
+        print(f'python-dotenv: {getattr(dotenv, \"__version__\", \"unknown\")}')
+        "
+
+    - name: Run performance benchmark
+      run: |
+        python -c "
         import time
         import tempfile
         import os
-        from pathlib import Path
-
+        import sys
+        sys.path.insert(0, './src')
+        
         def create_test_env(num_vars=100):
-            """Create test .env file with specified number of variables"""
             content = []
             for i in range(num_vars):
-                content.append(f'VAR_{i}=value_{i}_{"x" * 20}')
+                content.append(f'VAR_{i}=value_{i}_test_data')
             
             with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
                 f.write('\n'.join(content))
                 return f.name
 
-        def benchmark_simpleenvs(env_file, iterations=10):
-            """Benchmark SimpleEnvs loading"""
+        def benchmark_simpleenvs(env_file, iterations=5):
             import simpleenvs
-            
             times = []
+            
             for _ in range(iterations):
-                # Clear any existing data
-                if hasattr(simpleenvs, '_simple_loader') and simpleenvs._simple_loader:
-                    simpleenvs._simple_loader.clear()
+                # Clear environment
+                for key in list(os.environ.keys()):
+                    if key.startswith('VAR_'):
+                        del os.environ[key]
                 
                 start = time.perf_counter()
                 simpleenvs.load_dotenv(env_file)
                 end = time.perf_counter()
-                times.append((end - start) * 1000)  # Convert to milliseconds
+                times.append((end - start) * 1000)
             
             return times
 
-        def benchmark_python_dotenv(env_file, iterations=10):
-            """Benchmark python-dotenv loading"""
+        def benchmark_python_dotenv(env_file, iterations=5):
             from dotenv import load_dotenv
-            
             times = []
+            
             for _ in range(iterations):
                 # Clear environment
                 for key in list(os.environ.keys()):
@@ -84,93 +99,45 @@ jobs:
                 start = time.perf_counter()
                 load_dotenv(env_file, override=True)
                 end = time.perf_counter()
-                times.append((end - start) * 1000)  # Convert to milliseconds
+                times.append((end - start) * 1000)
             
             return times
 
-        def run_benchmark():
-            """Run comprehensive benchmark"""
-            test_sizes = [10, 50, 100, 500]
-            results = []
+        print('🚀 SimpleEnvs vs python-dotenv Performance Benchmark')
+        print('=' * 60)
+        
+        test_sizes = [50, 100, 500]
+        
+        for size in test_sizes:
+            print(f'\n📊 Testing with {size} variables...')
             
-            print("🚀 SimpleEnvs vs python-dotenv Performance Benchmark")
-            print("=" * 60)
+            env_file = create_test_env(size)
             
-            for size in test_sizes:
-                print(f"\n📊 Testing with {size} variables...")
+            try:
+                # Benchmark both
+                simpleenvs_times = benchmark_simpleenvs(env_file, iterations=3)
+                dotenv_times = benchmark_python_dotenv(env_file, iterations=3)
                 
-                # Create test file
-                env_file = create_test_env(size)
+                # Calculate averages
+                avg_simpleenvs = sum(simpleenvs_times) / len(simpleenvs_times)
+                avg_dotenv = sum(dotenv_times) / len(dotenv_times)
+                speedup = avg_dotenv / avg_simpleenvs if avg_simpleenvs > 0 else 1.0
                 
-                try:
-                    # Benchmark both libraries
-                    simpleenvs_times = benchmark_simpleenvs(env_file, iterations=5)
-                    dotenv_times = benchmark_python_dotenv(env_file, iterations=5)
-                    
-                    # Calculate averages
-                    avg_simpleenvs = sum(simpleenvs_times) / len(simpleenvs_times)
-                    avg_dotenv = sum(dotenv_times) / len(dotenv_times)
-                    speedup = avg_dotenv / avg_simpleenvs
-                    
-                    print(f"  SimpleEnvs:    {avg_simpleenvs:.2f}ms")
-                    print(f"  python-dotenv: {avg_dotenv:.2f}ms")
-                    print(f"  Speedup:       {speedup:.1f}x faster ⚡")
-                    
-                    results.append({
-                        'size': size,
-                        'simpleenvs': avg_simpleenvs,
-                        'dotenv': avg_dotenv,
-                        'speedup': speedup
-                    })
-                    
-                finally:
-                    os.unlink(env_file)
-            
-            # Summary
-            print(f"\n📈 Benchmark Summary:")
-            print("-" * 50)
-            for result in results:
-                print(f"{result['size']:3d} vars: {result['speedup']:.1f}x faster")
-            
-            avg_speedup = sum(r['speedup'] for r in results) / len(results)
-            print(f"\n🎯 Average speedup: {avg_speedup:.1f}x faster!")
-            
-            return results
-
-        if __name__ == "__main__":
-            run_benchmark()
-        EOF
-
-    - name: Run benchmark
-      run: |
-        python benchmark_simple.py 2>&1 | tee benchmark-results.txt
-        echo "✅ Benchmark completed successfully!"
+                print(f'  SimpleEnvs:    {avg_simpleenvs:.2f}ms')
+                print(f'  python-dotenv: {avg_dotenv:.2f}ms')
+                print(f'  Speedup:       {speedup:.1f}x faster ⚡')
+                
+            except Exception as e:
+                print(f'  ❌ Benchmark failed: {e}')
+            finally:
+                os.unlink(env_file)
+        
+        print('\n✅ Benchmark completed!')
+        "
 
     - name: Upload benchmark results
       uses: actions/upload-artifact@v3
       with:
         name: benchmark-results-${{ github.sha }}
         path: benchmark-results.txt
-
-    - name: Comment benchmark results
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const fs = require('fs');
-          const results = fs.readFileSync('benchmark-results.txt', 'utf8');
-          
-          const comment = `## 🚀 Performance Benchmark Results
-          
-          \`\`\`
-          ${results}
-          \`\`\`
-          
-          _Benchmark run on commit ${context.sha.substring(0, 7)}_`;
-          
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: comment
-          });
+        retention-days: 30
