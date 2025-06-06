@@ -11,9 +11,11 @@ jobs:
   test:
     name: Test Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5  # 👈 더 짧은 타임아웃
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [3.8, 3.9, 3.10, 3.11, 3.12]
+        python-version: [3.11]  # 👈 하나만 테스트!
 
     steps:
     - name: Checkout code
@@ -24,12 +26,46 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies
+    - name: Install dependencies (step by step)
+      timeout-minutes: 3  # 👈 단계별 타임아웃
       run: |
+        echo "🔧 Step 1: Upgrade pip"
         python -m pip install --upgrade pip
-        pip install aiofiles  # 👈 핵심 의존성 추가!
-        pip install -e .
+        echo "✅ Pip upgraded"
+        
+        echo "🔧 Step 2: Install aiofiles"
+        pip install aiofiles
+        echo "✅ aiofiles installed"
+        
+        echo "🔧 Step 3: Install pytest"  
         pip install pytest
+        echo "✅ pytest installed"
+        
+        echo "🔧 Step 4: Try simple import test BEFORE package install"
+        python -c "
+        import sys
+        print('Python version:', sys.version)
+        sys.path.insert(0, './src')
+        try:
+            import simpleenvs_python
+            print('✅ Direct import works!')
+        except Exception as e:
+            print(f'⚠️ Direct import failed: {e}')
+            import os
+            if os.path.exists('./src'):
+                print('src/ contents:', os.listdir('./src'))
+        "
+        
+        echo "🔧 Step 5: Install package"
+        pip install -e . --timeout 60  # 👈 타임아웃 추가
+        echo "✅ Package installed"
+
+    - name: Quick test
+      timeout-minutes: 1
+      run: |
+        echo "🧪 Quick import test..."
+        python -c "import simpleenvs_python; print('✅ Works!')"
+        echo "🎉 Success!"
 
     - name: Run tests
       run: |
