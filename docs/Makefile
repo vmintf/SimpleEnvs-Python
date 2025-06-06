@@ -57,14 +57,14 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r docs/requirements.txt
-        pip install -e .
+		python -m pip install --upgrade pip
+		pip install -r docs/requirements.txt
+		pip install -e .
 
     - name: Build documentation
       run: |
-        cd docs
-        make html
+		cd docs
+		make html
 
     - name: Deploy to GitHub Pages
       if: github.ref == 'refs/heads/main'
