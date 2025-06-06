@@ -1,124 +1,17 @@
-# .github/workflows/ci.yml
-name: CI Pipeline
-
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  test:
-    name: Test Python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.8, 3.9, 3.10, 3.11, 3.12]
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e .
-        pip install pytest
-
-    - name: Run tests
-      run: |
-        python -c "import simpleenvs_python; print('✅ Import successful!')"
-        echo "🎉 All tests passed!"
-
-  build:
-    name: Build Package
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
-
-    - name: Install build tools
-      run: |
-        python -m pip install --upgrade pip
-        pip install build
-
-    - name: Build package
-      run: |
-        python -m build
-        echo "✅ Package built successfully!"
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: dist
-        path: dist/
-
----
-
-# .github/workflows/deploy.yml
-name: Deploy to PyPI
-
-on:
-  release:
-    types: [published]
-  workflow_dispatch:
-
-jobs:
-  deploy:
-    name: Deploy to PyPI
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
-
-    - name: Install build tools
-      run: |
-        python -m pip install --upgrade pip
-        pip install build twine
-
-    - name: Build package
-      run: |
-        python -m build
-
-    - name: Publish to PyPI
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-      run: |
-        twine upload dist/*
-        echo "🚀 Successfully deployed to PyPI!"
-
----
-
-# .github/workflows/benchmark.yml
 name: Performance Benchmark
 
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
 
 jobs:
   benchmark:
-    name: Run Benchmarks
+    name: Run Performance Benchmarks
     runs-on: ubuntu-latest
 
     steps:
@@ -128,26 +21,156 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.11
+        python-version: "3.11"
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install aiofiles
+        pip install python-dotenv  # For comparison
         pip install -e .
-        pip install python-dotenv
+
+    - name: Verify installations
+      run: |
+        python -c "import simpleenvs; print(f'SimpleEnvs: v{simpleenvs.__version__}')"
+        python -c "import dotenv; print(f'python-dotenv: v{dotenv.__version__}')"
+
+    - name: Create benchmark script
+      run: |
+        cat > benchmark_simple.py << 'EOF'
+        import time
+        import tempfile
+        import os
+        from pathlib import Path
+
+        def create_test_env(num_vars=100):
+            """Create test .env file with specified number of variables"""
+            content = []
+            for i in range(num_vars):
+                content.append(f'VAR_{i}=value_{i}_{"x" * 20}')
+            
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+                f.write('\n'.join(content))
+                return f.name
+
+        def benchmark_simpleenvs(env_file, iterations=10):
+            """Benchmark SimpleEnvs loading"""
+            import simpleenvs
+            
+            times = []
+            for _ in range(iterations):
+                # Clear any existing data
+                if hasattr(simpleenvs, '_simple_loader') and simpleenvs._simple_loader:
+                    simpleenvs._simple_loader.clear()
+                
+                start = time.perf_counter()
+                simpleenvs.load_dotenv(env_file)
+                end = time.perf_counter()
+                times.append((end - start) * 1000)  # Convert to milliseconds
+            
+            return times
+
+        def benchmark_python_dotenv(env_file, iterations=10):
+            """Benchmark python-dotenv loading"""
+            from dotenv import load_dotenv
+            
+            times = []
+            for _ in range(iterations):
+                # Clear environment
+                for key in list(os.environ.keys()):
+                    if key.startswith('VAR_'):
+                        del os.environ[key]
+                
+                start = time.perf_counter()
+                load_dotenv(env_file, override=True)
+                end = time.perf_counter()
+                times.append((end - start) * 1000)  # Convert to milliseconds
+            
+            return times
+
+        def run_benchmark():
+            """Run comprehensive benchmark"""
+            test_sizes = [10, 50, 100, 500]
+            results = []
+            
+            print("🚀 SimpleEnvs vs python-dotenv Performance Benchmark")
+            print("=" * 60)
+            
+            for size in test_sizes:
+                print(f"\n📊 Testing with {size} variables...")
+                
+                # Create test file
+                env_file = create_test_env(size)
+                
+                try:
+                    # Benchmark both libraries
+                    simpleenvs_times = benchmark_simpleenvs(env_file, iterations=5)
+                    dotenv_times = benchmark_python_dotenv(env_file, iterations=5)
+                    
+                    # Calculate averages
+                    avg_simpleenvs = sum(simpleenvs_times) / len(simpleenvs_times)
+                    avg_dotenv = sum(dotenv_times) / len(dotenv_times)
+                    speedup = avg_dotenv / avg_simpleenvs
+                    
+                    print(f"  SimpleEnvs:    {avg_simpleenvs:.2f}ms")
+                    print(f"  python-dotenv: {avg_dotenv:.2f}ms")
+                    print(f"  Speedup:       {speedup:.1f}x faster ⚡")
+                    
+                    results.append({
+                        'size': size,
+                        'simpleenvs': avg_simpleenvs,
+                        'dotenv': avg_dotenv,
+                        'speedup': speedup
+                    })
+                    
+                finally:
+                    os.unlink(env_file)
+            
+            # Summary
+            print(f"\n📈 Benchmark Summary:")
+            print("-" * 50)
+            for result in results:
+                print(f"{result['size']:3d} vars: {result['speedup']:.1f}x faster")
+            
+            avg_speedup = sum(r['speedup'] for r in results) / len(results)
+            print(f"\n🎯 Average speedup: {avg_speedup:.1f}x faster!")
+            
+            return results
+
+        if __name__ == "__main__":
+            run_benchmark()
+        EOF
 
     - name: Run benchmark
       run: |
-        if [ -f "benchmark.py" ]; then
-          python benchmark.py --quick 2>&1 | tee benchmark-results.txt || echo "Benchmark script not found, skipping..."
-        else
-          echo "📊 Benchmark script not found, but that's okay!"
-          echo "🚀 Performance testing can be added later."
-        fi
+        python benchmark_simple.py 2>&1 | tee benchmark-results.txt
+        echo "✅ Benchmark completed successfully!"
 
     - name: Upload benchmark results
       uses: actions/upload-artifact@v3
-      if: success()
       with:
-        name: benchmark-results
+        name: benchmark-results-${{ github.sha }}
         path: benchmark-results.txt
+
+    - name: Comment benchmark results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const results = fs.readFileSync('benchmark-results.txt', 'utf8');
+          
+          const comment = `## 🚀 Performance Benchmark Results
+          
+          \`\`\`
+          ${results}
+          \`\`\`
+          
+          _Benchmark run on commit ${context.sha.substring(0, 7)}_`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });

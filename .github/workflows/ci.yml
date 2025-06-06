@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8, 3.9, 3.10, 3.11, 3.12]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
     - name: Checkout code
@@ -27,13 +27,72 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -e .
-        pip install pytest
+        pip install aiofiles  # Required dependency
+        pip install pytest pytest-asyncio  # Testing dependencies
 
-    - name: Run tests
+    - name: Install package
       run: |
-        python -c "import simpleenvs_python; print('✅ Import successful!')"
-        echo "🎉 All tests passed!"
+        pip install -e .
+
+    - name: Test import
+      run: |
+        python -c "import simpleenvs; print(f'✅ SimpleEnvs v{simpleenvs.__version__} imported successfully!')"
+
+    - name: Test basic functionality
+      run: |
+        python -c "
+        import simpleenvs
+        import tempfile
+        import os
+        
+        # Create test .env file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+            f.write('TEST_VAR=hello\\nDEBUG=true\\nPORT=8080\\n')
+            env_file = f.name
+        
+        try:
+            # Test simple loading
+            simpleenvs.load_dotenv(env_file)
+            assert os.getenv('TEST_VAR') == 'hello'
+            print('✅ Simple loading works!')
+            
+            # Test type-safe getters
+            debug = simpleenvs.get_bool('DEBUG')
+            port = simpleenvs.get_int('PORT')
+            assert debug == True
+            assert port == 8080
+            print('✅ Type-safe getters work!')
+            
+            print('🎉 All basic tests passed!')
+        finally:
+            os.unlink(env_file)
+        "
+
+    - name: Test async functionality
+      run: |
+        python -c "
+        import asyncio
+        import simpleenvs
+        import tempfile
+        import os
+        
+        async def test_async():
+            # Create test .env file
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+                f.write('ASYNC_VAR=test_value\\n')
+                env_file = f.name
+            
+            try:
+                # Test async loading
+                await simpleenvs.load(env_file)
+                value = simpleenvs.get('ASYNC_VAR')
+                assert value == 'test_value'
+                print('✅ Async loading works!')
+            finally:
+                os.unlink(env_file)
+        
+        asyncio.run(test_async())
+        "
 
   build:
     name: Build Package
@@ -47,7 +106,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.11
+        python-version: "3.11"
 
     - name: Install build tools
       run: |
@@ -59,95 +118,14 @@ jobs:
         python -m build
         echo "✅ Package built successfully!"
 
+    - name: Verify build
+      run: |
+        ls -la dist/
+        echo "📦 Build artifacts:"
+        find dist/ -name "*.whl" -o -name "*.tar.gz"
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: dist
+        name: dist-${{ github.sha }}
         path: dist/
-
----
-
-# .github/workflows/deploy.yml
-name: Deploy to PyPI
-
-on:
-  release:
-    types: [published]
-  workflow_dispatch:
-
-jobs:
-  deploy:
-    name: Deploy to PyPI
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
-
-    - name: Install build tools
-      run: |
-        python -m pip install --upgrade pip
-        pip install build twine
-
-    - name: Build package
-      run: |
-        python -m build
-
-    - name: Publish to PyPI
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-      run: |
-        twine upload dist/*
-        echo "🚀 Successfully deployed to PyPI!"
-
----
-
-# .github/workflows/benchmark.yml
-name: Performance Benchmark
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-jobs:
-  benchmark:
-    name: Run Benchmarks
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e .
-        pip install python-dotenv
-
-    - name: Run benchmark
-      run: |
-        if [ -f "benchmark.py" ]; then
-          python benchmark.py --quick 2>&1 | tee benchmark-results.txt || echo "Benchmark script not found, skipping..."
-        else
-          echo "📊 Benchmark script not found, but that's okay!"
-          echo "🚀 Performance testing can be added later."
-        fi
-
-    - name: Upload benchmark results
-      uses: actions/upload-artifact@v3
-      if: success()
-      with:
-        name: benchmark-results
-        path: benchmark-results.txt

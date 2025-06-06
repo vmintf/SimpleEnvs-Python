@@ -3,6 +3,13 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/docs/_build" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/htmlcov" />
+      <excludeFolder url="file://$MODULE_DIR$/htmlcov" />
+      <excludeFolder url="file://$MODULE_DIR$/src/SimpleEnvs_Python.egg-info" />
+      <excludeFolder url="file://$MODULE_DIR$/src/simpleenvs.egg-info" />
+      <excludeFolder url="file://$MODULE_DIR$/tests/htmlcov" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.11 (simpleenvs)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

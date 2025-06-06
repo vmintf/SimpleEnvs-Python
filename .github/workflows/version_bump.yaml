@@ -1,0 +1,248 @@
+# .github/workflows/version-bump.yml
+name: Auto Version Bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - auto
+      create_release:
+        description: 'Create GitHub release'
+        required: false
+        default: true
+        type: boolean
+      deploy_to_pypi:
+        description: 'Deploy to PyPI after release'
+        required: false
+        default: false
+        type: boolean
+
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - '*.md'
+      - '.github/workflows/docs.yml'
+
+jobs:
+  auto-bump-on-docs:
+    name: Auto Bump on Docs Changes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, 'docs:')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Configure git
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+    - name: Auto bump patch version
+      run: |
+        python version_bump.py patch
+        
+        # Get new version
+        NEW_VERSION=$(python -c "
+        import re
+        content = open('src/simpleenvs/constants.py').read()
+        match = re.search(r'VERSION = [\"\\']([0-9]+\\.[0-9]+\\.[0-9]+)[\"\\']', content)
+        print(match.group(1))
+        ")
+        
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+        echo "📦 Auto-bumped to version: $NEW_VERSION"
+
+    - name: Commit version bump
+      run: |
+        git add src/simpleenvs/constants.py
+        git commit -m "chore: auto-bump version to v${{ env.NEW_VERSION }} [skip ci]"
+        git push
+
+  manual-bump:
+    name: Manual Version Bump
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Configure git
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+    - name: Bump version
+      run: |
+        python version_bump.py ${{ github.event.inputs.bump_type }} --tag
+        
+        # Get new version
+        NEW_VERSION=$(python -c "
+        import re
+        content = open('src/simpleenvs/constants.py').read()
+        match = re.search(r'VERSION = [\"\\']([0-9]+\\.[0-9]+\\.[0-9]+)[\"\\']', content)
+        print(match.group(1))
+        ")
+        
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+        echo "📦 Bumped to version: $NEW_VERSION"
+
+    - name: Commit and push changes
+      run: |
+        git add src/simpleenvs/constants.py
+        git commit -m "chore: bump version to v${{ env.NEW_VERSION }}"
+        git push
+        git push --tags
+
+    - name: Create GitHub Release
+      if: github.event.inputs.create_release == 'true'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ env.NEW_VERSION }}
+        release_name: SimpleEnvs v${{ env.NEW_VERSION }}
+        body: |
+          ## SimpleEnvs v${{ env.NEW_VERSION }}
+          
+          ### Changes in this release
+          
+          **Auto-generated release notes:**
+          
+          - Version bump: ${{ github.event.inputs.bump_type }}
+          - Commit: ${{ github.sha }}
+          
+          ### Installation
+          
+          ```bash
+          pip install simpleenvs-python==${{ env.NEW_VERSION }}
+          ```
+          
+          ### Documentation
+          
+          - 📚 [Documentation](https://vmintf.github.io/SimpleEnvs-Python/)
+          - 🚀 [Quick Start](https://vmintf.github.io/SimpleEnvs-Python/quickstart/)
+          - 🔒 [Security Guide](https://vmintf.github.io/SimpleEnvs-Python/security/)
+          
+          ---
+          
+          **Full Changelog**: https://github.com/vmintf/SimpleEnvs-Python/compare/v${{ env.PREVIOUS_VERSION }}...v${{ env.NEW_VERSION }}
+        draft: false
+        prerelease: false
+
+    - name: Trigger PyPI deployment
+      if: github.event.inputs.deploy_to_pypi == 'true'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.actions.createWorkflowDispatch({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            workflow_id: 'deploy.yml',
+            ref: 'main',
+            inputs: {
+              environment: 'pypi'
+            }
+          });
+
+---
+
+# .github/workflows/smart-release.yml
+name: Smart Release
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9 AM
+  workflow_dispatch:
+
+jobs:
+  check-and-release:
+    name: Check for Changes and Release
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Check for unreleased changes
+      id: check_changes
+      run: |
+        # Get last tag
+        LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        
+        if [ -z "$LAST_TAG" ]; then
+          echo "No previous tags found"
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+          echo "change_type=minor" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        
+        # Get commits since last tag
+        COMMITS=$(git log $LAST_TAG..HEAD --oneline)
+        
+        if [ -z "$COMMITS" ]; then
+          echo "No changes since last release"
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        
+        echo "has_changes=true" >> $GITHUB_OUTPUT
+        
+        # Analyze commit messages to determine change type
+        if echo "$COMMITS" | grep -qi "breaking\|major:"; then
+          echo "change_type=major" >> $GITHUB_OUTPUT
+        elif echo "$COMMITS" | grep -qi "feat:\|feature:\|minor:"; then
+          echo "change_type=minor" >> $GITHUB_OUTPUT
+        else
+          echo "change_type=patch" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "📋 Changes detected:"
+        echo "$COMMITS"
+
+    - name: Trigger version bump
+      if: steps.check_changes.outputs.has_changes == 'true'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.actions.createWorkflowDispatch({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            workflow_id: 'version-bump.yml',
+            ref: 'main',
+            inputs: {
+              bump_type: '${{ steps.check_changes.outputs.change_type }}',
+              create_release: 'true',
+              deploy_to_pypi: 'true'
+            }
+          });
+          
+          console.log(`🚀 Triggered ${context.payload.inputs.change_type} version bump`);
