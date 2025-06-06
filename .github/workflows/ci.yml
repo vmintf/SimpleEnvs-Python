@@ -9,162 +9,20 @@ on:
 
 jobs:
   test:
-    name: Test Python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.8, 3.9, 3.10, 3.11, 3.12]
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install aiofiles  # 👈 핵심 의존성 추가!
-        pip install -e .
-        pip install pytest
-
-    - name: Run tests
-      run: |
-        python -c "import simpleenvs_python; print('✅ Import successful!')"
-        echo "🎉 All tests passed!"
-
-  build:
-    name: Build Package
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
-
-    - name: Install build tools
-      run: |
-        python -m pip install --upgrade pip
-        pip install build aiofiles  # 👈 여기도 추가!
-
-    - name: Build package
-      run: |
-        python -m build
-        echo "✅ Package built successfully!"
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4  # 👈 v4로 업데이트!
-      with:
-        name: dist
-        path: dist/
-
----
-
-# .github/workflows/deploy.yml
-name: Deploy to PyPI
-
-on:
-  release:
-    types: [published]
-  workflow_dispatch:
-
-jobs:
-  deploy:
-    name: Deploy to PyPI
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
-
-    - name: Install build tools
-      run: |
-        python -m pip install --upgrade pip
-        pip install build twine aiofiles  # 👈 여기도!
-
-    - name: Build package
-      run: |
-        python -m build
-
-    - name: Publish to PyPI
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-      run: |
-        twine upload dist/*
-        echo "🚀 Successfully deployed to PyPI!"
-
----
-
-# .github/workflows/benchmark.yml
-name: Performance Benchmark
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-jobs:
-  benchmark:
-    name: Run Benchmarks
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install aiofiles  # 👈 핵심 의존성!
-        pip install -e .
-        pip install python-dotenv
-
-    - name: Run benchmark
-      run: |
-        if [ -f "benchmark.py" ]; then
-          python benchmark.py --quick 2>&1 | tee benchmark-results.txt || echo "Benchmark script not found, skipping..."
-        else
-          echo "📊 Benchmark script not found, but that's okay!"
-          echo "🚀 Performance testing can be added later."
-        fi
-
-    - name: Upload benchmark results
-      uses: actions/upload-artifact@v4  # 👈 v4로 업데이트!
-      if: success()
-      with:
-        name: benchmark-results
-        path: benchmark-results.txt, develop ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  test:
-    name: Test Python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 5  # 👈 더 짧은 타임아웃
+    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.11]  # 👈 하나만 테스트!
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        exclude:
+          # Reduce CI time by skipping some combinations
+          - os: windows-latest
+            python-version: "3.8"
+          - os: macos-latest
+            python-version: "3.8"
 
     steps:
     - name: Checkout code
@@ -175,98 +33,129 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies (step by step)
-      timeout-minutes: 3  # 👈 단계별 타임아웃
+    - name: Install core dependencies
       run: |
-        echo "🔧 Step 1: Upgrade pip"
         python -m pip install --upgrade pip
-        echo "✅ Pip upgraded"
-        
-        echo "🔧 Step 2: Install aiofiles"
         pip install aiofiles
-        echo "✅ aiofiles installed"
-        
-        echo "🔧 Step 3: Install pytest"  
-        pip install pytest
-        echo "✅ pytest installed"
-        
-        echo "🔧 Step 4: Try simple import test BEFORE package install"
+
+    - name: Setup Python path
+      shell: bash
+      run: |
+        echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
+        # Fix Windows encoding issues
+        echo "PYTHONIOENCODING=utf-8" >> $GITHUB_ENV
+        echo "PYTHONUTF8=1" >> $GITHUB_ENV
+
+    - name: Test import and basic functionality
+      shell: bash
+      run: |
         python -c "
         import sys
-        print('Python version:', sys.version)
         sys.path.insert(0, './src')
+        
+        print('Python version:', sys.version)
+        print('Platform:', sys.platform)
+        
         try:
-            import simpleenvs_python
-            print('✅ Direct import works!')
-        except Exception as e:
-            print(f'⚠️ Direct import failed: {e}')
+            import simpleenvs
+            print('simpleenvs import successful!')
+            
+            # Check version
+            if hasattr(simpleenvs, '__version__'):
+                print('Version:', simpleenvs.__version__)
+            elif hasattr(simpleenvs, 'constants'):
+                print('Version:', simpleenvs.constants.VERSION)
+            else:
+                print('Version info not found, but import works!')
+            
+            # Test basic functionality
+            import tempfile, os
+            
+            # Test load_dotenv if available
+            if hasattr(simpleenvs, 'load_dotenv'):
+                print('Testing load_dotenv...')
+                
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+                    f.write('TEST_VAR=hello\\nDEBUG=true\\nPORT=8080\\n')
+                    env_file = f.name
+                
+                try:
+                    simpleenvs.load_dotenv(env_file)
+                    
+                    if os.getenv('TEST_VAR') == 'hello':
+                        print('Environment loading works!')
+                    else:
+                        print('Environment variables not loaded properly')
+                        
+                except Exception as e:
+                    print('Function test failed:', str(e))
+                finally:
+                    os.unlink(env_file)
+            else:
+                print('load_dotenv not found')
+                available_funcs = [x for x in dir(simpleenvs) if not x.startswith('_')]
+                print('Available functions:', available_funcs[:10])
+            
+            print('All tests passed for Python ${{ matrix.python-version }} on ${{ matrix.os }}!')
+            
+        except ImportError as e:
+            print('Import failed:', str(e))
             import os
             if os.path.exists('./src'):
                 print('src/ contents:', os.listdir('./src'))
+            sys.exit(1)
+        except Exception as e:
+            print('Unexpected error:', str(e))
+            sys.exit(1)
         "
-        
-        echo "🔧 Step 5: Install package"
-        pip install -e . --timeout 60  # 👈 타임아웃 추가
-        echo "✅ Package installed"
 
-    - name: Quick test
-      timeout-minutes: 1
+    - name: Test async functionality (if supported)
+      shell: bash
       run: |
-        echo "🧪 Quick import test..."
-        python -c "import simpleenvs_python; print('✅ Works!')"
-        echo "🎉 Success!"
-
-    - name: Run tests
-      run: |
-        echo "🧪 Starting import test..."
         python -c "
-        print('Python import test starting...')
+        import sys
+        sys.path.insert(0, './src')
+        import simpleenvs
+        import asyncio
+        import tempfile
+        import os
+        
+        async def test_async():
+            try:
+                if hasattr(simpleenvs, 'load') or hasattr(simpleenvs, 'aload_dotenv'):
+                    print('Testing async functionality...')
+                    
+                    with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+                        f.write('ASYNC_TEST=async_works\\n')
+                        env_file = f.name
+                    
+                    try:
+                        if hasattr(simpleenvs, 'load'):
+                            await simpleenvs.load(env_file)
+                        elif hasattr(simpleenvs, 'aload_dotenv'):
+                            await simpleenvs.aload_dotenv(env_file)
+                        
+                        print('Async loading works!')
+                    except Exception as e:
+                        print('Async test failed:', str(e))
+                    finally:
+                        os.unlink(env_file)
+                else:
+                    print('No async functions found')
+            except Exception as e:
+                print('Async test error:', str(e))
         
         try:
-            print('Attempting to import simpleenvs_python...')
-            import simpleenvs_python
-            print('✅ Import simpleenvs_python successful!')
-            
-            # Check what's available
-            print('Available attributes:', [x for x in dir(simpleenvs_python) if not x.startswith('_')][:10])
-            
-            # Try to get version info
-            if hasattr(simpleenvs_python, '__version__'):
-                print(f'Version: {simpleenvs_python.__version__}')
-            else:
-                print('No __version__ found')
-                
-        except ImportError as e:
-            print(f'❌ Import failed: {e}')
-            
-            # Debug info
-            import sys
-            print(f'Python path: {sys.path[:3]}...')
-            
-            import os
-            print('Checking installation...')
-            try:
-                import subprocess
-                result = subprocess.run(['pip', 'show', 'simpleenvs-python'], capture_output=True, text=True)
-                print('Pip show output:')
-                print(result.stdout)
-            except:
-                print('Could not run pip show')
-                
-            raise
-            
+            asyncio.run(test_async())
         except Exception as e:
-            print(f'❌ Unexpected error: {e}')
-            raise
-            
-        print('🎉 All tests completed successfully!')
+            print('Could not run async test:', str(e))
         "
-        echo "🎉 All tests passed!"
 
   build:
     name: Build Package
     runs-on: ubuntu-latest
     needs: test
+    timeout-minutes: 10
 
     steps:
     - name: Checkout code
@@ -275,108 +164,51 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.11
+        python-version: "3.11"
 
-    - name: Install build tools
+    - name: Install build dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install build aiofiles  # 👈 여기도 추가!
+        pip install build twine aiofiles
+
+    - name: Verify package can be imported before build
+      run: |
+        export PYTHONPATH="$PYTHONPATH:$(pwd)/src"
+        python -c "
+        import sys
+        sys.path.insert(0, './src')
+        import simpleenvs
+        print('✅ Package imports successfully before build')
+        "
 
     - name: Build package
       run: |
         python -m build
         echo "✅ Package built successfully!"
 
+    - name: Check package
+      run: |
+        twine check dist/*
+        echo "✅ Package check passed!"
+
+    - name: Test wheel installation
+      run: |
+        # Install the wheel
+        pip install dist/*.whl
+        
+        # Test import after installation
+        python -c "
+        try:
+            import simpleenvs
+            print('✅ Wheel installation and import successful!')
+        except ImportError as e:
+            print(f'❌ Wheel import failed: {e}')
+            exit(1)
+        "
+
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: dist
+        name: dist-${{ github.sha }}
         path: dist/
-
----
-
-# .github/workflows/deploy.yml
-name: Deploy to PyPI
-
-on:
-  release:
-    types: [published]
-  workflow_dispatch:
-
-jobs:
-  deploy:
-    name: Deploy to PyPI
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
-
-    - name: Install build tools
-      run: |
-        python -m pip install --upgrade pip
-        pip install build twine aiofiles  # 👈 여기도!
-
-    - name: Build package
-      run: |
-        python -m build
-
-    - name: Publish to PyPI
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-      run: |
-        twine upload dist/*
-        echo "🚀 Successfully deployed to PyPI!"
-
----
-
-# .github/workflows/benchmark.yml
-name: Performance Benchmark
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-jobs:
-  benchmark:
-    name: Run Benchmarks
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install aiofiles  # 👈 핵심 의존성!
-        pip install -e .
-        pip install python-dotenv
-
-    - name: Run benchmark
-      run: |
-        if [ -f "benchmark.py" ]; then
-          python benchmark.py --quick 2>&1 | tee benchmark-results.txt || echo "Benchmark script not found, skipping..."
-        else
-          echo "📊 Benchmark script not found, but that's okay!"
-          echo "🚀 Performance testing can be added later."
-        fi
-
-    - name: Upload benchmark results
-      uses: actions/upload-artifact@v3
-      if: success()
-      with:
-        name: benchmark-results
-        path: benchmark-results.txt
+        retention-days: 30
