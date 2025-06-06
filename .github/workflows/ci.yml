@@ -76,7 +76,7 @@ jobs:
         try:
             print('Attempting to import simpleenvs_python...')
             import simpleenvs_python
-            print('✅ Import simpleenvs_python successful!')
+            print('✅ Import simpleenvs successful!')
             
             # Check what's available
             print('Available attributes:', [x for x in dir(simpleenvs_python) if not x.startswith('_')][:10])
@@ -184,50 +184,3 @@ jobs:
       run: |
         twine upload dist/*
         echo "🚀 Successfully deployed to PyPI!"
-
----
-
-# .github/workflows/benchmark.yml
-name: Performance Benchmark
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-jobs:
-  benchmark:
-    name: Run Benchmarks
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install aiofiles  # 👈 핵심 의존성!
-        pip install -e .
-        pip install python-dotenv
-
-    - name: Run benchmark
-      run: |
-        if [ -f "benchmark.py" ]; then
-          python benchmark.py --quick 2>&1 | tee benchmark-results.txt || echo "Benchmark script not found, skipping..."
-        else
-          echo "📊 Benchmark script not found, but that's okay!"
-          echo "🚀 Performance testing can be added later."
-        fi
-
-    - name: Upload benchmark results
-      uses: actions/upload-artifact@v3
-      if: success()
-      with:
-        name: benchmark-results
-        path: benchmark-results.txt
