@@ -130,14 +130,14 @@ jobs:
           fi
         done
 
-    # 🧪 Test PyPI deployment (API Token 방식 유지)
-    - name: Deploy to Test PyPI
+    # 🧪 Test PyPI deployment (Trusted Publishing!)
+    - name: Deploy to Test PyPI (Trusted Publishing)
       if: github.event.inputs.environment == 'testpypi'
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository-url: https://test.pypi.org/legacy/
-        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
         print-hash: true
+        # 🔒 TestPyPI도 이제 토큰 불필요! OIDC 인증
 
     # 🚀 Production PyPI deployment (Trusted Publishing 사용)
     - name: Deploy to PyPI (Trusted Publishing)
@@ -182,7 +182,7 @@ jobs:
       run: |
         echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
         echo "- **Target**: ${{ github.event.inputs.environment || 'PyPI' }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Method**: ${{ github.event.inputs.environment == 'testpypi' && 'API Token' || 'Trusted Publishing' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Method**: Trusted Publishing (OIDC)" >> $GITHUB_STEP_SUMMARY
         echo "- **Python Version**: 3.12" >> $GITHUB_STEP_SUMMARY
         echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
@@ -192,9 +192,10 @@ jobs:
         echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
         ls -la dist/ >> $GITHUB_STEP_SUMMARY
         echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-        if [[ "${{ github.event.inputs.environment || 'pypi' }}" == "pypi" ]]; then
+        if [[ "${{ github.event.inputs.environment || 'pypi' }}" != "" ]]; then
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔒 **Security**: Deployed using Trusted Publishing (OIDC)" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 **No API tokens required!**" >> $GITHUB_STEP_SUMMARY
         fi
 
     - name: Upload deployment artifacts
