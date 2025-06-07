@@ -176,7 +176,7 @@ jobs:
         echo "✅ Package built successfully!"
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dist
         path: dist/
@@ -263,7 +263,7 @@ jobs:
         fi
 
     - name: Upload benchmark results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: success()
       with:
         name: benchmark-results
