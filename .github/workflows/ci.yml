@@ -17,17 +17,17 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
-        exclude:
-          # Reduce CI time by skipping some combinations
-          - os: windows-latest
-            python-version: "3.8"
-          - os: macos-latest
-            python-version: "3.8"
-          # Python 3.13 is new, test on fewer platforms initially
-          - os: windows-latest
-            python-version: "3.13"
-          - os: macos-latest
-            python-version: "3.13"
+#        exclude:
+#          # Reduce CI time by skipping some combinations
+#          - os: windows-latest
+#            python-version: "3.8"
+#          - os: macos-latest
+#            python-version: "3.8"
+#          # Python 3.13 is new, test on fewer platforms initially
+#          - os: windows-latest
+#            python-version: "3.13"
+#          - os: macos-latest
+#            python-version: "3.13"
 
     steps:
     - name: Checkout code
