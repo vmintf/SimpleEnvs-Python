@@ -1,6 +1,7 @@
 # SimpleEnvs
 
-[![PyPI version](https://badge.fury.io/py/simpleenvs.svg)](https://badge.fury.io/py/simpleenvs)
+
+![PyPI - Version](https://img.shields.io/pypi/v/simpleenvs_python?label=PyPI%20Package)
 [![Python](https://img.shields.io/pypi/pyversions/simpleenvs.svg)](https://pypi.org/project/simpleenvs/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PyPI Downloads](https://static.pepy.tech/badge/simpleenvs-python)](https://pepy.tech/projects/simpleenvs-python)
