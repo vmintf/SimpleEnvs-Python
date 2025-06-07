@@ -24,8 +24,8 @@ except ImportError:
         release = simpleenvs.__version__
         version = '.'.join(release.split('.')[:2])
     except ImportError:
-        release = '1.0.4'
-        version = '1.0'
+        release = '1.1.3'
+        version = '1.1'
         print(f"Warning: Using fallback version: {release}")
 
 print(f"📚 Building documentation for SimpleEnvs v{release}")

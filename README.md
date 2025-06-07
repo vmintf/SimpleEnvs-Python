@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/simpleenvs.svg)](https://badge.fury.io/py/simpleenvs)
 [![Python](https://img.shields.io/pypi/pyversions/simpleenvs.svg)](https://pypi.org/project/simpleenvs/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Tests](https://github.com/vmintf/SimpleEnvs-Python/simpleenvs/workflows/tests/badge.svg)](https://github.com/vmintf/SimpleEnvs-Python/simpleenvs/actions)
+[![PyPI Downloads](https://static.pepy.tech/badge/simpleenvs-python)](https://pepy.tech/projects/simpleenvs-python)
 
 > **Ultra-secure, high-performance .env file loader for Python**  
 > *Simple to use, enterprise-grade security, 2-4x faster performance*
