@@ -30,7 +30,9 @@ jobs:
 
     - name: Run benchmark
       run: |
-        if [ -f "benchmark.py" ]; then
+        if [ -f "src/simpleenvs/benchmark.py" ]; then
+          python -m simpleenvs.benchmark --quick 2>&1 | tee benchmark-results.txt || echo "Benchmark completed with warnings"
+        elif [ -f "benchmark.py" ]; then
           python benchmark.py --quick 2>&1 | tee benchmark-results.txt || echo "Benchmark completed with warnings"
         else
           echo "📊 Benchmark script not found, but that's okay!"
