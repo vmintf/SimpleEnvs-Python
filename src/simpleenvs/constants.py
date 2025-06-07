@@ -346,11 +346,11 @@ API_VERSION = "1.0"
 MIN_PYTHON_VERSION = (3, 7)
 
 # Library metadata
-LIBRARY_NAME = "SimpleEnvs"
+LIBRARY_NAME = "SimpleEnvs-Python"
 AUTHOR = "vmintf"
 DESCRIPTION = "Ultra-secure, high-performance .env file loader"
 LICENSE = "MIT"
-HOMEPAGE = "https://github.com/vmintf/simpleenvs"
+HOMEPAGE = "https://github.com/vmintf/SimpleEnvs-Python"
 
 
 # =============================================================================

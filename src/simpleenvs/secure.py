@@ -140,6 +140,21 @@ class SecureEnvLoader:
         file_hash = self.__calculate_file_hash(file_path)
         self.__file_hashes[file_path] = file_hash
 
+    def __validate_content_security_batch(self, content: str) -> None:
+        """배치로 전체 내용 보안 검증 - 한 번에 처리"""
+        content_lower = content.lower()
+
+        # 🚀 최적화: 한 번의 검색으로 모든 위험 패턴 확인
+        for pattern in DANGEROUS_PATTERNS:
+            if pattern in content_lower:
+                raise InvalidInputError(f"Dangerous pattern detected: {pattern}")
+
+        # 스크립트 인젝션 패턴도 배치로 확인
+        script_patterns = ["<script", "</script>", "javascript:", "vbscript:"]
+        for pattern in script_patterns:
+            if pattern in content_lower:
+                raise InvalidInputError(f"Script injection pattern detected: {pattern}")
+
     def __calculate_file_hash(self, file_path: str) -> str:
         """Calculate SHA-256 hash of file for integrity checking"""
         hasher = hashlib.sha256()
@@ -182,7 +197,7 @@ class SecureEnvLoader:
             try:
                 num = int(value)
                 # Validate integer range (64-bit signed)
-                if -(2**63) <= num <= (2**63 - 1):
+                if -(2 ** 63) <= num <= (2 ** 63 - 1):
                     return num
                 else:
                     # Out of range, treat as string
@@ -196,6 +211,77 @@ class SecureEnvLoader:
             return value
         except UnicodeEncodeError:
             raise InvalidInputError("Invalid UTF-8 encoding in value")
+
+    async def __parse_file_secure(self, file_path: str) -> EnvMap:
+        """Securely parse .env file with comprehensive validation - OPTIMIZED"""
+        self.__validate_path_security(file_path)
+        self.__validate_file_security(file_path)
+
+        env_data: EnvMap = {}
+        line_count = 0
+
+        try:
+            # 🚀 최적화 1: 파일 크기에 따른 읽기 전략 선택
+            file_size = Path(file_path).stat().st_size
+
+            if file_size < 1024 * 1024:  # 1MB 미만은 동기 읽기가 더 빠름
+                with open(file_path, "r", encoding="utf-8") as file:
+                    content = file.read()
+            else:
+                # 큰 파일만 비동기로 (청크 단위 또는 전체 읽기)
+                async with aiofiles.open(file_path, "r", encoding="utf-8") as file:
+                    content = await file.read()  # ✅ 한 번에 읽기
+
+            # 🚀 최적화 2: 배치 보안 검증 (전체 내용 한 번에)
+            self.__validate_content_security_batch(content)
+
+            # 🚀 최적화 3: 동기적 라인 처리 (async for 대신)
+            lines = content.splitlines()
+
+            for line_number, line in enumerate(lines, 1):
+                line_count += 1
+
+                # Line count protection
+                if line_count > 10000:
+                    raise InvalidInputError("Too many lines in file")
+
+                # Line length validation
+                if len(line) > MAX_LINE_LENGTH:
+                    continue
+
+                # Process line
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+
+                # Parse key=value
+                if "=" not in line:
+                    continue
+
+                key, _, value = line.partition("=")
+                key = key.strip()
+                value = value.strip()
+
+                # Remove quotes if present
+                if (value.startswith('"') and value.endswith('"')) or (
+                        value.startswith("'") and value.endswith("'")
+                ):
+                    value = value[1:-1]
+
+                # Security validation (key-value specific)
+                self.__validate_key_value(key, value)
+
+                # Store securely parsed value
+                env_data[key] = self.__parse_value_secure(value)
+
+        except UnicodeDecodeError:
+            raise InvalidInputError("Invalid UTF-8 encoding in file")
+        except Exception as e:
+            self.__log_access("file_parse", file_path, False)
+            raise FileParsingError(file_path, original_error=e)
+
+        self.__log_access("file_parse", file_path, True)
+        return env_data
 
     async def __scan_directory_secure(self, path: str, max_depth: int) -> Optional[str]:
         """Securely scan directory for .env file"""
@@ -235,61 +321,6 @@ class SecureEnvLoader:
             return None
 
         return None
-
-    async def __parse_file_secure(self, file_path: str) -> EnvMap:
-        """Securely parse .env file with comprehensive validation"""
-        self.__validate_path_security(file_path)
-        self.__validate_file_security(file_path)
-
-        env_data: EnvMap = {}
-        line_count = 0
-
-        try:
-            async with aiofiles.open(file_path, "r", encoding="utf-8") as file:
-                async for line in file:
-                    line_count += 1
-
-                    # Line count protection
-                    if line_count > 10000:
-                        raise InvalidInputError("Too many lines in file")
-
-                    # Line length validation
-                    if len(line) > MAX_LINE_LENGTH:
-                        continue
-
-                    # Process line
-                    line = line.strip()
-                    if not line or line.startswith("#"):
-                        continue
-
-                    # Parse key=value
-                    if "=" not in line:
-                        continue
-
-                    key, _, value = line.partition("=")
-                    key = key.strip()
-                    value = value.strip()
-
-                    # Remove quotes if present
-                    if (value.startswith('"') and value.endswith('"')) or (
-                        value.startswith("'") and value.endswith("'")
-                    ):
-                        value = value[1:-1]
-
-                    # Security validation
-                    self.__validate_key_value(key, value)
-
-                    # Store securely parsed value
-                    env_data[key] = self.__parse_value_secure(value)
-
-        except UnicodeDecodeError:
-            raise InvalidInputError("Invalid UTF-8 encoding in file")
-        except Exception as e:
-            self.__log_access("file_parse", file_path, False)
-            raise FileParsingError(file_path, original_error=e)
-
-        self.__log_access("file_parse", file_path, True)
-        return env_data
 
     async def load_secure(self, options: LoadOptions = LoadOptions()) -> None:
         """Securely load environment variables (memory-isolated)"""
