@@ -460,7 +460,7 @@ SimpleEnvs shines in practical scenarios:
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions! Please see [CONTRIBUTING.md](Contributing.md) for guidelines.
 
 ### Development Setup
 ```bash
