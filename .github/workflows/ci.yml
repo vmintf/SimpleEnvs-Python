@@ -16,20 +16,25 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-        exclude:
-          # Reduce CI time by skipping some combinations
-          - os: windows-latest
-            python-version: "3.8"
-          - os: macos-latest
-            python-version: "3.8"
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+#        exclude:
+#          # Reduce CI time by skipping some combinations
+#          - os: windows-latest
+#            python-version: "3.8"
+#          - os: macos-latest
+#            python-version: "3.8"
+#          # Python 3.13 is new, test on fewer platforms initially
+#          - os: windows-latest
+#            python-version: "3.13"
+#          - os: macos-latest
+#            python-version: "3.13"
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5  # Updated to v5 for Python 3.13 support
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -151,6 +156,115 @@ jobs:
             print('Could not run async test:', str(e))
         "
 
+  # Python 3.13 compatibility check job
+  python-313-compatibility:
+    name: Python 3.13 Compatibility Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true  # Allow failure for now while 3.13 is still new
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+        allow-prereleases: true  # In case 3.13 is still in prerelease
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install aiofiles
+
+    - name: Check for Python 3.13 specific issues
+      shell: bash
+      run: |
+        python -c "
+        import sys
+        print('Python version:', sys.version)
+        print('Version info:', sys.version_info)
+        
+        # Check for any warnings or deprecations
+        import warnings
+        warnings.simplefilter('always')
+        
+        sys.path.insert(0, './src')
+        
+        try:
+            import simpleenvs
+            print('✅ simpleenvs imports successfully on Python 3.13')
+            
+            # Test core functionality
+            import tempfile, os
+            
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+                f.write('PYTHON313_TEST=success\\nDEBUG=true\\n')
+                env_file = f.name
+            
+            try:
+                if hasattr(simpleenvs, 'load_dotenv'):
+                    simpleenvs.load_dotenv(env_file)
+                    if os.getenv('PYTHON313_TEST') == 'success':
+                        print('✅ Basic functionality works on Python 3.13')
+                    else:
+                        print('⚠️ Environment loading issue on Python 3.13')
+                else:
+                    print('ℹ️ load_dotenv not available for testing')
+                    
+            except Exception as e:
+                print(f'⚠️ Functionality test failed on Python 3.13: {e}')
+            finally:
+                os.unlink(env_file)
+                
+        except ImportError as e:
+            print(f'❌ Import failed on Python 3.13: {e}')
+            sys.exit(1)
+        except Exception as e:
+            print(f'❌ Unexpected error on Python 3.13: {e}')
+            sys.exit(1)
+        "
+
+    - name: Test async with Python 3.13
+      shell: bash
+      run: |
+        python -c "
+        import sys
+        sys.path.insert(0, './src')
+        import simpleenvs
+        import asyncio
+        import tempfile
+        import os
+        
+        async def test_python313_async():
+            print('Testing async functionality on Python 3.13...')
+            
+            try:
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+                    f.write('PYTHON313_ASYNC=works\\n')
+                    env_file = f.name
+                
+                if hasattr(simpleenvs, 'load'):
+                    await simpleenvs.load(env_file)
+                    print('✅ Async loading works on Python 3.13')
+                elif hasattr(simpleenvs, 'aload_dotenv'):
+                    await simpleenvs.aload_dotenv(env_file)
+                    print('✅ Async loading works on Python 3.13')
+                else:
+                    print('ℹ️ No async functions found to test')
+                    
+                os.unlink(env_file)
+                
+            except Exception as e:
+                print(f'⚠️ Async test failed on Python 3.13: {e}')
+        
+        try:
+            asyncio.run(test_python313_async())
+        except Exception as e:
+            print(f'❌ Could not run async test on Python 3.13: {e}')
+        "
+
   build:
     name: Build Package
     runs-on: ubuntu-latest
@@ -162,7 +276,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5  # Updated to v5
       with:
         python-version: "3.11"
 

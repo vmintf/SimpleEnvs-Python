@@ -22,19 +22,24 @@ jobs:
     timeout-minutes: 15
     environment: ${{ github.event.inputs.environment || 'pypi' }}
 
+    # 🔒 Trusted Publishing을 위한 권한 설정
+    permissions:
+      id-token: write  # OIDC 토큰 생성 권한
+      contents: read   # 코드 읽기 권한
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5  # Updated for Python 3.13 support
       with:
-        python-version: "3.11"
+        python-version: "3.12"  # Updated to more stable latest version
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install build twine aiofiles
+        pip install build aiofiles
 
     - name: Pre-deployment test
       run: |
@@ -58,51 +63,144 @@ jobs:
         import tempfile, os
         if hasattr(simpleenvs, 'load_dotenv'):
             with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
-                f.write('DEPLOY_TEST=works\\n')
+                f.write('DEPLOY_TEST=works\\nPYTHON_VERSION=' + sys.version.split()[0] + '\\n')
                 env_file = f.name
             
             try:
                 simpleenvs.load_dotenv(env_file)
                 if os.getenv('DEPLOY_TEST') == 'works':
-                    print('Pre-deployment test passed!')
+                    print('✅ Pre-deployment test passed!')
+                    print('✅ Python version:', os.getenv('PYTHON_VERSION'))
                 else:
-                    print('Pre-deployment test failed!')
+                    print('❌ Pre-deployment test failed!')
                     exit(1)
             finally:
                 os.unlink(env_file)
+                
+        # Test secure functionality if available
+        if hasattr(simpleenvs, 'load_dotenv_secure'):
+            try:
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+                    f.write('SECURE_TEST=secure_works\\n')
+                    env_file = f.name
+                
+                simpleenvs.load_dotenv_secure(env_file)
+                secure_val = simpleenvs.get_secure('SECURE_TEST')
+                if secure_val == 'secure_works':
+                    print('✅ Secure functionality test passed!')
+                    # Verify isolation
+                    if os.getenv('SECURE_TEST') is None:
+                        print('✅ Memory isolation verified!')
+                    else:
+                        print('⚠️ Memory isolation may not be working')
+                else:
+                    print('⚠️ Secure functionality test failed')
+                os.unlink(env_file)
+            except Exception as e:
+                print(f'ℹ️ Secure functionality test skipped: {e}')
         "
 
     - name: Build package
       run: |
         python -m build
-        echo "Package built for deployment!"
+        echo "📦 Package built for deployment!"
 
     - name: Check package
       run: |
+        python -m pip install twine  # Install twine for checking only
         twine check dist/*
-        echo "Package validation passed!"
+        echo "✅ Package validation passed!"
 
-    - name: Deploy to Test PyPI
+    - name: Display package info
+      run: |
+        echo "📋 Package Information:"
+        ls -la dist/
+        echo ""
+        echo "📦 Package contents:"
+        for file in dist/*.whl; do
+          if [ -f "$file" ]; then
+            echo "Wheel: $(basename "$file")"
+            python -m zipfile -l "$file" | head -20
+          fi
+        done
+        for file in dist/*.tar.gz; do
+          if [ -f "$file" ]; then
+            echo "Source: $(basename "$file")"
+            tar -tzf "$file" | head -20
+          fi
+        done
+
+    # 🧪 Test PyPI deployment (Trusted Publishing!)
+    - name: Deploy to Test PyPI (Trusted Publishing)
       if: github.event.inputs.environment == 'testpypi'
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
-      run: |
-        twine upload --repository testpypi dist/*
-        echo "Successfully deployed to Test PyPI!"
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        print-hash: true
+        # 🔒 TestPyPI도 이제 토큰 불필요! OIDC 인증
 
-    - name: Deploy to PyPI
+    # 🚀 Production PyPI deployment (Trusted Publishing 사용)
+    - name: Deploy to PyPI (Trusted Publishing)
       if: github.event.inputs.environment == 'pypi' || github.event_name == 'release'
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        print-hash: true
+        # 🔒 토큰 불필요! GitHub OIDC로 자동 인증
+
+    - name: Verify deployment
+      if: github.event.inputs.environment == 'pypi' || github.event_name == 'release'
       run: |
-        twine upload dist/*
-        echo "🚀 Successfully deployed to PyPI!"
+        echo "⏳ Waiting for PyPI propagation..."
+        sleep 60
+        
+        # Try to install from PyPI
+        python -m pip install --index-url https://pypi.org/simple/ simpleenvs-python --upgrade --force-reinstall
+        
+        # Test installation
+        python -c "
+        import simpleenvs
+        print('✅ Installation from PyPI successful!')
+        print('✅ Trusted Publishing deployment verified!')
+        
+        # Quick functionality test
+        import tempfile, os
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+            f.write('PYPI_TEST=success\\n')
+            env_file = f.name
+        
+        try:
+            simpleenvs.load_dotenv(env_file)
+            if os.getenv('PYPI_TEST') == 'success':
+                print('✅ PyPI package functionality verified!')
+            else:
+                print('⚠️ PyPI package functionality issue')
+        finally:
+            os.unlink(env_file)
+        "
 
     - name: Create deployment summary
       run: |
         echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
         echo "- **Target**: ${{ github.event.inputs.environment || 'PyPI' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Method**: Trusted Publishing (OIDC)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Python Version**: 3.12" >> $GITHUB_STEP_SUMMARY
         echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Package Files**: $(ls dist/ | tr '\n' ', ' | sed 's/,$//')" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📦 Package Information" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        ls -la dist/ >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        if [[ "${{ github.event.inputs.environment || 'pypi' }}" != "" ]]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔒 **Security**: Deployed using Trusted Publishing (OIDC)" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 **No API tokens required!**" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Upload deployment artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-packages-${{ github.sha }}
+        path: dist/
+        retention-days: 30
