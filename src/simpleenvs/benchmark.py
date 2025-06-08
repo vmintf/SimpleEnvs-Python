@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
 SimpleEnvs vs python-dotenv Performance Benchmark
-Includes Secure API benchmarking
+Includes Secure API benchmarking with improved dependency management
 """
 
 import os
+import sys
 import time
 import tempfile
 import statistics
@@ -12,25 +13,83 @@ import asyncio
 from pathlib import Path
 from typing import List, Dict, Any
 
-# Benchmark targets
-try:
+
+def check_dependencies():
+    """Check and guide user for missing dependencies"""
+    missing_deps = []
+    install_commands = []
+
+    # Check python-dotenv
+    try:
+        import dotenv
+        DOTENV_AVAILABLE = True
+    except ImportError:
+        DOTENV_AVAILABLE = False
+        missing_deps.append("python-dotenv")
+
+    # Check simpleenvs
+    try:
+        import simpleenvs
+        SIMPLEENVS_AVAILABLE = True
+    except ImportError:
+        SIMPLEENVS_AVAILABLE = False
+        missing_deps.append("simpleenvs-python")
+
+    if missing_deps:
+        print("❌ Missing required dependencies for benchmarking!")
+        print("=" * 60)
+
+        # Show what's missing
+        print("Missing packages:")
+        for dep in missing_deps:
+            print(f"  • {dep}")
+
+        print("\n📦 Installation Options:")
+        print("=" * 60)
+
+        # Option 1: Install benchmark extras (recommended)
+        print("🚀 Option 1 (Recommended): Install benchmark dependencies")
+        print("   pip install 'simpleenvs-python[benchmark]'")
+        print("   This installs SimpleEnvs with benchmark dependencies")
+
+        # Option 2: Manual installation
+        print("\n🔧 Option 2: Manual installation")
+        if "python-dotenv" in missing_deps:
+            print("   pip install python-dotenv")
+        if "simpleenvs-python" in missing_deps:
+            print("   pip install simpleenvs-python")
+
+        # Option 3: Dev environment
+        print("\n🛠️  Option 3: For development")
+        print("   pip install -e '.[benchmark]'")
+        print("   Use this if you're working on SimpleEnvs source code")
+
+        print("\n💡 What each package does:")
+        print("  • python-dotenv: Comparison baseline (the library we're benchmarking against)")
+        print("  • simpleenvs-python: Our high-performance .env loader")
+
+        print("\n🔄 After installation, run this benchmark again:")
+        print(f"   python {' '.join(sys.argv)}")
+
+        sys.exit(1)
+
+    return DOTENV_AVAILABLE, SIMPLEENVS_AVAILABLE
+
+
+# Check dependencies first
+DOTENV_AVAILABLE, SIMPLEENVS_AVAILABLE = check_dependencies()
+
+# Import after dependency check
+if DOTENV_AVAILABLE:
     from dotenv import load_dotenv as dotenv_load
 
-    DOTENV_AVAILABLE = True
-except ImportError:
-    print("⚠️  python-dotenv not installed. Install with: pip install python-dotenv")
-    DOTENV_AVAILABLE = False
-
-try:
+if SIMPLEENVS_AVAILABLE:
     from simpleenvs import load_dotenv as simpleenvs_load
     from simpleenvs import load_dotenv_secure, get_secure
     import simpleenvs
 
-    SIMPLEENVS_AVAILABLE = True
     SIMPLEENVS_SECURE_AVAILABLE = True
-except ImportError:
-    print("⚠️  simpleenvs-python not installed.")
-    SIMPLEENVS_AVAILABLE = False
+else:
     SIMPLEENVS_SECURE_AVAILABLE = False
 
 
@@ -125,7 +184,7 @@ class BenchmarkRunner:
             self.clear_env_vars(prefixes)
 
             # Also clean SimpleEnvs secure data
-            if 'Secure' in name:
+            if 'Secure' in name and SIMPLEENVS_AVAILABLE:
                 simpleenvs.clear()
 
             # Measure execution time
@@ -159,7 +218,8 @@ class BenchmarkRunner:
         for i in range(rounds):
             # Clean environment variables and secure data
             self.clear_env_vars(prefixes)
-            simpleenvs.clear()
+            if SIMPLEENVS_AVAILABLE:
+                simpleenvs.clear()
 
             # Measure execution time
             exec_time = await self.measure_async_function(func, test_file)
@@ -302,7 +362,7 @@ class BenchmarkRunner:
                 else:
                     print(f"   Async overhead: {-async_improvement:.1f}%")
 
-        # Individual results
+        # Individual results for partial availability
         elif 'dotenv' in results:
             print(f"🐍 python-dotenv: {results['dotenv']['mean'] * 1000:.3f}ms")
 
@@ -316,9 +376,14 @@ class BenchmarkRunner:
             print("🔒 Including Secure API performance tests")
         print("=" * 70)
 
-        if not (DOTENV_AVAILABLE or SIMPLEENVS_AVAILABLE):
-            print("❌ No libraries available for benchmarking.")
-            return
+        # Availability check
+        available_libs = []
+        if DOTENV_AVAILABLE:
+            available_libs.append("python-dotenv")
+        if SIMPLEENVS_AVAILABLE:
+            available_libs.append("SimpleEnvs")
+
+        print(f"📦 Available libraries: {', '.join(available_libs)}")
 
         if include_secure and not SIMPLEENVS_SECURE_AVAILABLE:
             print("⚠️  Secure API not available.")

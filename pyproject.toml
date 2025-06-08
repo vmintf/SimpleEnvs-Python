@@ -67,7 +67,8 @@ test = [
 benchmark = [
     "python-dotenv>=1.0.0",  # For comparison benchmarks
     "pytest-benchmark>=4.0.0",
-    "memory-profiler>=0.60.0"
+    "memory-profiler>=0.60.0",
+    "python-dotenv==1.1.0"
 ]
 
 [project.urls]
