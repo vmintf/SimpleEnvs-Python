@@ -1,0 +1,26 @@
+# .github/ISSUE_TEMPLATE/config.yml
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/vmintf/SimpleEnvs-Python/discussions
+    about: Ask questions, share ideas, or discuss general topics about SimpleEnvs
+
+  - name: 🔒 Security Vulnerability
+    url: mailto:vmintf@gmail.com
+    about: Report security vulnerabilities privately (DO NOT create public issues for security problems)
+
+  - name: 📚 Documentation
+    url: https://vmintf.github.io/SimpleEnvs-Python
+    about: Read the full documentation and API reference
+
+  - name: 📦 PyPI Package
+    url: https://pypi.org/project/simpleenvs-python/
+    about: View package information and installation details
+
+  - name: ⚡ Performance Benchmarks
+    url: https://github.com/vmintf/SimpleEnvs-Python/blob/main/src/simpleenvs/benchmark.py
+    about: Run performance comparisons with python-dotenv
+
+  - name: 🎯 Examples & Usage
+    url: https://github.com/vmintf/SimpleEnvs-Python/tree/main/examples
+    about: Browse real-world usage examples and integrations
