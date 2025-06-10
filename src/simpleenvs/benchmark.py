@@ -4,11 +4,11 @@ SimpleEnvs vs python-dotenv 성능 벤치마크
 """
 
 import os
-import time
-import tempfile
 import statistics
+import tempfile
+import time
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 # 벤치마크 대상들
 try:
@@ -41,7 +41,7 @@ class BenchmarkRunner:
         fd, path = tempfile.mkstemp(suffix=f".env{file_suffix}", text=True)
 
         try:
-            with os.fdopen(fd, 'w') as f:
+            with os.fdopen(fd, "w") as f:
                 f.write("# Test .env file\n")
                 f.write("# Generated for benchmarking\n\n")
 
@@ -86,13 +86,25 @@ class BenchmarkRunner:
         end_time = time.perf_counter()
         return end_time - start_time
 
-    def run_benchmark(self, name: str, func, test_file: str, rounds: int = None) -> Dict[str, float]:
+    def run_benchmark(
+        self, name: str, func, test_file: str, rounds: int = None
+    ) -> Dict[str, float]:
         """개별 벤치마크 실행"""
         if rounds is None:
             rounds = self.rounds
 
         times = []
-        prefixes = ['VAR_', 'NUM_', 'BOOL_', 'PATH_', 'DB_', 'API_', 'DEBUG', 'PORT', 'TIMEOUT']
+        prefixes = [
+            "VAR_",
+            "NUM_",
+            "BOOL_",
+            "PATH_",
+            "DB_",
+            "API_",
+            "DEBUG",
+            "PORT",
+            "TIMEOUT",
+        ]
 
         print(f"🔄 {name} 벤치마크 실행 중... (rounds: {rounds})")
 
@@ -109,12 +121,12 @@ class BenchmarkRunner:
 
         # 통계 계산
         return {
-            'mean': statistics.mean(times),
-            'median': statistics.median(times),
-            'min': min(times),
-            'max': max(times),
-            'stdev': statistics.stdev(times) if len(times) > 1 else 0,
-            'times': times
+            "mean": statistics.mean(times),
+            "median": statistics.median(times),
+            "min": min(times),
+            "max": max(times),
+            "stdev": statistics.stdev(times) if len(times) > 1 else 0,
+            "times": times,
         }
 
     def compare_performance(self, var_count: int) -> Dict[str, Any]:
@@ -126,24 +138,20 @@ class BenchmarkRunner:
 
         try:
             results = {
-                'var_count': var_count,
-                'file_size': Path(test_file).stat().st_size
+                "var_count": var_count,
+                "file_size": Path(test_file).stat().st_size,
             }
 
             # python-dotenv 벤치마크
             if DOTENV_AVAILABLE:
-                results['dotenv'] = self.run_benchmark(
-                    "python-dotenv",
-                    dotenv_load,
-                    test_file
+                results["dotenv"] = self.run_benchmark(
+                    "python-dotenv", dotenv_load, test_file
                 )
 
             # simpleenvs 벤치마크
             if SIMPLEENVS_AVAILABLE:
-                results['simpleenvs'] = self.run_benchmark(
-                    "SimpleEnvs",
-                    simpleenvs_load,
-                    test_file
+                results["simpleenvs"] = self.run_benchmark(
+                    "SimpleEnvs", simpleenvs_load, test_file
                 )
 
             return results
@@ -157,27 +165,30 @@ class BenchmarkRunner:
 
     def print_results(self, results: Dict[str, Any]):
         """결과 출력"""
-        var_count = results['var_count']
-        file_size = results['file_size']
+        var_count = results["var_count"]
+        file_size = results["file_size"]
 
         print(f"\n{'=' * 60}")
         print(f"📈 결과: {var_count}개 변수 (파일 크기: {file_size:,} bytes)")
         print(f"{'=' * 60}")
 
-        if 'dotenv' in results and 'simpleenvs' in results:
-            dotenv_mean = results['dotenv']['mean']
-            simpleenvs_mean = results['simpleenvs']['mean']
+        if "dotenv" in results and "simpleenvs" in results:
+            dotenv_mean = results["dotenv"]["mean"]
+            simpleenvs_mean = results["simpleenvs"]["mean"]
 
             print(f"🐍 python-dotenv:")
             print(f"   평균: {dotenv_mean * 1000:.3f}ms")
             print(f"   중간값: {results['dotenv']['median'] * 1000:.3f}ms")
-            print(f"   최소/최대: {results['dotenv']['min'] * 1000:.3f}ms / {results['dotenv']['max'] * 1000:.3f}ms")
+            print(
+                f"   최소/최대: {results['dotenv']['min'] * 1000:.3f}ms / {results['dotenv']['max'] * 1000:.3f}ms"
+            )
 
             print(f"\n⚡ SimpleEnvs:")
             print(f"   평균: {simpleenvs_mean * 1000:.3f}ms")
             print(f"   중간값: {results['simpleenvs']['median'] * 1000:.3f}ms")
             print(
-                f"   최소/최대: {results['simpleenvs']['min'] * 1000:.3f}ms / {results['simpleenvs']['max'] * 1000:.3f}ms")
+                f"   최소/최대: {results['simpleenvs']['min'] * 1000:.3f}ms / {results['simpleenvs']['max'] * 1000:.3f}ms"
+            )
 
             # 비교
             ratio = dotenv_mean / simpleenvs_mean
@@ -186,10 +197,10 @@ class BenchmarkRunner:
             else:
                 print(f"\n🏆 python-dotenv가 {1 / ratio:.2f}배 빠름!")
 
-        elif 'dotenv' in results:
+        elif "dotenv" in results:
             print(f"🐍 python-dotenv: {results['dotenv']['mean'] * 1000:.3f}ms")
 
-        elif 'simpleenvs' in results:
+        elif "simpleenvs" in results:
             print(f"⚡ SimpleEnvs: {results['simpleenvs']['mean'] * 1000:.3f}ms")
 
     def run_comprehensive_benchmark(self):
@@ -226,24 +237,31 @@ class BenchmarkRunner:
         print("📊 전체 요약")
         print(f"{'=' * 60}")
 
-        print(f"{'변수 개수':>8} | {'파일크기':>10} | {'dotenv(ms)':>12} | {'SimpleEnvs(ms)':>15} | {'비율':>8}")
+        print(
+            f"{'변수 개수':>8} | {'파일크기':>10} | {'dotenv(ms)':>12} | {'SimpleEnvs(ms)':>15} | {'비율':>8}"
+        )
         print("-" * 70)
 
         for result in all_results:
-            var_count = result['var_count']
-            file_size = result['file_size']
+            var_count = result["var_count"]
+            file_size = result["file_size"]
 
-            dotenv_time = result.get('dotenv', {}).get('mean', 0) * 1000
-            simpleenvs_time = result.get('simpleenvs', {}).get('mean', 0) * 1000
+            dotenv_time = result.get("dotenv", {}).get("mean", 0) * 1000
+            simpleenvs_time = result.get("simpleenvs", {}).get("mean", 0) * 1000
 
             if dotenv_time > 0 and simpleenvs_time > 0:
                 ratio = dotenv_time / simpleenvs_time
                 print(
-                    f"{var_count:>8} | {file_size:>8}B | {dotenv_time:>10.3f} | {simpleenvs_time:>13.3f} | {ratio:>6.2f}x")
+                    f"{var_count:>8} | {file_size:>8}B | {dotenv_time:>10.3f} | {simpleenvs_time:>13.3f} | {ratio:>6.2f}x"
+                )
             elif dotenv_time > 0:
-                print(f"{var_count:>8} | {file_size:>8}B | {dotenv_time:>10.3f} | {'N/A':>13} | {'N/A':>8}")
+                print(
+                    f"{var_count:>8} | {file_size:>8}B | {dotenv_time:>10.3f} | {'N/A':>13} | {'N/A':>8}"
+                )
             elif simpleenvs_time > 0:
-                print(f"{var_count:>8} | {file_size:>8}B | {'N/A':>10} | {simpleenvs_time:>13.3f} | {'N/A':>8}")
+                print(
+                    f"{var_count:>8} | {file_size:>8}B | {'N/A':>10} | {simpleenvs_time:>13.3f} | {'N/A':>8}"
+                )
 
 
 def main():
@@ -251,9 +269,15 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="SimpleEnvs vs python-dotenv 벤치마크")
-    parser.add_argument("--rounds", "-r", type=int, default=10, help="각 테스트 라운드 수")
-    parser.add_argument("--size", "-s", type=int, help="특정 크기로만 테스트 (변수 개수)")
-    parser.add_argument("--quick", "-q", action="store_true", help="빠른 테스트 (3라운드)")
+    parser.add_argument(
+        "--rounds", "-r", type=int, default=10, help="각 테스트 라운드 수"
+    )
+    parser.add_argument(
+        "--size", "-s", type=int, help="특정 크기로만 테스트 (변수 개수)"
+    )
+    parser.add_argument(
+        "--quick", "-q", action="store_true", help="빠른 테스트 (3라운드)"
+    )
 
     args = parser.parse_args()
 
