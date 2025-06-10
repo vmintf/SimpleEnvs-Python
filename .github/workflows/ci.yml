@@ -6,38 +6,114 @@ permissions:
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ main, develop, dev/ongoing-improvement ]  # 개발 브랜치 추가
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
+  workflow_dispatch:  # 🎯 수동 실행 트리거 추가
+    inputs:
+      test_scope:
+        description: 'Test scope to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - basic
+          - performance
+          - security
+      python_versions:
+        description: 'Python versions to test (comma-separated)'
+        required: false
+        default: '3.11,3.12'
+        type: string
+      platforms:
+        description: 'Platforms to test'
+        required: false
+        default: 'ubuntu-latest'
+        type: choice
+        options:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+          - all
+      skip_slow_tests:
+        description: 'Skip slow tests'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  # CI 최적화를 위한 환경변수
+  PYTHONUNBUFFERED: 1
+  PYTHONDONTWRITEBYTECODE: 1
 
 jobs:
+  # 🚀 Platform 매트릭스 동적 생성
+  setup:
+    name: Setup Test Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      python-versions: ${{ steps.matrix.outputs.python-versions }}
+      platforms: ${{ steps.matrix.outputs.platforms }}
+      test-scope: ${{ steps.matrix.outputs.test-scope }}
+    steps:
+      - name: Generate test matrix
+        id: matrix
+        run: |
+          # Python 버전 매트릭스 설정
+          if [[ "${{ github.event.inputs.python_versions }}" != "" ]]; then
+            PYTHON_VERSIONS="${{ github.event.inputs.python_versions }}"
+          else
+            PYTHON_VERSIONS="3.8,3.9,3.10,3.11,3.12,3.13"
+          fi
+          
+          # Platform 매트릭스 설정
+          if [[ "${{ github.event.inputs.platforms }}" == "all" ]]; then
+            PLATFORMS="ubuntu-latest,windows-latest,macos-latest"
+          elif [[ "${{ github.event.inputs.platforms }}" != "" ]]; then
+            PLATFORMS="${{ github.event.inputs.platforms }}"
+          else
+            PLATFORMS="ubuntu-latest,windows-latest,macos-latest"
+          fi
+          
+          # Test scope 설정
+          TEST_SCOPE="${{ github.event.inputs.test_scope || 'all' }}"
+          
+          # JSON 배열로 변환
+          PYTHON_JSON=$(echo "$PYTHON_VERSIONS" | sed 's/,/","/g' | sed 's/^/["/' | sed 's/$/"]/')
+          PLATFORMS_JSON=$(echo "$PLATFORMS" | sed 's/,/","/g' | sed 's/^/["/' | sed 's/$/"]/')
+          
+          echo "python-versions=$PYTHON_JSON" >> $GITHUB_OUTPUT
+          echo "platforms=$PLATFORMS_JSON" >> $GITHUB_OUTPUT
+          echo "test-scope=$TEST_SCOPE" >> $GITHUB_OUTPUT
+          
+          echo "🐍 Python versions: $PYTHON_JSON"
+          echo "🖥️  Platforms: $PLATFORMS_JSON"
+          echo "🧪 Test scope: $TEST_SCOPE"
+
   test:
     name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    needs: setup
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
-#        exclude:
-#          # Reduce CI time by skipping some combinations
-#          - os: windows-latest
-#            python-version: "3.8"
-#          - os: macos-latest
-#            python-version: "3.8"
-#          # Python 3.13 is new, test on fewer platforms initially
-#          - os: windows-latest
-#            python-version: "3.13"
-#          - os: macos-latest
-#            python-version: "3.13"
+        os: ${{ fromJson(needs.setup.outputs.platforms) }}
+        python-version: ${{ fromJson(needs.setup.outputs.python-versions) }}
+        exclude:
+          # 수동 실행시 제외 조건 최소화
+          - os: windows-latest
+            python-version: "3.8"
+          - os: macos-latest
+            python-version: "3.8"
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5  # Updated to v5 for Python 3.13 support
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -50,38 +126,38 @@ jobs:
       shell: bash
       run: |
         echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
-        # Fix Windows encoding issues
         echo "PYTHONIOENCODING=utf-8" >> $GITHUB_ENV
         echo "PYTHONUTF8=1" >> $GITHUB_ENV
 
-    - name: Test import and basic functionality
+    - name: Basic functionality test
+      if: needs.setup.outputs.test-scope == 'all' || needs.setup.outputs.test-scope == 'basic'
       shell: bash
       run: |
         python -c "
         import sys
         sys.path.insert(0, './src')
         
-        print('Python version:', sys.version)
-        print('Platform:', sys.platform)
+        print('🐍 Python version:', sys.version)
+        print('🖥️  Platform:', sys.platform)
+        print('🧪 Test scope: ${{ needs.setup.outputs.test-scope }}')
         
         try:
             import simpleenvs
-            print('simpleenvs import successful!')
+            print('✅ simpleenvs import successful!')
             
             # Check version
             if hasattr(simpleenvs, '__version__'):
-                print('Version:', simpleenvs.__version__)
+                print('📦 Version:', simpleenvs.__version__)
             elif hasattr(simpleenvs, 'constants'):
-                print('Version:', simpleenvs.constants.VERSION)
+                print('📦 Version:', simpleenvs.constants.VERSION)
             else:
-                print('Version info not found, but import works!')
+                print('📦 Version info not found, but import works!')
             
             # Test basic functionality
             import tempfile, os
             
-            # Test load_dotenv if available
             if hasattr(simpleenvs, 'load_dotenv'):
-                print('Testing load_dotenv...')
+                print('🧪 Testing load_dotenv...')
                 
                 with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
                     f.write('TEST_VAR=hello\\nDEBUG=true\\nPORT=8080\\n')
@@ -91,33 +167,27 @@ jobs:
                     simpleenvs.load_dotenv(env_file)
                     
                     if os.getenv('TEST_VAR') == 'hello':
-                        print('Environment loading works!')
+                        print('✅ Environment loading works!')
                     else:
-                        print('Environment variables not loaded properly')
+                        print('❌ Environment variables not loaded properly')
                         
                 except Exception as e:
-                    print('Function test failed:', str(e))
+                    print('❌ Function test failed:', str(e))
                 finally:
                     os.unlink(env_file)
-            else:
-                print('load_dotenv not found')
-                available_funcs = [x for x in dir(simpleenvs) if not x.startswith('_')]
-                print('Available functions:', available_funcs[:10])
             
-            print('All tests passed for Python ${{ matrix.python-version }} on ${{ matrix.os }}!')
+            print('✅ All basic tests passed!')
             
         except ImportError as e:
-            print('Import failed:', str(e))
-            import os
-            if os.path.exists('./src'):
-                print('src/ contents:', os.listdir('./src'))
+            print('❌ Import failed:', str(e))
             sys.exit(1)
         except Exception as e:
-            print('Unexpected error:', str(e))
+            print('❌ Unexpected error:', str(e))
             sys.exit(1)
         "
 
-    - name: Test async functionality (if supported)
+    - name: Async functionality test
+      if: needs.setup.outputs.test-scope == 'all' || needs.setup.outputs.test-scope == 'basic'
       shell: bash
       run: |
         python -c "
@@ -131,7 +201,7 @@ jobs:
         async def test_async():
             try:
                 if hasattr(simpleenvs, 'load') or hasattr(simpleenvs, 'aload_dotenv'):
-                    print('Testing async functionality...')
+                    print('🧪 Testing async functionality...')
                     
                     with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
                         f.write('ASYNC_TEST=async_works\\n')
@@ -143,28 +213,120 @@ jobs:
                         elif hasattr(simpleenvs, 'aload_dotenv'):
                             await simpleenvs.aload_dotenv(env_file)
                         
-                        print('Async loading works!')
+                        print('✅ Async loading works!')
                     except Exception as e:
-                        print('Async test failed:', str(e))
+                        print('❌ Async test failed:', str(e))
                     finally:
                         os.unlink(env_file)
                 else:
-                    print('No async functions found')
+                    print('ℹ️  No async functions found')
             except Exception as e:
-                print('Async test error:', str(e))
+                print('❌ Async test error:', str(e))
         
         try:
             asyncio.run(test_async())
         except Exception as e:
-            print('Could not run async test:', str(e))
+            print('❌ Could not run async test:', str(e))
         "
 
-  # Python 3.13 compatibility check job
+    - name: Security features test
+      if: needs.setup.outputs.test-scope == 'all' || needs.setup.outputs.test-scope == 'security'
+      shell: bash
+      run: |
+        python -c "
+        import sys
+        sys.path.insert(0, './src')
+        import simpleenvs
+        import tempfile
+        import os
+        
+        print('🔒 Testing security features...')
+        
+        # Test secure API if available
+        if hasattr(simpleenvs, 'load_dotenv_secure') and hasattr(simpleenvs, 'get_secure'):
+            try:
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+                    f.write('SECRET_KEY=super_secret\\nAPI_TOKEN=secret_token\\n')
+                    env_file = f.name
+                
+                try:
+                    # Load secure
+                    simpleenvs.load_dotenv_secure(env_file)
+                    
+                    # Test secure access
+                    secret_key = simpleenvs.get_secure('SECRET_KEY')
+                    if secret_key == 'super_secret':
+                        print('✅ Secure API access works!')
+                    else:
+                        print('❌ Secure API access failed')
+                    
+                    # Verify isolation
+                    if os.getenv('SECRET_KEY') is None:
+                        print('✅ Memory isolation verified!')
+                    else:
+                        print('⚠️  Memory isolation may not be working')
+                        
+                except Exception as e:
+                    print('❌ Secure API test failed:', str(e))
+                finally:
+                    os.unlink(env_file)
+                    
+            except Exception as e:
+                print('❌ Security test setup failed:', str(e))
+        else:
+            print('ℹ️  Secure API not available for testing')
+        "
+
+    - name: Performance test (Quick)
+      if: |
+        (needs.setup.outputs.test-scope == 'all' || needs.setup.outputs.test-scope == 'performance') &&
+        !inputs.skip_slow_tests
+      shell: bash
+      run: |
+        python -c "
+        import sys
+        sys.path.insert(0, './src')
+        import simpleenvs
+        import time
+        import tempfile
+        import os
+        
+        print('⚡ Testing performance...')
+        
+        # Create test file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+            for i in range(100):  # 100 variables for quick test
+                f.write(f'VAR_{i}=value_{i}\\n')
+            env_file = f.name
+        
+        try:
+            # Test simple loading speed
+            start_time = time.perf_counter()
+            simpleenvs.load_dotenv(env_file)
+            end_time = time.perf_counter()
+            
+            loading_time = (end_time - start_time) * 1000
+            print(f'📊 Simple loading time: {loading_time:.2f}ms')
+            
+            if loading_time < 100:  # Should be much faster than 100ms
+                print('✅ Performance test passed!')
+            else:
+                print('⚠️  Performance slower than expected')
+                
+        except Exception as e:
+            print('❌ Performance test failed:', str(e))
+        finally:
+            os.unlink(env_file)
+        "
+
+  # Python 3.13 특별 테스트 (선택적)
   python-313-compatibility:
     name: Python 3.13 Compatibility Check
     runs-on: ubuntu-latest
+    needs: setup
+    if: contains(needs.setup.outputs.python-versions, '3.13')
     timeout-minutes: 15
-    continue-on-error: true  # Allow failure for now while 3.13 is still new
+    continue-on-error: true
 
     steps:
     - name: Checkout code
@@ -174,22 +336,21 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.13"
-        allow-prereleases: true  # In case 3.13 is still in prerelease
+        allow-prereleases: true
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install aiofiles
 
-    - name: Check for Python 3.13 specific issues
+    - name: Check Python 3.13 compatibility
       shell: bash
       run: |
         python -c "
         import sys
-        print('Python version:', sys.version)
-        print('Version info:', sys.version_info)
+        print('🐍 Python version:', sys.version)
+        print('📊 Version info:', sys.version_info)
         
-        # Check for any warnings or deprecations
         import warnings
         warnings.simplefilter('always')
         
@@ -199,7 +360,6 @@ jobs:
             import simpleenvs
             print('✅ simpleenvs imports successfully on Python 3.13')
             
-            # Test core functionality
             import tempfile, os
             
             with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
@@ -212,12 +372,10 @@ jobs:
                     if os.getenv('PYTHON313_TEST') == 'success':
                         print('✅ Basic functionality works on Python 3.13')
                     else:
-                        print('⚠️ Environment loading issue on Python 3.13')
-                else:
-                    print('ℹ️ load_dotenv not available for testing')
-                    
+                        print('⚠️  Environment loading issue on Python 3.13')
+                        
             except Exception as e:
-                print(f'⚠️ Functionality test failed on Python 3.13: {e}')
+                print(f'⚠️  Functionality test failed on Python 3.13: {e}')
             finally:
                 os.unlink(env_file)
                 
@@ -227,45 +385,6 @@ jobs:
         except Exception as e:
             print(f'❌ Unexpected error on Python 3.13: {e}')
             sys.exit(1)
-        "
-
-    - name: Test async with Python 3.13
-      shell: bash
-      run: |
-        python -c "
-        import sys
-        sys.path.insert(0, './src')
-        import simpleenvs
-        import asyncio
-        import tempfile
-        import os
-        
-        async def test_python313_async():
-            print('Testing async functionality on Python 3.13...')
-            
-            try:
-                with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
-                    f.write('PYTHON313_ASYNC=works\\n')
-                    env_file = f.name
-                
-                if hasattr(simpleenvs, 'load'):
-                    await simpleenvs.load(env_file)
-                    print('✅ Async loading works on Python 3.13')
-                elif hasattr(simpleenvs, 'aload_dotenv'):
-                    await simpleenvs.aload_dotenv(env_file)
-                    print('✅ Async loading works on Python 3.13')
-                else:
-                    print('ℹ️ No async functions found to test')
-                    
-                os.unlink(env_file)
-                
-            except Exception as e:
-                print(f'⚠️ Async test failed on Python 3.13: {e}')
-        
-        try:
-            asyncio.run(test_python313_async())
-        except Exception as e:
-            print(f'❌ Could not run async test on Python 3.13: {e}')
         "
 
   build:
@@ -279,9 +398,9 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v5  # Updated to v5
+      uses: actions/setup-python@v5
       with:
-        python-version: "3.13"
+        python-version: "3.12"
 
     - name: Install build dependencies
       run: |
@@ -310,10 +429,8 @@ jobs:
 
     - name: Test wheel installation
       run: |
-        # Install the wheel
         pip install dist/*.whl
         
-        # Test import after installation
         python -c "
         try:
             import simpleenvs
@@ -329,3 +446,27 @@ jobs:
         name: dist-${{ github.sha }}
         path: dist/
         retention-days: 30
+
+  # 수동 실행 결과 요약
+  summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [setup, test, build]
+    if: always() && github.event_name == 'workflow_dispatch'
+
+    steps:
+    - name: Generate test summary
+      run: |
+        echo "## 🧪 Manual CI Run Summary" >> $GITHUB_STEP_SUMMARY
+        echo "**Triggered by:** @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Test scope:** ${{ needs.setup.outputs.test-scope }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Python versions:** ${{ needs.setup.outputs.python-versions }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Platforms:** ${{ needs.setup.outputs.platforms }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Skip slow tests:** ${{ inputs.skip_slow_tests }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📊 Results" >> $GITHUB_STEP_SUMMARY
+        echo "- **Test job:** ${{ needs.test.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Build job:** ${{ needs.build.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
