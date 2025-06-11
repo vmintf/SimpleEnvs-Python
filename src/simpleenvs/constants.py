@@ -341,7 +341,7 @@ FEATURES = {
 # =============================================================================
 
 # Version information
-VERSION = "1.1.5"
+VERSION = "2.0.0"
 API_VERSION = "1.0"
 MIN_PYTHON_VERSION = (3, 7)
 

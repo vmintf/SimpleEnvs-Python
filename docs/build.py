@@ -6,9 +6,9 @@ Commands: html, clean, serve, help
 """
 
 import os
-import sys
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -27,6 +27,7 @@ def get_version():
     try:
         # Try to import from installed package
         import simpleenvs
+
         return simpleenvs.__version__
     except ImportError:
         # Try to read from constants.py
@@ -35,11 +36,12 @@ def get_version():
             from pathlib import Path
 
             # Add src directory to path
-            src_path = Path(__file__).parent.parent / 'src'
+            src_path = Path(__file__).parent.parent / "src"
             if src_path.exists():
                 sys.path.insert(0, str(src_path))
 
             from simpleenvs.constants import VERSION
+
             return VERSION
         except ImportError:
             return "unknown"
@@ -85,7 +87,8 @@ def serve_docs():
 
 def show_help():
     """Show help message"""
-    print("""
+    print(
+        """
 📚 SimpleEnvs Documentation Builder
 
 Usage: python build.py [command]
@@ -103,7 +106,8 @@ Examples:
 
 🔧 Requirements:
   pip install -r requirements.txt
-    """)
+    """
+    )
 
 
 def main():

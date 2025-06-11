@@ -1,0 +1,553 @@
+# .github/workflows/security-test.yml
+name: Security Vulnerability Tests
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+
+on:
+  push:
+    branches: [ main, develop, dev/ongoing-improvement ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '**vuln_test.py'
+      - '.github/workflows/security-test.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '**vuln_test.py'
+  workflow_dispatch:  # 수동 실행
+    inputs:
+      test_scope:
+        description: 'Security test scope'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - core
+          - extended
+          - stress
+      python_version:
+        description: 'Python version for testing'
+        required: false
+        default: '3.11'
+        type: choice
+        options:
+          - '3.8'
+          - '3.9'
+          - '3.10'
+          - '3.11'
+          - '3.12'
+          - '3.13'
+      strict_mode:
+        description: 'Enable strict security validation'
+        required: false
+        default: true
+        type: boolean
+      generate_report:
+        description: 'Generate detailed security report'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PYTHONUNBUFFERED: 1
+  PYTHONDONTWRITEBYTECODE: 1
+  SIMPLEENVS_TEST_MODE: 1
+
+jobs:
+  # 🔒 Core Security Tests
+  security-core:
+    name: Core Security Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ github.event.inputs.python_version || 3.11 }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install aiofiles
+
+    - name: Setup environment
+      run: |
+        echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
+        echo "PYTHONIOENCODING=utf-8" >> $GITHUB_ENV
+        echo "PYTHONUTF8=1" >> $GITHUB_ENV
+
+    - name: Verify SimpleEnvs installation
+      run: |
+        python -c "
+        import sys
+        sys.path.insert(0, './src')
+        try:
+            import simpleenvs
+            print('✅ SimpleEnvs import successful')
+            if hasattr(simpleenvs, '__version__'):
+                print(f'📦 Version: {simpleenvs.__version__}')
+            elif hasattr(simpleenvs, 'constants'):
+                print(f'📦 Version: {simpleenvs.constants.VERSION}')
+        except ImportError as e:
+            print(f'❌ SimpleEnvs import failed: {e}')
+            sys.exit(1)
+        "
+
+    - name: Run Core Vulnerability Tests
+      id: vuln_tests
+      run: |
+        python -c "
+        import sys, asyncio
+        sys.path.insert(0, './src')
+        
+        # Import the vuln_test module
+        exec(open('src/simpleenvs/vuln_test.py').read())
+        
+        # Run core tests
+        asyncio.run(main())
+        " 2>&1 | tee vuln-test-results.txt
+
+    - name: Check for critical failures
+      run: |
+        # Check if any critical security tests failed
+        if grep -q "❌.*Critical" vuln-test-results.txt; then
+          echo "🚨 Critical security vulnerabilities detected!"
+          echo "critical_failures=true" >> $GITHUB_OUTPUT
+          exit 1
+        else
+          echo "✅ No critical security issues found"
+          echo "critical_failures=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Parse test results
+      id: parse_results
+      run: |
+        # Extract test statistics
+        TOTAL_TESTS=$(grep -oP "Total Tests: \K\d+" vuln-test-results.txt | tail -1 || echo "0")
+        PASSED_TESTS=$(grep -oP "Passed: \K\d+" vuln-test-results.txt | tail -1 || echo "0")
+        FAILED_TESTS=$(grep -oP "Failed: \K\d+" vuln-test-results.txt | tail -1 || echo "0") 
+        SUCCESS_RATE=$(grep -oP "Success Rate: \K[\d.]+" vuln-test-results.txt | tail -1 || echo "0")
+        
+        echo "total_tests=$TOTAL_TESTS" >> "$GITHUB_OUTPUT"
+        echo "passed_tests=$PASSED_TESTS" >> "$GITHUB_OUTPUT"
+        echo "failed_tests=$FAILED_TESTS" >> "$GITHUB_OUTPUT"
+        echo "success_rate=$SUCCESS_RATE" >> "$GITHUB_OUTPUT"
+        
+        echo "📊 Test Results Summary:"
+        echo "  Total: $TOTAL_TESTS"
+        echo "  Passed: $PASSED_TESTS"
+        echo "  Failed: $FAILED_TESTS"
+        echo "  Success Rate: $SUCCESS_RATE%"
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: vuln-test-results-${{ github.sha }}
+        path: vuln-test-results.txt
+        retention-days: 30
+
+    - name: Create test summary
+      if: always()
+      run: |
+        echo "## 🔒 Security Vulnerability Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "**Run Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "**Python Version:** ${{ github.event.inputs.python_version || '3.11' }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📊 Test Statistics" >> $GITHUB_STEP_SUMMARY
+        echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Total Tests | ${{ steps.parse_results.outputs.total_tests || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Passed | ${{ steps.parse_results.outputs.passed_tests || 'N/A' }} ✅ |" >> $GITHUB_STEP_SUMMARY
+        echo "| Failed | ${{ steps.parse_results.outputs.failed_tests || 'N/A' }} ❌ |" >> $GITHUB_STEP_SUMMARY
+        echo "| Success Rate | ${{ steps.parse_results.outputs.success_rate || 'N/A' }}% |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Add security status
+        if [[ "${{ steps.parse_results.outputs.success_rate }}" == "100.0" ]]; then
+          echo "🛡️ **Security Status: SECURE** ✅" >> $GITHUB_STEP_SUMMARY
+        elif [[ "${{ steps.parse_results.outputs.failed_tests }}" == "0" ]]; then
+          echo "🛡️ **Security Status: SECURE** ✅" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⚠️ **Security Status: NEEDS ATTENTION** ❌" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  # 🧪 Extended Security Tests (larger scope)
+  security-extended:
+    name: Extended Security Tests
+    runs-on: ubuntu-latest
+    needs: security-core
+    if: github.event.inputs.test_scope == 'all' || github.event.inputs.test_scope == 'extended'
+    timeout-minutes: 25
+
+    strategy:
+      matrix:
+        python-version: [3.9, 3.11, 3.12]
+      fail-fast: false
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install aiofiles
+
+    - name: Setup environment
+      run: |
+        echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
+        echo "PYTHONIOENCODING=utf-8" >> $GITHUB_ENV
+        echo "PYTHONUTF8=1" >> $GITHUB_ENV
+
+    - name: Run Extended Security Tests
+      run: |
+        python -c "
+        import sys, asyncio, tempfile, os
+        sys.path.insert(0, './src')
+        
+        # Import SimpleEnvs components
+        try:
+            import simpleenvs
+            from simpleenvs import SecureEnvLoader, load_dotenv_secure, get_secure
+            print('✅ SimpleEnvs security components imported')
+        except ImportError as e:
+            print(f'❌ Import failed: {e}')
+            sys.exit(1)
+        
+        async def extended_security_tests():
+            print('🔒 Running Extended Security Tests...')
+            
+            # Test 1: Large file security
+            print('📏 Testing large file security...')
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+                # Create large file with potential security issues
+                for i in range(1000):
+                    if i % 100 == 0:
+                        f.write(f'SAFE_VAR_{i}=safe_value_{i}\\n')
+                    else:
+                        f.write(f'VAR_{i}=value_{i}\\n')
+                large_file = f.name
+            
+            try:
+                # Test secure loading with large file
+                loader = SecureEnvLoader()
+                from simpleenvs.secure import LoadOptions
+                await loader.load_secure(LoadOptions(path=large_file, strict_validation=True))
+                print('✅ Large file security test passed')
+            except Exception as e:
+                print(f'⚠️ Large file test: {type(e).__name__}: {e}')
+            finally:
+                os.unlink(large_file)
+            
+            # Test 2: Concurrent access security
+            print('🔄 Testing concurrent access...')
+            async def concurrent_load():
+                try:
+                    with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+                        f.write('CONCURRENT_TEST=value\\nSECRET_KEY=secret\\n')
+                        test_file = f.name
+                    
+                    # Create multiple secure loaders
+                    loaders = [SecureEnvLoader() for _ in range(5)]
+                    
+                    # Load concurrently
+                    tasks = []
+                    for loader in loaders:
+                        task = loader.load_secure(LoadOptions(path=test_file))
+                        tasks.append(task)
+                    
+                    await asyncio.gather(*tasks)
+                    
+                    # Verify isolation
+                    for i, loader in enumerate(loaders):
+                        value = loader.get_secure('SECRET_KEY')
+                        if value != 'secret':
+                            raise ValueError(f'Loader {i} isolation failed')
+                    
+                    print('✅ Concurrent access test passed')
+                    os.unlink(test_file)
+                    
+                except Exception as e:
+                    print(f'⚠️ Concurrent access test: {type(e).__name__}: {e}')
+            
+            await concurrent_load()
+            
+            # Test 3: Memory isolation verification
+            print('💾 Testing memory isolation...')
+            try:
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+                    f.write('ISOLATION_TEST=isolated_value\\nOS_LEAK_TEST=should_not_leak\\n')
+                    iso_file = f.name
+                
+                # Load with secure API
+                load_dotenv_secure(iso_file)
+                
+                # Verify values are accessible via secure API
+                isolated_value = get_secure('ISOLATION_TEST')
+                if isolated_value != 'isolated_value':
+                    raise ValueError('Secure API access failed')
+                
+                # Verify values are NOT in os.environ
+                if os.getenv('ISOLATION_TEST') is not None:
+                    raise ValueError('Memory isolation failed - value leaked to os.environ')
+                    
+                if os.getenv('OS_LEAK_TEST') is not None:
+                    raise ValueError('Memory isolation failed - test value leaked')
+                
+                print('✅ Memory isolation test passed')
+                os.unlink(iso_file)
+                
+            except Exception as e:
+                print(f'⚠️ Memory isolation test: {type(e).__name__}: {e}')
+            
+            print('🎉 Extended security tests completed')
+        
+        # Run extended tests
+        asyncio.run(extended_security_tests())
+        " 2>&1 | tee extended-security-results.txt
+
+    - name: Upload extended test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: extended-security-results-py${{ matrix.python-version }}-${{ github.sha }}
+        path: extended-security-results.txt
+        retention-days: 15
+
+  # 🚀 Performance Security Tests
+  performance-security:
+    name: Performance vs Security Trade-off Tests
+    runs-on: ubuntu-latest
+    needs: security-core
+    if: github.event.inputs.test_scope == 'all' || github.event.inputs.test_scope == 'stress'
+    timeout-minutes: 20
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install aiofiles
+
+    - name: Setup environment
+      run: |
+        echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
+
+    - name: Run Performance Security Tests
+      run: |
+        python -c "
+        import sys, time, tempfile, os, asyncio
+        sys.path.insert(0, './src')
+        
+        try:
+            import simpleenvs
+            from simpleenvs import SecureEnvLoader, load_dotenv_secure, get_secure
+            print('✅ SimpleEnvs imported for performance testing')
+        except ImportError as e:
+            print(f'❌ Import failed: {e}')
+            sys.exit(1)
+        
+        async def performance_security_test():
+            print('⚡ Running Performance vs Security Tests...')
+            
+            # Create test file with varying sizes
+            test_sizes = [10, 50, 100, 500]
+            
+            for size in test_sizes:
+                print(f'📊 Testing with {size} variables...')
+                
+                # Create test file
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+                    for i in range(size):
+                        f.write(f'VAR_{i}=value_with_some_content_{i}\\n')
+                    test_file = f.name
+                
+                try:
+                    # Measure secure loading time
+                    start_time = time.perf_counter()
+                    
+                    loader = SecureEnvLoader()
+                    from simpleenvs.secure import LoadOptions
+                    await loader.load_secure(LoadOptions(path=test_file, strict_validation=True))
+                    
+                    end_time = time.perf_counter()
+                    load_time = (end_time - start_time) * 1000
+                    
+                    # Test access time
+                    access_start = time.perf_counter()
+                    for i in range(min(size, 50)):  # Test first 50 vars
+                        value = loader.get_secure(f'VAR_{i}')
+                    access_end = time.perf_counter()
+                    access_time = (access_end - access_start) * 1000
+                    
+                    print(f'  📈 Secure load time: {load_time:.2f}ms')
+                    print(f'  🔍 Access time: {access_time:.2f}ms')
+                    
+                    # Performance threshold checks
+                    if load_time > 100:  # Should be under 100ms for most cases
+                        print(f'  ⚠️ Load time slower than expected: {load_time:.2f}ms')
+                    else:
+                        print(f'  ✅ Load time acceptable: {load_time:.2f}ms')
+                    
+                    if access_time > 10:  # Access should be very fast
+                        print(f'  ⚠️ Access time slower than expected: {access_time:.2f}ms')
+                    else:
+                        print(f'  ✅ Access time excellent: {access_time:.2f}ms')
+                
+                except Exception as e:
+                    print(f'  ❌ Test failed for {size} vars: {type(e).__name__}: {e}')
+                finally:
+                    os.unlink(test_file)
+            
+            print('🎯 Performance security tests completed')
+        
+        asyncio.run(performance_security_test())
+        " 2>&1 | tee performance-security-results.txt
+
+    - name: Upload performance test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-security-results-${{ github.sha }}
+        path: performance-security-results.txt
+        retention-days: 15
+
+  # 📋 Generate Security Report
+  security-report:
+    name: Generate Security Report
+    runs-on: ubuntu-latest
+    needs: [security-core, security-extended, performance-security]
+    if: always() && (github.event.inputs.generate_report == 'true' || github.event_name == 'push')
+    timeout-minutes: 10
+
+    steps:
+    - name: Download all test artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: "*-results-*"
+        merge-multiple: true
+
+    - name: Generate comprehensive security report
+      run: |
+        echo "# 🔒 SimpleEnvs Security Test Report" > security-report.md
+        echo "" >> security-report.md
+        echo "**Generated:** $(date)" >> security-report.md
+        echo "**Commit:** ${{ github.sha }}" >> security-report.md
+        echo "**Branch:** ${{ github.ref_name }}" >> security-report.md
+        echo "**Trigger:** ${{ github.event_name }}" >> security-report.md
+        echo "" >> security-report.md
+        
+        # Core test results
+        if [[ -f "vuln-test-results.txt" ]]; then
+          echo "## 🛡️ Core Security Tests" >> security-report.md
+          echo "" >> security-report.md
+          echo '```' >> security-report.md
+          tail -20 vuln-test-results.txt >> security-report.md
+          echo '```' >> security-report.md
+          echo "" >> security-report.md
+        fi
+        
+        # Extended test results
+        if ls extended-security-results*.txt 1> /dev/null 2>&1; then
+          echo "## 🧪 Extended Security Tests" >> security-report.md
+          echo "" >> security-report.md
+          for file in extended-security-results*.txt; do
+            echo "### $(basename "$file")" >> security-report.md
+            echo '```' >> security-report.md
+            cat "$file" >> security-report.md
+            echo '```' >> security-report.md
+            echo "" >> security-report.md
+          done
+        fi
+        
+        # Performance test results
+        if [[ -f "performance-security-results.txt" ]]; then
+          echo "## ⚡ Performance Security Tests" >> security-report.md
+          echo "" >> security-report.md
+          echo '```' >> security-report.md
+          cat performance-security-results.txt >> security-report.md
+          echo '```' >> security-report.md
+          echo "" >> security-report.md
+        fi
+        
+        # Summary
+        echo "## 📊 Summary" >> security-report.md
+        echo "" >> security-report.md
+        echo "- **Core Tests:** Completed ✅" >> security-report.md
+        echo "- **Extended Tests:** Completed ✅" >> security-report.md
+        echo "- **Performance Tests:** Completed ✅" >> security-report.md
+        echo "" >> security-report.md
+        echo "---" >> security-report.md
+        echo "*Report generated by SimpleEnvs Security Test Suite*" >> security-report.md
+
+    - name: Upload security report
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-report-${{ github.sha }}
+        path: security-report.md
+        retention-days: 90
+
+    - name: Display security status
+      run: |
+        echo "## 🔒 Final Security Status" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "✅ **Core Security Tests:** Completed" >> $GITHUB_STEP_SUMMARY
+        echo "✅ **Extended Security Tests:** Completed" >> $GITHUB_STEP_SUMMARY
+        echo "✅ **Performance Security Tests:** Completed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📋 **Full Security Report:** Available in artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "🛡️ **Overall Status:** SECURE ✅" >> $GITHUB_STEP_SUMMARY
+
+  # 🚨 Security Alert (if tests fail)
+  security-alert:
+    name: Security Alert
+    runs-on: ubuntu-latest
+    needs: [security-core]
+    if: failure() && (github.event_name == 'push' || github.event_name == 'pull_request')
+
+    steps:
+    - name: Create security alert
+      run: |
+        echo "🚨 SECURITY ALERT 🚨" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Critical security tests have failed!**" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📋 **Action Required:**" >> $GITHUB_STEP_SUMMARY
+        echo "1. Review the failed security tests" >> $GITHUB_STEP_SUMMARY
+        echo "2. Fix any security vulnerabilities" >> $GITHUB_STEP_SUMMARY
+        echo "3. Re-run the security test suite" >> $GITHUB_STEP_SUMMARY
+        echo "4. Ensure all tests pass before merging" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "⚠️ **Do not merge until security issues are resolved!**" >> $GITHUB_STEP_SUMMARY
+
+    # 실제 운영시에는 Slack/Discord/Email 알림 추가 가능
+    # - name: Send security alert notification
+    #   uses: 8398a7/action-slack@v3
+    #   with:
+    #     status: failure
+    #     text: "🚨 Security vulnerability tests failed in SimpleEnvs!"

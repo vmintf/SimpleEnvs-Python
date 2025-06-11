@@ -1,0 +1,240 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement for SimpleEnvs
+title: "[FEATURE] "
+labels: ["enhancement", "feature-request"]
+assignees:
+  - vmintf
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ✨ Feature Request
+        
+        Thanks for suggesting a new feature! Your ideas help make SimpleEnvs better for everyone.
+        
+        **Before submitting:**
+        - [ ] I've checked [existing issues](https://github.com/vmintf/SimpleEnvs-Python/issues?q=label%3Aenhancement) and [roadmap](https://github.com/vmintf/SimpleEnvs-Python/discussions)
+        - [ ] This isn't already available in the current version
+        - [ ] I've considered if this fits SimpleEnvs' core mission (security + performance + simplicity)
+
+  - type: dropdown
+    id: feature_category
+    attributes:
+      label: 🎯 Feature Category
+      description: What type of feature are you suggesting?
+      options:
+        - "🔒 Security Enhancement (new security features, improved isolation)"
+        - "⚡ Performance Optimization (speed, memory, caching)"
+        - "🔧 API Extension (new functions, better developer experience)"
+        - "🌐 Integration (FastAPI, Django, Flask, CI/CD tools)"
+        - "📁 File Handling (new formats, remote loading, compression)"
+        - "🎨 Developer Experience (better errors, debugging, tooling)"
+        - "📊 Monitoring & Observability (logging, metrics, health checks)"
+        - "🔄 Advanced Features (hot reload, variable substitution, encryption)"
+        - "📚 Documentation & Examples"
+        - "🧪 Testing & Quality Assurance"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature_summary
+    attributes:
+      label: 📝 Feature Summary
+      description: Brief, clear description of the proposed feature
+      placeholder: |
+        Example: "Add support for encrypted .env files using AES-256"
+        Example: "Integration plugin for FastAPI with automatic dependency injection"
+        Example: "Hot reload capability to detect .env file changes automatically"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem_solution
+    attributes:
+      label: 💡 Problem & Solution
+      description: What problem does this solve and how?
+      placeholder: |
+        **Problem:**
+        Currently, sensitive environment variables are stored in plain text .env files, which poses security risks in shared repositories or compromised systems.
+        
+        **Proposed Solution:**
+        Add an `load_dotenv_encrypted()` function that can decrypt AES-256 encrypted .env files using a master key from environment or key management system.
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_cases
+    attributes:
+      label: 🎬 Use Cases & Examples
+      description: Real-world scenarios where this would be valuable
+      placeholder: |
+        **Use Case 1: Enterprise Deployment**
+        - Store encrypted .env files in version control
+        - Deploy with master key from secure key management
+        - Prevent credential exposure in repos
+        
+        **Use Case 2: Development Teams**
+        - Share encrypted development configs safely
+        - Different encryption keys per environment
+        - Audit trail for config access
+        
+        **Use Case 3: CI/CD Pipelines**
+        - Encrypted secrets in pipeline configs
+        - Automatic decryption during deployment
+        - No plain text secrets in build logs
+
+  - type: textarea
+    id: proposed_api
+    attributes:
+      label: 🔧 Proposed API Design
+      description: How would you like to use this feature?
+      render: python
+      placeholder: |
+        # Example API design for the proposed feature
+        from simpleenvs import load_dotenv_encrypted, get_secure
+        
+        # Method 1: Key from environment
+        load_dotenv_encrypted('.env.encrypted', key_env='MASTER_KEY')
+        
+        # Method 2: Key from file
+        load_dotenv_encrypted('.env.encrypted', key_file='master.key')
+        
+        # Method 3: Key from callback
+        def get_key():
+            return fetch_from_vault('production-key')
+        
+        load_dotenv_encrypted('.env.encrypted', key_provider=get_key)
+        
+        # Access encrypted variables securely
+        db_password = get_secure('DATABASE_PASSWORD')
+    validations:
+      required: true
+
+  - type: dropdown
+    id: implementation_complexity
+    attributes:
+      label: 🔨 Implementation Complexity
+      description: How complex do you think this feature would be?
+      options:
+        - "🟢 Simple - Small addition to existing code"
+        - "🟡 Medium - New module or significant changes"
+        - "🔴 Complex - Major architectural changes"
+        - "🤔 Not sure - Need maintainer input"
+    validations:
+      required: true
+
+  - type: textarea
+    id: compatibility_impact
+    attributes:
+      label: 🔄 Backward Compatibility
+      description: How would this affect existing users?
+      placeholder: |
+        - ✅ Fully backward compatible - existing code unchanged
+        - ⚠️ New optional dependencies required
+        - ⚠️ New configuration options with sensible defaults
+        - ❌ Breaking changes required (explain why necessary)
+        
+        **Migration path for existing users:**
+        [Describe how current users would adopt this feature]
+
+  - type: textarea
+    id: similar_implementations
+    attributes:
+      label: 🔍 Similar Implementations
+      description: Have you seen this feature elsewhere?
+      placeholder: |
+        **Similar features in other tools:**
+        - python-dotenv: [feature comparison]
+        - Other libraries: [examples]
+        - Industry standards: [references]
+        
+        **How SimpleEnvs could do it better:**
+        - Better performance
+        - Enhanced security
+        - Simpler API
+        - [other advantages]
+
+  - type: checkboxes
+    id: feature_requirements
+    attributes:
+      label: 📋 Feature Requirements
+      description: What aspects are important for this feature?
+      options:
+        - label: Must maintain SimpleEnvs' performance advantage
+        - label: Must follow SimpleEnvs' security-first approach
+        - label: Should have comprehensive documentation
+        - label: Should include usage examples
+        - label: Should have thorough test coverage
+        - label: Should be cross-platform compatible
+        - label: Should integrate well with existing API
+
+  - type: dropdown
+    id: willingness_to_contribute
+    attributes:
+      label: 🤝 Contribution Willingness
+      description: Would you be interested in helping implement this?
+      options:
+        - "🚀 Yes, I'd love to implement this myself"
+        - "🤝 Yes, I can help with implementation"
+        - "📝 I can help with documentation/testing"
+        - "💡 I'm mainly providing the idea"
+        - "❓ Not sure, depends on complexity"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 📋 Additional Context
+      description: Any other relevant information
+      placeholder: |
+        **Related issues or discussions:**
+        - Link to related issues
+        - Previous discussions about this topic
+        
+        **Alternative approaches considered:**
+        - Other ways to solve this problem
+        - Why this approach is preferred
+        
+        **Dependencies or prerequisites:**
+        - External libraries needed
+        - System requirements
+        - Configuration changes
+        
+        **Future extensions:**
+        - How this could be expanded later
+        - Related features that might follow
+
+  - type: dropdown
+    id: priority_impact
+    attributes:
+      label: 🎯 Priority & Impact
+      description: How important is this feature?
+      options:
+        - "🔥 High Priority - Addresses critical user need"
+        - "⭐ Medium Priority - Valuable enhancement"
+        - "💡 Nice to Have - Quality of life improvement"
+        - "🔮 Future Vision - Long-term strategic feature"
+    validations:
+      required: true
+
+  - type: textarea
+    id: success_criteria
+    attributes:
+      label: ✅ Success Criteria
+      description: How would we know this feature is successful?
+      placeholder: |
+        **Success metrics:**
+        - Users can [specific capability]
+        - Performance impact: [acceptable range]
+        - Adoption: [expected usage patterns]
+        - Feedback: [user satisfaction goals]
+        
+        **Definition of done:**
+        - [ ] Feature implemented and tested
+        - [ ] Documentation updated
+        - [ ] Examples provided
+        - [ ] Performance benchmarks pass
+        - [ ] Security review completed (if applicable)

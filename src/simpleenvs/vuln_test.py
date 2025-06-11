@@ -14,21 +14,37 @@ from typing import Dict, List, Tuple
 # Import SimpleEnvs components (assuming they're available)
 try:
     from simpleenvs import (
-        SimpleEnvLoader, SecureEnvLoader,
-        SimpleEnvsError, EnvSecurityError, PathTraversalError,
-        FileSizeError, InvalidInputError, AccessDeniedError,
-        FileParsingError, EnvNotLoadedError, KeyNotFoundError,
-        TypeConversionError, ConfigurationError, IntegrityError,
-        SessionError, MemorySecurityError
+        AccessDeniedError,
+        ConfigurationError,
+        EnvNotLoadedError,
+        EnvSecurityError,
+        FileParsingError,
+        FileSizeError,
+        IntegrityError,
+        InvalidInputError,
+        KeyNotFoundError,
+        MemorySecurityError,
+        PathTraversalError,
+        SecureEnvLoader,
+        SessionError,
+        SimpleEnvLoader,
+        SimpleEnvsError,
+        TypeConversionError,
+    )
+    from simpleenvs.constants import (
+        DANGEROUS_PATTERNS,
+        MAX_FILE_SIZE,
+        MAX_KEY_LENGTH,
+        MAX_LINE_LENGTH,
+        MAX_VALUE_LENGTH,
     )
     from simpleenvs.secure import LoadOptions  # ← 별도로 import
-    from simpleenvs.constants import (
-        MAX_FILE_SIZE, MAX_KEY_LENGTH, MAX_VALUE_LENGTH,
-        MAX_LINE_LENGTH, DANGEROUS_PATTERNS
-    )
     from simpleenvs.utils import (
-        parse_env_value, validate_path_security, validate_key_format,
-        parse_env_content, safe_file_read
+        parse_env_content,
+        parse_env_value,
+        safe_file_read,
+        validate_key_format,
+        validate_path_security,
     )
 
     USING_REAL_SIMPLEENVS = True
@@ -37,87 +53,78 @@ except ImportError as e:
     USING_REAL_SIMPLEENVS = False
     print("Warning: SimpleEnvs not installed. Creating mock classes for demonstration.")
 
-
     # Mock classes for demonstration
     class SimpleEnvsError(Exception):
         pass
 
-
     class EnvSecurityError(SimpleEnvsError):
         pass
 
-
     class PathTraversalError(EnvSecurityError):
         pass
-
 
     class FileSizeError(EnvSecurityError):
         def __init__(self, file_path, size, max_size):
             self.file_path = file_path
             self.size = size
             self.max_size = max_size
-            super().__init__(f"File {file_path} is too large ({size} bytes, max: {max_size})")
-
+            super().__init__(
+                f"File {file_path} is too large ({size} bytes, max: {max_size})"
+            )
 
     class InvalidInputError(EnvSecurityError):
         pass
 
-
     class AccessDeniedError(EnvSecurityError):
         pass
-
 
     class FileParsingError(SimpleEnvsError):
         pass
 
-
     class EnvNotLoadedError(SimpleEnvsError):
         pass
-
 
     class KeyNotFoundError(SimpleEnvsError):
         pass
 
-
     class TypeConversionError(SimpleEnvsError):
         pass
-
 
     class ConfigurationError(SimpleEnvsError):
         pass
 
-
     class IntegrityError(EnvSecurityError):
         pass
-
 
     class SessionError(EnvSecurityError):
         pass
 
-
     class MemorySecurityError(EnvSecurityError):
         pass
 
-
     class SimpleEnvLoader:
-        def __init__(self): self.env_data = {}
+        def __init__(self):
+            self.env_data = {}
 
-        async def load(self, path=None): pass
+        async def load(self, path=None):
+            pass
 
-        def get(self, key): return None
-
+        def get(self, key):
+            return None
 
     class SecureEnvLoader:
-        def __init__(self): pass
+        def __init__(self):
+            pass
 
-        async def load_secure(self, options=None): pass
+        async def load_secure(self, options=None):
+            pass
 
-        def get_secure(self, key): return None
-
+        def get_secure(self, key):
+            return None
 
     class LoadOptions:
-        def __init__(self, **kwargs): pass
-
+        def __init__(self, **kwargs):
+            pass
 
     MAX_FILE_SIZE = 10 * 1024 * 1024
     MAX_KEY_LENGTH = 128
@@ -134,14 +141,16 @@ class ErrorTestSuite:
         self.temp_dir = tempfile.mkdtemp()
         print(f"Using temporary directory: {self.temp_dir}")
 
-    def log_test(self, test_name: str, error_type: str, success: bool, details: str = ""):
+    def log_test(
+        self, test_name: str, error_type: str, success: bool, details: str = ""
+    ):
         """Log test results"""
         result = {
             "test_name": test_name,
             "error_type": error_type,
             "success": success,
             "details": details,
-            "timestamp": time.time()
+            "timestamp": time.time(),
         }
         self.test_results.append(result)
 
@@ -151,14 +160,14 @@ class ErrorTestSuite:
     def create_test_file(self, filename: str, content: str) -> str:
         """Create a test file with specified content"""
         file_path = os.path.join(self.temp_dir, filename)
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
         return file_path
 
     def create_large_file(self, filename: str, size_bytes: int) -> str:
         """Create a large file for size testing"""
         file_path = os.path.join(self.temp_dir, filename)
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             # Write in chunks to avoid memory issues
             chunk_size = 8192  # 8KB chunks
             chunk = "A" * chunk_size
@@ -187,7 +196,7 @@ class ErrorTestSuite:
             "%2e%2e/passwd",
             "..%2fpasswd",
             "..%5cpasswd",
-            "./../../secrets.env"
+            "./../../secrets.env",
         ]
 
         for path in dangerous_paths:
@@ -195,12 +204,26 @@ class ErrorTestSuite:
                 # Test with SecureEnvLoader
                 loader = SecureEnvLoader()
                 await loader.load_secure(LoadOptions(path=path))
-                self.log_test(f"Path traversal: {path}", "PathTraversalError", False, "Should have failed")
+                self.log_test(
+                    f"Path traversal: {path}",
+                    "PathTraversalError",
+                    False,
+                    "Should have failed",
+                )
             except PathTraversalError:
-                self.log_test(f"Path traversal: {path}", "PathTraversalError", True, "Correctly blocked")
+                self.log_test(
+                    f"Path traversal: {path}",
+                    "PathTraversalError",
+                    True,
+                    "Correctly blocked",
+                )
             except Exception as e:
-                self.log_test(f"Path traversal: {path}", "PathTraversalError", True,
-                              f"Blocked with: {type(e).__name__}")
+                self.log_test(
+                    f"Path traversal: {path}",
+                    "PathTraversalError",
+                    True,
+                    f"Blocked with: {type(e).__name__}",
+                )
 
     # =============================================================================
     # FILE SIZE TESTS
@@ -215,7 +238,7 @@ class ErrorTestSuite:
             ("empty.env", 0, ""),
             ("normal.env", 1024, "APP_NAME=TestApp\nDEBUG=true"),  # 1KB
             ("medium.env", 1024 * 1024, None),  # 1MB
-            ("large.env", 15 * 1024 * 1024, None)  # 15MB file (over 10MB limit)
+            ("large.env", 15 * 1024 * 1024, None),  # 15MB file (over 10MB limit)
         ]
 
         for filename, size_bytes, content in test_cases:
@@ -231,18 +254,34 @@ class ErrorTestSuite:
                 await loader.load_secure(LoadOptions(path=file_path))
 
                 if size_bytes > MAX_FILE_SIZE:
-                    self.log_test(f"File size: {filename} ({size_bytes // 1024}KB)", "FileSizeError", False,
-                                  "Should have failed")
+                    self.log_test(
+                        f"File size: {filename} ({size_bytes // 1024}KB)",
+                        "FileSizeError",
+                        False,
+                        "Should have failed",
+                    )
                 else:
-                    self.log_test(f"File size: {filename} ({size_bytes // 1024}KB)", "FileSizeError", True,
-                                  "Correctly accepted")
+                    self.log_test(
+                        f"File size: {filename} ({size_bytes // 1024}KB)",
+                        "FileSizeError",
+                        True,
+                        "Correctly accepted",
+                    )
 
             except FileSizeError as e:
-                self.log_test(f"File size: {filename} ({size_bytes // 1024}KB)", "FileSizeError", True,
-                              f"Correctly rejected: {e}")
+                self.log_test(
+                    f"File size: {filename} ({size_bytes // 1024}KB)",
+                    "FileSizeError",
+                    True,
+                    f"Correctly rejected: {e}",
+                )
             except Exception as e:
-                self.log_test(f"File size: {filename} ({size_bytes // 1024}KB)", "FileSizeError", True,
-                              f"Rejected with: {type(e).__name__}")
+                self.log_test(
+                    f"File size: {filename} ({size_bytes // 1024}KB)",
+                    "FileSizeError",
+                    True,
+                    f"Rejected with: {type(e).__name__}",
+                )
 
     # =============================================================================
     # INVALID INPUT TESTS
@@ -254,38 +293,59 @@ class ErrorTestSuite:
 
         # Test dangerous patterns in .env content
         dangerous_contents = [
-            ("script_injection.env", """
+            (
+                "script_injection.env",
+                """
 APP_NAME=MyApp
 SCRIPT_TAG=<script>alert('xss')</script>
 DEBUG=true
-"""),
-            ("command_injection.env", """
+""",
+            ),
+            (
+                "command_injection.env",
+                """
 APP_NAME=MyApp
 COMMAND=$(rm -rf /)
 DEBUG=true
-"""),
-            ("shell_injection.env", """
+""",
+            ),
+            (
+                "shell_injection.env",
+                """
 APP_NAME=MyApp
 SHELL_CMD=`cat /etc/passwd`
 DEBUG=true
-"""),
-            ("variable_substitution.env", """
+""",
+            ),
+            (
+                "variable_substitution.env",
+                """
 APP_NAME=MyApp
 EXPLOIT=${USER:-$(whoami)}
 DEBUG=true
-"""),
-            ("null_byte.env", """
+""",
+            ),
+            (
+                "null_byte.env",
+                """
 APP_NAME=MyApp\x00
 DEBUG=true
-"""),
-            ("oversized_key.env", f"""
+""",
+            ),
+            (
+                "oversized_key.env",
+                f"""
 {"A" * (MAX_KEY_LENGTH + 10)}=value
 DEBUG=true
-"""),
-            ("oversized_value.env", f"""
+""",
+            ),
+            (
+                "oversized_value.env",
+                f"""
 APP_NAME={"B" * (MAX_VALUE_LENGTH + 100)}
 DEBUG=true
-"""),
+""",
+            ),
         ]
 
         for filename, content in dangerous_contents:
@@ -293,12 +353,26 @@ DEBUG=true
                 file_path = self.create_test_file(filename, content)
                 loader = SecureEnvLoader()
                 await loader.load_secure(LoadOptions(path=file_path))
-                self.log_test(f"Invalid input: {filename}", "InvalidInputError", False, "Should have been rejected")
+                self.log_test(
+                    f"Invalid input: {filename}",
+                    "InvalidInputError",
+                    False,
+                    "Should have been rejected",
+                )
             except InvalidInputError as e:
-                self.log_test(f"Invalid input: {filename}", "InvalidInputError", True, f"Correctly rejected: {e}")
+                self.log_test(
+                    f"Invalid input: {filename}",
+                    "InvalidInputError",
+                    True,
+                    f"Correctly rejected: {e}",
+                )
             except Exception as e:
-                self.log_test(f"Invalid input: {filename}", "InvalidInputError", True,
-                              f"Rejected with: {type(e).__name__}")
+                self.log_test(
+                    f"Invalid input: {filename}",
+                    "InvalidInputError",
+                    True,
+                    f"Rejected with: {type(e).__name__}",
+                )
 
     # =============================================================================
     # FILE PARSING TESTS
@@ -309,27 +383,39 @@ DEBUG=true
         print("\n📄 Testing File Parsing Errors...")
 
         parsing_test_cases = [
-            ("malformed.env", """
+            (
+                "malformed.env",
+                """
 APP_NAME=MyApp
 INVALID_LINE_NO_EQUALS
 DEBUG=true
 ANOTHER_INVALID
-"""),
-            ("invalid_encoding.env", b"""
+""",
+            ),
+            (
+                "invalid_encoding.env",
+                b"""
 APP_NAME=MyApp
 INVALID_UTF8=\xff\xfe\x00\x00
 DEBUG=true
-"""),
-            ("mixed_quotes.env", """
+""",
+            ),
+            (
+                "mixed_quotes.env",
+                """
 APP_NAME="MyApp
 DEBUG='true"
 PORT=8080
-"""),
-            ("extremely_long_lines.env", f"""
+""",
+            ),
+            (
+                "extremely_long_lines.env",
+                f"""
 APP_NAME=MyApp
 LONG_LINE={"X" * (MAX_LINE_LENGTH + 100)}
 DEBUG=true
-"""),
+""",
+            ),
         ]
 
         for filename, content in parsing_test_cases:
@@ -337,20 +423,34 @@ DEBUG=true
                 if isinstance(content, bytes):
                     # Write binary content for encoding tests
                     file_path = os.path.join(self.temp_dir, filename)
-                    with open(file_path, 'wb') as f:
+                    with open(file_path, "wb") as f:
                         f.write(content)
                 else:
                     file_path = self.create_test_file(filename, content)
 
                 loader = SimpleEnvLoader()
                 await loader.load(file_path)
-                self.log_test(f"File parsing: {filename}", "FileParsingError", True,
-                              "Parsed successfully (non-strict mode)")
+                self.log_test(
+                    f"File parsing: {filename}",
+                    "FileParsingError",
+                    True,
+                    "Parsed successfully (non-strict mode)",
+                )
 
             except FileParsingError as e:
-                self.log_test(f"File parsing: {filename}", "FileParsingError", True, f"Correctly failed: {e}")
+                self.log_test(
+                    f"File parsing: {filename}",
+                    "FileParsingError",
+                    True,
+                    f"Correctly failed: {e}",
+                )
             except Exception as e:
-                self.log_test(f"File parsing: {filename}", "FileParsingError", True, f"Failed with: {type(e).__name__}")
+                self.log_test(
+                    f"File parsing: {filename}",
+                    "FileParsingError",
+                    True,
+                    f"Failed with: {type(e).__name__}",
+                )
 
     # =============================================================================
     # ENVIRONMENT NOT LOADED TESTS
@@ -373,11 +473,26 @@ DEBUG=true
             try:
                 loader = SimpleEnvLoader()  # Not loaded
                 result = operation(loader)
-                self.log_test(f"Not loaded: {op_name}", "EnvNotLoadedError", False, "Should have failed")
+                self.log_test(
+                    f"Not loaded: {op_name}",
+                    "EnvNotLoadedError",
+                    False,
+                    "Should have failed",
+                )
             except EnvNotLoadedError as e:
-                self.log_test(f"Not loaded: {op_name}", "EnvNotLoadedError", True, f"Correctly failed: {e}")
+                self.log_test(
+                    f"Not loaded: {op_name}",
+                    "EnvNotLoadedError",
+                    True,
+                    f"Correctly failed: {e}",
+                )
             except Exception as e:
-                self.log_test(f"Not loaded: {op_name}", "EnvNotLoadedError", True, f"Failed with: {type(e).__name__}")
+                self.log_test(
+                    f"Not loaded: {op_name}",
+                    "EnvNotLoadedError",
+                    True,
+                    f"Failed with: {type(e).__name__}",
+                )
 
     # =============================================================================
     # TYPE CONVERSION TESTS
@@ -415,17 +530,31 @@ LARGE_NUMBER=999999999999999999999999999999999999999
             for test_name, test_func in test_cases:
                 try:
                     result = test_func()
-                    self.log_test(f"Type conversion: {test_name}", "TypeConversionError", True,
-                                  f"Gracefully handled: {result}")
+                    self.log_test(
+                        f"Type conversion: {test_name}",
+                        "TypeConversionError",
+                        True,
+                        f"Gracefully handled: {result}",
+                    )
                 except TypeConversionError as e:
-                    self.log_test(f"Type conversion: {test_name}", "TypeConversionError", True,
-                                  f"Correctly failed: {e}")
+                    self.log_test(
+                        f"Type conversion: {test_name}",
+                        "TypeConversionError",
+                        True,
+                        f"Correctly failed: {e}",
+                    )
                 except Exception as e:
-                    self.log_test(f"Type conversion: {test_name}", "TypeConversionError", True,
-                                  f"Handled with: {type(e).__name__}")
+                    self.log_test(
+                        f"Type conversion: {test_name}",
+                        "TypeConversionError",
+                        True,
+                        f"Handled with: {type(e).__name__}",
+                    )
 
         except Exception as e:
-            self.log_test("Type conversion setup", "FileParsingError", False, f"Setup failed: {e}")
+            self.log_test(
+                "Type conversion setup", "FileParsingError", False, f"Setup failed: {e}"
+            )
 
     # =============================================================================
     # KEY NOT FOUND TESTS
@@ -453,18 +582,30 @@ PORT=8080
                 "DATABASE_URL",
                 "SECRET_KEY",
                 "REDIS_URL",
-                "NONEXISTENT_KEY"
+                "NONEXISTENT_KEY",
             ]
 
             for key in missing_keys:
                 result = loader.get(key)
                 if result is None:
-                    self.log_test(f"Key not found: {key}", "KeyNotFoundError", True, "Correctly returned None")
+                    self.log_test(
+                        f"Key not found: {key}",
+                        "KeyNotFoundError",
+                        True,
+                        "Correctly returned None",
+                    )
                 else:
-                    self.log_test(f"Key not found: {key}", "KeyNotFoundError", False, f"Unexpected result: {result}")
+                    self.log_test(
+                        f"Key not found: {key}",
+                        "KeyNotFoundError",
+                        False,
+                        f"Unexpected result: {result}",
+                    )
 
         except Exception as e:
-            self.log_test("Key not found setup", "FileParsingError", False, f"Setup failed: {e}")
+            self.log_test(
+                "Key not found setup", "FileParsingError", False, f"Setup failed: {e}"
+            )
 
     # =============================================================================
     # SECURITY-SPECIFIC TESTS
@@ -480,33 +621,75 @@ PORT=8080
             # Try to access private methods (this would normally be blocked)
             # In a real implementation, this might involve accessing _SecureEnvLoader__env_data directly
             info = loader.get_security_info()
-            self.log_test("Security info access", "AccessDeniedError", True, "Allowed access to security info")
+            self.log_test(
+                "Security info access",
+                "AccessDeniedError",
+                True,
+                "Allowed access to security info",
+            )
         except AccessDeniedError as e:
-            self.log_test("Security info access", "AccessDeniedError", True, f"Correctly denied: {e}")
+            self.log_test(
+                "Security info access",
+                "AccessDeniedError",
+                True,
+                f"Correctly denied: {e}",
+            )
         except Exception as e:
-            self.log_test("Security info access", "AccessDeniedError", True, f"Handled with: {type(e).__name__}")
+            self.log_test(
+                "Security info access",
+                "AccessDeniedError",
+                True,
+                f"Handled with: {type(e).__name__}",
+            )
 
         # Test session errors
         try:
             loader1 = SecureEnvLoader(session_id="session1")
             loader2 = SecureEnvLoader(session_id="session2")
             # In a real implementation, this might test session conflicts
-            self.log_test("Session conflict", "SessionError", True, "Multiple sessions created successfully")
+            self.log_test(
+                "Session conflict",
+                "SessionError",
+                True,
+                "Multiple sessions created successfully",
+            )
         except SessionError as e:
-            self.log_test("Session conflict", "SessionError", True, f"Correctly handled: {e}")
+            self.log_test(
+                "Session conflict", "SessionError", True, f"Correctly handled: {e}"
+            )
         except Exception as e:
-            self.log_test("Session conflict", "SessionError", True, f"Handled with: {type(e).__name__}")
+            self.log_test(
+                "Session conflict",
+                "SessionError",
+                True,
+                f"Handled with: {type(e).__name__}",
+            )
 
         # Test memory security
         try:
             loader = SecureEnvLoader()
             await loader.load_secure()
             loader.secure_wipe()
-            self.log_test("Memory security wipe", "MemorySecurityError", True, "Successfully wiped memory")
+            self.log_test(
+                "Memory security wipe",
+                "MemorySecurityError",
+                True,
+                "Successfully wiped memory",
+            )
         except MemorySecurityError as e:
-            self.log_test("Memory security wipe", "MemorySecurityError", True, f"Error during wipe: {e}")
+            self.log_test(
+                "Memory security wipe",
+                "MemorySecurityError",
+                True,
+                f"Error during wipe: {e}",
+            )
         except Exception as e:
-            self.log_test("Memory security wipe", "MemorySecurityError", True, f"Handled with: {type(e).__name__}")
+            self.log_test(
+                "Memory security wipe",
+                "MemorySecurityError",
+                True,
+                f"Handled with: {type(e).__name__}",
+            )
 
     # =============================================================================
     # INTEGRITY TESTS
@@ -536,20 +719,37 @@ DEBUG=false
 PORT=9090
 MALICIOUS_CODE=$(rm -rf /)
 """
-            with open(file_path, 'w') as f:
+            with open(file_path, "w") as f:
                 f.write(modified_content)
 
             # Check integrity
             integrity_check = loader.verify_file_integrity(file_path)
             if not integrity_check:
-                self.log_test("File integrity check", "IntegrityError", True, "Correctly detected file modification")
+                self.log_test(
+                    "File integrity check",
+                    "IntegrityError",
+                    True,
+                    "Correctly detected file modification",
+                )
             else:
-                self.log_test("File integrity check", "IntegrityError", False, "Failed to detect modification")
+                self.log_test(
+                    "File integrity check",
+                    "IntegrityError",
+                    False,
+                    "Failed to detect modification",
+                )
 
         except IntegrityError as e:
-            self.log_test("File integrity check", "IntegrityError", True, f"Correctly failed: {e}")
+            self.log_test(
+                "File integrity check", "IntegrityError", True, f"Correctly failed: {e}"
+            )
         except Exception as e:
-            self.log_test("File integrity check", "IntegrityError", True, f"Handled with: {type(e).__name__}")
+            self.log_test(
+                "File integrity check",
+                "IntegrityError",
+                True,
+                f"Handled with: {type(e).__name__}",
+            )
 
     # =============================================================================
     # CONFIGURATION ERRORS
@@ -561,7 +761,10 @@ MALICIOUS_CODE=$(rm -rf /)
 
         config_test_cases = [
             ("invalid_max_depth", lambda: SimpleEnvLoader().load_sync(max_depth=-1)),
-            ("invalid_max_depth_high", lambda: SimpleEnvLoader().load_sync(max_depth=100)),
+            (
+                "invalid_max_depth_high",
+                lambda: SimpleEnvLoader().load_sync(max_depth=100),
+            ),
             ("invalid_path_type", lambda: SimpleEnvLoader().load_sync(path=123)),
             ("invalid_key_type", lambda: SimpleEnvLoader().get(123)),
         ]
@@ -569,13 +772,26 @@ MALICIOUS_CODE=$(rm -rf /)
         for test_name, test_func in config_test_cases:
             try:
                 test_func()
-                self.log_test(f"Configuration: {test_name}", "ConfigurationError", False, "Should have failed")
+                self.log_test(
+                    f"Configuration: {test_name}",
+                    "ConfigurationError",
+                    False,
+                    "Should have failed",
+                )
             except (ConfigurationError, InvalidInputError, TypeError, ValueError) as e:
-                self.log_test(f"Configuration: {test_name}", "ConfigurationError", True,
-                              f"Correctly failed: {type(e).__name__}")
+                self.log_test(
+                    f"Configuration: {test_name}",
+                    "ConfigurationError",
+                    True,
+                    f"Correctly failed: {type(e).__name__}",
+                )
             except Exception as e:
-                self.log_test(f"Configuration: {test_name}", "ConfigurationError", True,
-                              f"Failed with: {type(e).__name__}")
+                self.log_test(
+                    f"Configuration: {test_name}",
+                    "ConfigurationError",
+                    True,
+                    f"Failed with: {type(e).__name__}",
+                )
 
     # =============================================================================
     # EDGE CASE TESTS
@@ -587,13 +803,18 @@ MALICIOUS_CODE=$(rm -rf /)
 
         edge_cases = [
             ("empty_file.env", ""),
-            ("only_comments.env", """
+            (
+                "only_comments.env",
+                """
 # This is a comment
 # Another comment
 # Yet another comment
-"""),
+""",
+            ),
             ("whitespace_only.env", "   \n  \t  \n   "),
-            ("mixed_content.env", """
+            (
+                "mixed_content.env",
+                """
 # Configuration file
 APP_NAME=TestApp
 
@@ -605,12 +826,16 @@ DB_PORT=5432
 DEBUG=true
 
 # End of file
-"""),
-            ("unicode_content.env", """
+""",
+            ),
+            (
+                "unicode_content.env",
+                """
 APP_NAME=测试应用
 EMOJI=🚀
 DESCRIPTION=Iñtërnâtiônàlizætiøn
-"""),
+""",
+            ),
         ]
 
         for filename, content in edge_cases:
@@ -624,10 +849,17 @@ DESCRIPTION=Iñtërnâtiônàlizætiøn
                 secure_loader = SecureEnvLoader()
                 await secure_loader.load_secure(LoadOptions(path=file_path))
 
-                self.log_test(f"Edge case: {filename}", "EdgeCase", True, "Successfully handled")
+                self.log_test(
+                    f"Edge case: {filename}", "EdgeCase", True, "Successfully handled"
+                )
 
             except Exception as e:
-                self.log_test(f"Edge case: {filename}", "EdgeCase", True, f"Gracefully failed: {type(e).__name__}")
+                self.log_test(
+                    f"Edge case: {filename}",
+                    "EdgeCase",
+                    True,
+                    f"Gracefully failed: {type(e).__name__}",
+                )
 
     # =============================================================================
     # RUN ALL TESTS
@@ -695,6 +927,7 @@ DESCRIPTION=Iñtërnâtiônàlizætiøn
 
         # Cleanup
         import shutil
+
         try:
             shutil.rmtree(self.temp_dir)
             print(f"\n🧹 Cleaned up temporary directory: {self.temp_dir}")
@@ -706,10 +939,11 @@ DESCRIPTION=Iñtërnâtiônàlizætiøn
 # DEMO FUNCTIONS (수정된 부분)
 # =============================================================================
 
+
 def create_demo_large_file(temp_dir: str, filename: str, size_bytes: int) -> str:
     """Create a demo large file for testing"""
     file_path = os.path.join(temp_dir, filename)
-    with open(file_path, 'w') as f:
+    with open(file_path, "w") as f:
         # Write enough data to reach the target size
         chunk_size = 1024  # 1KB chunks
         chunk = "X" * chunk_size
@@ -759,7 +993,9 @@ def demonstrate_error_handling():
         # Example 2: Generic exception handling
         print("\n2. Generic Exception Handling:")
         try:
-            raise InvalidInputError("Dangerous pattern detected", "<script>alert('xss')</script>")
+            raise InvalidInputError(
+                "Dangerous pattern detected", "<script>alert('xss')</script>"
+            )
         except EnvSecurityError as e:
             print(f"   Caught security error: {e}")
         except SimpleEnvsError as e:
@@ -771,16 +1007,18 @@ def demonstrate_error_handling():
         print("\n3. Error Details Extraction (with real file):")
         try:
             # Create a real large file for testing
-            large_file_path = create_demo_large_file(temp_dir, "large_test_file.txt", 2048)  # 2KB file
+            large_file_path = create_demo_large_file(
+                temp_dir, "large_test_file.txt", 2048
+            )  # 2KB file
             max_allowed_size = 1000  # 1KB limit
 
             check_file_size(large_file_path, max_allowed_size)
 
         except FileSizeError as e:
             # 안전한 속성 접근 - SimpleEnvs와 mock 버전 모두 지원
-            file_path = getattr(e, 'file_path', getattr(e, 'path', 'unknown'))
-            size = getattr(e, 'size', 'unknown')
-            max_size = getattr(e, 'max_size', 'unknown')
+            file_path = getattr(e, "file_path", getattr(e, "path", "unknown"))
+            size = getattr(e, "size", "unknown")
+            max_size = getattr(e, "max_size", "unknown")
 
             print(f"   File: {file_path}")
             print(f"   Size: {size} bytes")
@@ -807,8 +1045,8 @@ def demonstrate_error_handling():
                 print(f"   ✅ {filename} ({size_bytes} bytes): Accepted")
 
             except FileSizeError as e:
-                file_path = getattr(e, 'file_path', getattr(e, 'path', 'unknown'))
-                size = getattr(e, 'size', 'unknown')
+                file_path = getattr(e, "file_path", getattr(e, "path", "unknown"))
+                size = getattr(e, "size", "unknown")
                 print(f"   ❌ {filename} ({size} bytes): Rejected (too large)")
 
             except Exception as e:
@@ -817,11 +1055,22 @@ def demonstrate_error_handling():
         # Example 5: Demonstrating error cascading
         print("\n5. Error Cascading and Recovery:")
         operations = [
-            ("check_small_file", lambda: check_file_size(
-                create_demo_large_file(temp_dir, "cascade_small.txt", 800), 1000)),
-            ("check_large_file", lambda: check_file_size(
-                create_demo_large_file(temp_dir, "cascade_large.txt", 2000), 1000)),
-            ("check_nonexistent", lambda: check_file_size("nonexistent_file.txt", 1000)),
+            (
+                "check_small_file",
+                lambda: check_file_size(
+                    create_demo_large_file(temp_dir, "cascade_small.txt", 800), 1000
+                ),
+            ),
+            (
+                "check_large_file",
+                lambda: check_file_size(
+                    create_demo_large_file(temp_dir, "cascade_large.txt", 2000), 1000
+                ),
+            ),
+            (
+                "check_nonexistent",
+                lambda: check_file_size("nonexistent_file.txt", 1000),
+            ),
         ]
 
         for op_name, operation in operations:
@@ -838,6 +1087,7 @@ def demonstrate_error_handling():
     finally:
         # Cleanup demo files
         import shutil
+
         try:
             shutil.rmtree(temp_dir)
             print(f"\n🧹 Demo cleanup completed")
@@ -848,6 +1098,7 @@ def demonstrate_error_handling():
 # =============================================================================
 # MAIN EXECUTION
 # =============================================================================
+
 
 async def main():
     """Main execution function"""
@@ -869,7 +1120,9 @@ async def main():
     demonstrate_error_handling()
 
     print("\n🎉 Error testing complete!")
-    print("This suite demonstrates all major error types and security features in SimpleEnvs.")
+    print(
+        "This suite demonstrates all major error types and security features in SimpleEnvs."
+    )
 
     if not USING_REAL_SIMPLEENVS:
         print("\n💡 To run with real SimpleEnvs functionality:")

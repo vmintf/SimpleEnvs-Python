@@ -1,0 +1,334 @@
+name: ⚡ Performance Issue
+description: Report performance problems or suggest optimizations
+title: "[PERFORMANCE] "
+labels: ["performance", "needs-investigation"]
+assignees:
+  - vmintf
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚡ Performance Issue
+        
+        Thanks for reporting a performance issue! SimpleEnvs aims to be 2-4x faster than python-dotenv.
+        
+        **Before submitting:**
+        - [ ] I've run the built-in benchmark: `python -m simpleenvs.benchmark`
+        - [ ] I've tested with the latest SimpleEnvs version
+        - [ ] I've compared against python-dotenv when relevant
+        - [ ] I've included actual performance measurements
+
+  - type: dropdown
+    id: performance_category
+    attributes:
+      label: 🎯 Performance Category
+      description: What type of performance issue are you experiencing?
+      options:
+        - "🐌 Slow Loading - .env file loading takes too long"
+        - "💾 High Memory Usage - Excessive RAM consumption"
+        - "🔄 Slow Type Conversion - Boolean/integer parsing performance"
+        - "🔍 Slow File Discovery - Auto-search taking too long"
+        - "🔒 Secure Mode Overhead - Memory isolation performance impact"
+        - "🚀 Async Performance - Async operations slower than expected"
+        - "📊 Scalability Issue - Performance degrades with size/complexity"
+        - "🔄 Memory Introspection - gc.get_objects() performance impact"
+        - "📈 Regression - Performance worse than previous version"
+        - "🆚 Comparison - Not faster than python-dotenv as claimed"
+        - "Other Performance Issue"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: loading_mode_perf
+    attributes:
+      label: 🔧 Loading Mode
+      description: Which mode shows the performance issue?
+      options:
+        - "Simple Mode (load_dotenv, SimpleEnvLoader)"
+        - "Secure Mode (load_dotenv_secure, SecureEnvLoader)"
+        - "Async Loading (aload_dotenv, async load)"
+        - "Mixed Usage (both simple and secure)"
+        - "Direct Class Usage"
+        - "All modes affected"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: textarea
+    id: performance_description
+    attributes:
+      label: 📝 Performance Issue Description
+      description: Detailed description of the performance problem
+      placeholder: |
+        Example: "Loading a .env file with 500 variables takes 200ms, which is slower than expected based on the 2-4x performance claims."
+    validations:
+      required: true
+
+  - type: textarea
+    id: performance_measurements
+    attributes:
+      label: 📊 Performance Measurements
+      description: Actual timing/memory measurements
+      render: text
+      placeholder: |
+        **Current Performance:**
+        - SimpleEnvs loading time: 200ms
+        - Memory usage: 50MB
+        - CPU usage: 15%
+        
+        **Expected Performance:**
+        - Based on benchmark claims: ~50ms
+        - Expected memory: <20MB
+        
+        **Comparison with python-dotenv:**
+        - python-dotenv loading time: 180ms (SimpleEnvs should be faster!)
+        - python-dotenv memory: 30MB
+        
+        **Measurement Method:**
+        - Tool used: time.perf_counter() / memory_profiler / custom script
+        - Environment: Python 3.11, Ubuntu 22.04, 16GB RAM
+        - Repeated: 10 times, averaged results
+    validations:
+      required: true
+
+  - type: textarea
+    id: env_file_characteristics
+    attributes:
+      label: 📄 .env File Characteristics
+      description: Details about the .env file(s) causing performance issues
+      placeholder: |
+        **File Size & Complexity:**
+        - File size: 50KB / 500KB / 5MB
+        - Number of variables: 100 / 1000 / 10000
+        - Variable types: mostly strings / mixed types / complex values
+        - Quote usage: minimal / heavy use of quotes
+        - Comments: few / many comment lines
+        
+        **File Structure:**
+        - Line length: typical / very long lines (>1000 chars)
+        - Special characters: minimal / heavy Unicode usage
+        - Encoding: UTF-8 / UTF-16 / other
+        
+        **Example content pattern (remove sensitive data):**
+        ```
+        # Typical variable
+        APP_NAME=MyApplication
+        
+        # Long variable
+        LONG_CONFIG=very_long_value_that_goes_on_and_on...
+        
+        # Complex parsing
+        COMPLEX_BOOL=enabled
+        ```
+
+  - type: textarea
+    id: benchmark_results
+    attributes:
+      label: 🏁 Built-in Benchmark Results
+      description: Results from `python -m simpleenvs.benchmark`
+      render: text
+      placeholder: |
+        **Run this command and paste the full output:**
+        ```bash
+        python -m simpleenvs.benchmark
+        # OR
+        python -m simpleenvs.benchmark --quick
+        ```
+        
+        **Expected output format:**
+        ```
+        SimpleEnvs vs python-dotenv Performance Comparison
+        ==================================================
+        Testing with 100 variables...
+        python-dotenv: 8.04ms
+        SimpleEnvs:    2.17ms  
+        Speedup:       3.7x faster ⚡
+        ```
+        
+        **If benchmark fails or shows unexpected results, include error messages:**
+        [Paste any errors or unexpected benchmark output here]
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction_code
+    attributes:
+      label: 🔬 Performance Reproduction Code
+      description: Code to reproduce the performance issue
+      render: python
+      placeholder: |
+        import time
+        import simpleenvs
+        
+        # Create test .env file
+        with open('perf_test.env', 'w') as f:
+            for i in range(1000):  # Adjust size as needed
+                f.write(f'VAR_{i}=value_{i}\n')
+        
+        # Measure loading performance
+        start_time = time.perf_counter()
+        simpleenvs.load_dotenv('perf_test.env')
+        end_time = time.perf_counter()
+        
+        loading_time = (end_time - start_time) * 1000
+        print(f"Loading time: {loading_time:.2f}ms")
+        
+        # Compare with python-dotenv if available
+        try:
+            from dotenv import load_dotenv as dotenv_load
+            
+            start_time = time.perf_counter()
+            dotenv_load('perf_test.env')
+            end_time = time.perf_counter()
+            
+            dotenv_time = (end_time - start_time) * 1000
+            print(f"python-dotenv time: {dotenv_time:.2f}ms")
+            print(f"Speedup: {dotenv_time / loading_time:.1f}x")
+        except ImportError:
+            print("python-dotenv not available for comparison")
+
+  - type: textarea
+    id: memory_profiling
+    attributes:
+      label: 💾 Memory Usage Analysis (Optional)
+      description: Memory profiling results if relevant
+      render: text
+      placeholder: |
+        **Memory profiling results:**
+        ```bash
+        # Using memory_profiler
+        python -m memory_profiler your_script.py
+        
+        # OR using tracemalloc
+        # Include memory snapshots before/after loading
+        ```
+        
+        **Key memory metrics:**
+        - Peak memory usage: XXX MB
+        - Memory after loading: XXX MB
+        - Memory growth rate: XXX MB per 1000 variables
+        - Memory not released after clearing: XXX MB
+
+  - type: textarea
+    id: environment_info_perf
+    attributes:
+      label: 🖥️ Performance Environment
+      description: System information that might affect performance
+      render: text
+      placeholder: |
+        **System Specifications:**
+        - CPU: Intel i7-12700K / Apple M2 / AMD Ryzen 7 5800X
+        - RAM: 16GB DDR4-3200 / 32GB DDR5-5600
+        - Storage: NVMe SSD / SATA SSD / HDD
+        - OS: Windows 11 / macOS 13 / Ubuntu 22.04
+        
+        **Python Environment:**
+        - Python version: 3.11.2
+        - SimpleEnvs version: 1.1.4
+        - Virtual environment: venv / conda / poetry
+        - Other relevant packages: aiofiles version, etc.
+        
+        **System Load:**
+        - CPU usage during test: 10% / 50% / 90%
+        - Available RAM: 8GB / 16GB / 32GB
+        - Disk I/O load: minimal / moderate / heavy
+        - Running in: Docker / VM / native OS
+      value: |
+        **System Specifications:**
+        - CPU: 
+        - RAM: 
+        - Storage: 
+        - OS: 
+        
+        **Python Environment:**
+        - Python version: 
+        - SimpleEnvs version: 
+        - Virtual environment: 
+        - Other packages: 
+        
+        **System Load:**
+        - CPU usage: 
+        - Available RAM: 
+        - Disk I/O: 
+        - Environment:
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_performance
+    attributes:
+      label: ✅ Expected Performance
+      description: What performance were you expecting?
+      placeholder: |
+        **Based on SimpleEnvs claims:**
+        - 2-4x faster than python-dotenv
+        - Sub-millisecond loading for small files (<100 variables)
+        - Linear scaling with file size
+        - Minimal memory overhead
+        
+        **Your specific expectations:**
+        - Loading time: <50ms for 1000 variables
+        - Memory usage: <10MB for typical usage
+        - Startup overhead: <1ms
+        
+        **Comparison baseline:**
+        - python-dotenv performance: XXXms
+        - Expected SimpleEnvs performance: XXXms
+        - Acceptable performance range: XXXms - XXXms
+
+  - type: checkboxes
+    id: optimization_areas
+    attributes:
+      label: 🎯 Potential Optimization Areas
+      description: Where do you think the performance issue might be?
+      options:
+        - label: File I/O operations (reading .env files)
+        - label: String parsing and processing
+        - label: Type conversion (str → int/bool)
+        - label: Memory allocation and management
+        - label: Regular expression matching
+        - label: Security validation overhead
+        - label: Memory introspection (gc.get_objects)
+        - label: Async/await overhead
+        - label: Import time / startup cost
+        - label: Not sure where the bottleneck is
+
+  - type: dropdown
+    id: performance_impact
+    attributes:
+      label: 🎯 Performance Impact
+      description: How does this affect your application?
+      options:
+        - "🚨 Critical - Blocking production deployment"
+        - "🔥 High - Significantly impacts application startup"
+        - "⚠️ Medium - Noticeable but manageable delay"
+        - "🔧 Low - Minor performance concern"
+        - "📊 Benchmark - Interested in optimization opportunities"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context_perf
+    attributes:
+      label: 📋 Additional Context
+      description: Any other relevant performance information
+      placeholder: |
+        **Workarounds tried:**
+        - Smaller .env files: [result]
+        - Different loading modes: [result]
+        - Caching strategies: [result]
+        
+        **Related observations:**
+        - Performance varies by time of day: yes/no
+        - Consistent across multiple runs: yes/no  
+        - Affects other parts of application: yes/no
+        
+        **Comparison with alternatives:**
+        - Other .env libraries tested: [names and results]
+        - Manual file reading performance: [timing]
+        
+        **Performance requirements:**
+        - Target loading time: <XXXms
+        - Maximum acceptable memory: <XXXMB
+        - Scalability needs: up to XXX variables

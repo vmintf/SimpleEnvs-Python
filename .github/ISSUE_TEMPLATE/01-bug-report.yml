@@ -1,0 +1,188 @@
+name: 🐛 Bug Report
+description: Report a bug in SimpleEnvs
+title: "[BUG] "
+labels: ["bug", "needs-triage"]
+assignees:
+  - vmintf
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐛 Bug Report
+        
+        Thanks for reporting a bug! Please provide detailed information to help us fix it quickly.
+        
+        **Before submitting:**
+        - [ ] I've checked [existing issues](https://github.com/vmintf/SimpleEnvs-Python/issues)
+        - [ ] I'm using the latest version of SimpleEnvs
+        - [ ] I've tried with a minimal example
+
+  - type: dropdown
+    id: bug_category
+    attributes:
+      label: 🔍 Bug Category
+      description: What type of issue are you experiencing?
+      options:
+        - "File Loading (path issues, file not found, permissions)"
+        - "Type Conversion (boolean, integer, string parsing)"
+        - "Security/Memory Isolation (secure mode, os.environ leakage)"
+        - "Performance (slow loading, memory usage)"
+        - "Async/Sync Operations"
+        - "Cross-platform (Windows/macOS/Linux differences)"
+        - "API Compatibility (python-dotenv migration)"
+        - "Documentation/Examples"
+        - "Other"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: loading_mode
+    attributes:
+      label: 🔧 Loading Mode
+      description: Which loading mode were you using?
+      options:
+        - "Simple Mode (load_dotenv, syncs to os.environ)"
+        - "Secure Mode (load_dotenv_secure, memory-isolated)"
+        - "Mixed Mode (both simple and secure)"
+        - "Direct Class Usage (SimpleEnvLoader/SecureEnvLoader)"
+        - "Async Loading (aload_dotenv, load())"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: textarea
+    id: bug_description
+    attributes:
+      label: 📝 Bug Description
+      description: Clear description of what's wrong
+      placeholder: |
+        Example: "When loading a .env file with boolean values, 'enabled' is not recognized as True"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: ✅ Expected Behavior
+      description: What should happen?
+      placeholder: |
+        Example: "simpleenvs.get_bool('FEATURE_ENABLED') should return True when FEATURE_ENABLED=enabled"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: ❌ Actual Behavior
+      description: What actually happens?
+      placeholder: |
+        Example: "simpleenvs.get_bool('FEATURE_ENABLED') returns False instead of True"
+    validations:
+      required: true
+
+  - type: textarea
+    id: env_file_content
+    attributes:
+      label: 📄 .env File Content (if relevant)
+      description: Share the problematic .env content (remove sensitive data!)
+      render: bash
+      placeholder: |
+        # Example .env content
+        APP_NAME=MyApp
+        DEBUG=true
+        FEATURE_ENABLED=enabled
+        PORT=8080
+
+  - type: textarea
+    id: minimal_code
+    attributes:
+      label: 🔬 Minimal Reproduction Code
+      description: Minimal code that reproduces the issue
+      render: python
+      placeholder: |
+        # Minimal code to reproduce the bug
+        from simpleenvs import load_dotenv, get_bool
+        
+        # Create test .env file
+        with open('.env', 'w') as f:
+            f.write('FEATURE_ENABLED=enabled\n')
+        
+        load_dotenv()
+        result = get_bool('FEATURE_ENABLED')
+        print(f"Result: {result}")  # Expected: True, Actual: False
+    validations:
+      required: true
+
+  - type: textarea
+    id: error_output
+    attributes:
+      label: 🚨 Error Output/Traceback
+      description: Full error message or unexpected output
+      render: text
+      placeholder: |
+        Paste the complete error traceback or unexpected output here.
+        
+        If no error but unexpected behavior, describe what you see vs what you expect.
+
+  - type: textarea
+    id: environment_info
+    attributes:
+      label: 🖥️ Environment Information
+      description: Your system environment
+      render: text
+      placeholder: |
+        - Python version: 3.11.2
+        - SimpleEnvs version: 1.1.4  
+        - Operating System: Windows 11 / macOS 13 / Ubuntu 22.04
+        - Shell/Terminal: PowerShell / Terminal / Bash
+        - Virtual Environment: venv / conda / poetry / none
+        - Installation method: pip / poetry / conda
+      value: |
+        - Python version: 
+        - SimpleEnvs version: 
+        - Operating System: 
+        - Shell/Terminal: 
+        - Virtual Environment: 
+        - Installation method:
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 📋 Additional Context
+      description: Any other relevant information
+      placeholder: |
+        - File system details (NTFS, ext4, APFS)
+        - File size or number of variables
+        - Concurrent usage patterns
+        - Integration with other libraries
+        - Performance measurements
+        - Workarounds you've tried
+
+  - type: checkboxes
+    id: verification_steps
+    attributes:
+      label: ✔️ Verification Steps
+      description: Please confirm you've tried these steps
+      options:
+        - label: I can reproduce this bug consistently
+        - label: I've tested with the latest SimpleEnvs version
+        - label: I've checked if this might be a python-dotenv compatibility issue
+        - label: I've removed sensitive information from the example
+        - label: I've searched for similar issues in the repository
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 🎯 Priority/Impact
+      description: How does this affect your project?
+      options:
+        - "🚨 Critical - Blocks production deployment"
+        - "🔥 High - Significant functionality broken"
+        - "⚠️ Medium - Workaround exists but inconvenient"
+        - "🔧 Low - Minor issue or edge case"
+        - "📚 Documentation - Unclear or missing docs"
+    validations:
+      required: true

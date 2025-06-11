@@ -4,14 +4,14 @@ SimpleEnvs vs python-dotenv Performance Benchmark
 Includes Secure API benchmarking with improved dependency management
 """
 
-import os
-import sys
-import time
-import tempfile
-import statistics
 import asyncio
+import os
+import statistics
+import sys
+import tempfile
+import time
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 
 def check_dependencies():
@@ -22,6 +22,7 @@ def check_dependencies():
     # Check python-dotenv
     try:
         import dotenv
+
         DOTENV_AVAILABLE = True
     except ImportError:
         DOTENV_AVAILABLE = False
@@ -30,6 +31,7 @@ def check_dependencies():
     # Check simpleenvs
     try:
         import simpleenvs
+
         SIMPLEENVS_AVAILABLE = True
     except ImportError:
         SIMPLEENVS_AVAILABLE = False
@@ -65,7 +67,9 @@ def check_dependencies():
         print("   Use this if you're working on SimpleEnvs source code")
 
         print("\n💡 What each package does:")
-        print("  • python-dotenv: Comparison baseline (the library we're benchmarking against)")
+        print(
+            "  • python-dotenv: Comparison baseline (the library we're benchmarking against)"
+        )
         print("  • simpleenvs-python: Our high-performance .env loader")
 
         print("\n🔄 After installation, run this benchmark again:")
@@ -84,9 +88,10 @@ if DOTENV_AVAILABLE:
     from dotenv import load_dotenv as dotenv_load
 
 if SIMPLEENVS_AVAILABLE:
-    from simpleenvs import load_dotenv as simpleenvs_load
-    from simpleenvs import load_dotenv_secure, get_secure
     import simpleenvs
+    from simpleenvs import get_secure
+    from simpleenvs import load_dotenv as simpleenvs_load
+    from simpleenvs import load_dotenv_secure
 
     SIMPLEENVS_SECURE_AVAILABLE = True
 else:
@@ -110,7 +115,7 @@ class BenchmarkRunner:
         path = os.path.join(".", filename)
 
         try:
-            with open(path, 'w') as f:
+            with open(path, "w") as f:
                 f.write("# Test .env file\n")
                 f.write("# Generated for benchmarking\n\n")
 
@@ -168,14 +173,28 @@ class BenchmarkRunner:
         end_time = time.perf_counter()
         return end_time - start_time
 
-    def run_benchmark(self, name: str, func, test_file: str, rounds: int = None) -> Dict[str, float]:
+    def run_benchmark(
+        self, name: str, func, test_file: str, rounds: int = None
+    ) -> Dict[str, float]:
         """Run individual benchmark"""
         if rounds is None:
             rounds = self.rounds
 
         times = []
-        prefixes = ['VAR_', 'NUM_', 'BOOL_', 'PATH_', 'DB_', 'API_', 'DEBUG', 'PORT', 'TIMEOUT', 'SECRET_', 'DATABASE_',
-                    'ENCRYPTION_']
+        prefixes = [
+            "VAR_",
+            "NUM_",
+            "BOOL_",
+            "PATH_",
+            "DB_",
+            "API_",
+            "DEBUG",
+            "PORT",
+            "TIMEOUT",
+            "SECRET_",
+            "DATABASE_",
+            "ENCRYPTION_",
+        ]
 
         print(f"🔄 Running {name} benchmark... (rounds: {rounds})")
 
@@ -184,7 +203,7 @@ class BenchmarkRunner:
             self.clear_env_vars(prefixes)
 
             # Also clean SimpleEnvs secure data
-            if 'Secure' in name and SIMPLEENVS_AVAILABLE:
+            if "Secure" in name and SIMPLEENVS_AVAILABLE:
                 simpleenvs.clear()
 
             # Measure execution time
@@ -196,22 +215,36 @@ class BenchmarkRunner:
 
         # Calculate statistics
         return {
-            'mean': statistics.mean(times),
-            'median': statistics.median(times),
-            'min': min(times),
-            'max': max(times),
-            'stdev': statistics.stdev(times) if len(times) > 1 else 0,
-            'times': times
+            "mean": statistics.mean(times),
+            "median": statistics.median(times),
+            "min": min(times),
+            "max": max(times),
+            "stdev": statistics.stdev(times) if len(times) > 1 else 0,
+            "times": times,
         }
 
-    async def run_async_benchmark(self, name: str, func, test_file: str, rounds: int = None) -> Dict[str, float]:
+    async def run_async_benchmark(
+        self, name: str, func, test_file: str, rounds: int = None
+    ) -> Dict[str, float]:
         """Run async benchmark"""
         if rounds is None:
             rounds = self.rounds
 
         times = []
-        prefixes = ['VAR_', 'NUM_', 'BOOL_', 'PATH_', 'DB_', 'API_', 'DEBUG', 'PORT', 'TIMEOUT', 'SECRET_', 'DATABASE_',
-                    'ENCRYPTION_']
+        prefixes = [
+            "VAR_",
+            "NUM_",
+            "BOOL_",
+            "PATH_",
+            "DB_",
+            "API_",
+            "DEBUG",
+            "PORT",
+            "TIMEOUT",
+            "SECRET_",
+            "DATABASE_",
+            "ENCRYPTION_",
+        ]
 
         print(f"🔄 Running {name} benchmark... (rounds: {rounds})")
 
@@ -230,15 +263,17 @@ class BenchmarkRunner:
 
         # Calculate statistics
         return {
-            'mean': statistics.mean(times),
-            'median': statistics.median(times),
-            'min': min(times),
-            'max': max(times),
-            'stdev': statistics.stdev(times) if len(times) > 1 else 0,
-            'times': times
+            "mean": statistics.mean(times),
+            "median": statistics.median(times),
+            "min": min(times),
+            "max": max(times),
+            "stdev": statistics.stdev(times) if len(times) > 1 else 0,
+            "times": times,
         }
 
-    def compare_performance(self, var_count: int, include_secure: bool = False) -> Dict[str, Any]:
+    def compare_performance(
+        self, var_count: int, include_secure: bool = False
+    ) -> Dict[str, Any]:
         """Run performance comparison"""
         print(f"\n📊 Benchmarking with {var_count} variables...")
         if include_secure:
@@ -249,33 +284,27 @@ class BenchmarkRunner:
 
         try:
             results = {
-                'var_count': var_count,
-                'file_size': Path(test_file).stat().st_size
+                "var_count": var_count,
+                "file_size": Path(test_file).stat().st_size,
             }
 
             # python-dotenv benchmark
             if DOTENV_AVAILABLE:
-                results['dotenv'] = self.run_benchmark(
-                    "python-dotenv",
-                    dotenv_load,
-                    test_file
+                results["dotenv"] = self.run_benchmark(
+                    "python-dotenv", dotenv_load, test_file
                 )
 
             # simpleenvs standard benchmark
             if SIMPLEENVS_AVAILABLE:
-                results['simpleenvs'] = self.run_benchmark(
-                    "SimpleEnvs",
-                    simpleenvs_load,
-                    test_file
+                results["simpleenvs"] = self.run_benchmark(
+                    "SimpleEnvs", simpleenvs_load, test_file
                 )
 
             # simpleenvs secure benchmark (optional)
             if include_secure and SIMPLEENVS_SECURE_AVAILABLE:
                 # Synchronous secure benchmark
-                results['simpleenvs_secure'] = self.run_benchmark(
-                    "SimpleEnvs Secure",
-                    load_dotenv_secure,
-                    test_file
+                results["simpleenvs_secure"] = self.run_benchmark(
+                    "SimpleEnvs Secure", load_dotenv_secure, test_file
                 )
 
                 # Asynchronous secure benchmark
@@ -285,11 +314,9 @@ class BenchmarkRunner:
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 try:
-                    results['simpleenvs_async_secure'] = loop.run_until_complete(
+                    results["simpleenvs_async_secure"] = loop.run_until_complete(
                         self.run_async_benchmark(
-                            "SimpleEnvs Async Secure",
-                            async_secure_load,
-                            test_file
+                            "SimpleEnvs Async Secure", async_secure_load, test_file
                         )
                     )
                 finally:
@@ -306,28 +333,31 @@ class BenchmarkRunner:
 
     def print_results(self, results: Dict[str, Any]):
         """Print benchmark results"""
-        var_count = results['var_count']
-        file_size = results['file_size']
+        var_count = results["var_count"]
+        file_size = results["file_size"]
 
         print(f"\n{'=' * 70}")
         print(f"📈 Results: {var_count} variables (file size: {file_size:,} bytes)")
         print(f"{'=' * 70}")
 
         # Basic comparison (dotenv vs simpleenvs)
-        if 'dotenv' in results and 'simpleenvs' in results:
-            dotenv_mean = results['dotenv']['mean']
-            simpleenvs_mean = results['simpleenvs']['mean']
+        if "dotenv" in results and "simpleenvs" in results:
+            dotenv_mean = results["dotenv"]["mean"]
+            simpleenvs_mean = results["simpleenvs"]["mean"]
 
             print(f"🐍 python-dotenv:")
             print(f"   Average: {dotenv_mean * 1000:.3f}ms")
             print(f"   Median: {results['dotenv']['median'] * 1000:.3f}ms")
-            print(f"   Min/Max: {results['dotenv']['min'] * 1000:.3f}ms / {results['dotenv']['max'] * 1000:.3f}ms")
+            print(
+                f"   Min/Max: {results['dotenv']['min'] * 1000:.3f}ms / {results['dotenv']['max'] * 1000:.3f}ms"
+            )
 
             print(f"\n⚡ SimpleEnvs (Standard):")
             print(f"   Average: {simpleenvs_mean * 1000:.3f}ms")
             print(f"   Median: {results['simpleenvs']['median'] * 1000:.3f}ms")
             print(
-                f"   Min/Max: {results['simpleenvs']['min'] * 1000:.3f}ms / {results['simpleenvs']['max'] * 1000:.3f}ms")
+                f"   Min/Max: {results['simpleenvs']['min'] * 1000:.3f}ms / {results['simpleenvs']['max'] * 1000:.3f}ms"
+            )
 
             # Comparison
             ratio = dotenv_mean / simpleenvs_mean
@@ -337,36 +367,40 @@ class BenchmarkRunner:
                 print(f"\n🏆 python-dotenv is {1 / ratio:.2f}x faster!")
 
         # Secure API results
-        if 'simpleenvs_secure' in results:
-            secure_mean = results['simpleenvs_secure']['mean']
+        if "simpleenvs_secure" in results:
+            secure_mean = results["simpleenvs_secure"]["mean"]
             print(f"\n🔒 SimpleEnvs Secure (Sync):")
             print(f"   Average: {secure_mean * 1000:.3f}ms")
             print(f"   Median: {results['simpleenvs_secure']['median'] * 1000:.3f}ms")
 
             # Compare with standard SimpleEnvs
-            if 'simpleenvs' in results:
-                overhead = (secure_mean / results['simpleenvs']['mean'] - 1) * 100
+            if "simpleenvs" in results:
+                overhead = (secure_mean / results["simpleenvs"]["mean"] - 1) * 100
                 print(f"   Security overhead: {overhead:.1f}%")
 
-        if 'simpleenvs_async_secure' in results:
-            async_secure_mean = results['simpleenvs_async_secure']['mean']
+        if "simpleenvs_async_secure" in results:
+            async_secure_mean = results["simpleenvs_async_secure"]["mean"]
             print(f"\n🔒⚡ SimpleEnvs Async Secure:")
             print(f"   Average: {async_secure_mean * 1000:.3f}ms")
-            print(f"   Median: {results['simpleenvs_async_secure']['median'] * 1000:.3f}ms")
+            print(
+                f"   Median: {results['simpleenvs_async_secure']['median'] * 1000:.3f}ms"
+            )
 
             # Compare with sync secure
-            if 'simpleenvs_secure' in results:
-                async_improvement = (results['simpleenvs_secure']['mean'] / async_secure_mean - 1) * 100
+            if "simpleenvs_secure" in results:
+                async_improvement = (
+                    results["simpleenvs_secure"]["mean"] / async_secure_mean - 1
+                ) * 100
                 if async_improvement > 0:
                     print(f"   Async improvement: {async_improvement:.1f}% faster")
                 else:
                     print(f"   Async overhead: {-async_improvement:.1f}%")
 
         # Individual results for partial availability
-        elif 'dotenv' in results:
+        elif "dotenv" in results:
             print(f"🐍 python-dotenv: {results['dotenv']['mean'] * 1000:.3f}ms")
 
-        elif 'simpleenvs' in results:
+        elif "simpleenvs" in results:
             print(f"⚡ SimpleEnvs: {results['simpleenvs']['mean'] * 1000:.3f}ms")
 
     def run_comprehensive_benchmark(self, include_secure: bool = False):
@@ -405,7 +439,9 @@ class BenchmarkRunner:
         # Print summary
         self.print_summary(all_results, include_secure)
 
-    def print_summary(self, all_results: List[Dict[str, Any]], include_secure: bool = False):
+    def print_summary(
+        self, all_results: List[Dict[str, Any]], include_secure: bool = False
+    ):
         """Print overall summary"""
         if not all_results:
             return
@@ -417,42 +453,58 @@ class BenchmarkRunner:
         if include_secure:
             # Summary including Secure API
             print(
-                f"{'Vars':>4} | {'FileSize':>8} | {'dotenv':>8} | {'Simple':>8} | {'Secure':>8} | {'AsyncSec':>8} | {'Ratio':>6}")
+                f"{'Vars':>4} | {'FileSize':>8} | {'dotenv':>8} | {'Simple':>8} | {'Secure':>8} | {'AsyncSec':>8} | {'Ratio':>6}"
+            )
             print("-" * 90)
 
             for result in all_results:
-                var_count = result['var_count']
-                file_size = result['file_size']
+                var_count = result["var_count"]
+                file_size = result["file_size"]
 
-                dotenv_time = result.get('dotenv', {}).get('mean', 0) * 1000
-                simpleenvs_time = result.get('simpleenvs', {}).get('mean', 0) * 1000
-                secure_time = result.get('simpleenvs_secure', {}).get('mean', 0) * 1000
-                async_secure_time = result.get('simpleenvs_async_secure', {}).get('mean', 0) * 1000
+                dotenv_time = result.get("dotenv", {}).get("mean", 0) * 1000
+                simpleenvs_time = result.get("simpleenvs", {}).get("mean", 0) * 1000
+                secure_time = result.get("simpleenvs_secure", {}).get("mean", 0) * 1000
+                async_secure_time = (
+                    result.get("simpleenvs_async_secure", {}).get("mean", 0) * 1000
+                )
 
-                ratio = dotenv_time / simpleenvs_time if dotenv_time > 0 and simpleenvs_time > 0 else 0
+                ratio = (
+                    dotenv_time / simpleenvs_time
+                    if dotenv_time > 0 and simpleenvs_time > 0
+                    else 0
+                )
 
-                print(f"{var_count:>4} | {file_size:>6}B | {dotenv_time:>6.1f}ms | {simpleenvs_time:>6.1f}ms | "
-                      f"{secure_time:>6.1f}ms | {async_secure_time:>6.1f}ms | {ratio:>4.1f}x")
+                print(
+                    f"{var_count:>4} | {file_size:>6}B | {dotenv_time:>6.1f}ms | {simpleenvs_time:>6.1f}ms | "
+                    f"{secure_time:>6.1f}ms | {async_secure_time:>6.1f}ms | {ratio:>4.1f}x"
+                )
         else:
             # Standard summary
-            print(f"{'Variables':>8} | {'File Size':>10} | {'dotenv(ms)':>12} | {'SimpleEnvs(ms)':>15} | {'Ratio':>8}")
+            print(
+                f"{'Variables':>8} | {'File Size':>10} | {'dotenv(ms)':>12} | {'SimpleEnvs(ms)':>15} | {'Ratio':>8}"
+            )
             print("-" * 70)
 
             for result in all_results:
-                var_count = result['var_count']
-                file_size = result['file_size']
+                var_count = result["var_count"]
+                file_size = result["file_size"]
 
-                dotenv_time = result.get('dotenv', {}).get('mean', 0) * 1000
-                simpleenvs_time = result.get('simpleenvs', {}).get('mean', 0) * 1000
+                dotenv_time = result.get("dotenv", {}).get("mean", 0) * 1000
+                simpleenvs_time = result.get("simpleenvs", {}).get("mean", 0) * 1000
 
                 if dotenv_time > 0 and simpleenvs_time > 0:
                     ratio = dotenv_time / simpleenvs_time
                     print(
-                        f"{var_count:>8} | {file_size:>8}B | {dotenv_time:>10.3f} | {simpleenvs_time:>13.3f} | {ratio:>6.2f}x")
+                        f"{var_count:>8} | {file_size:>8}B | {dotenv_time:>10.3f} | {simpleenvs_time:>13.3f} | {ratio:>6.2f}x"
+                    )
                 elif dotenv_time > 0:
-                    print(f"{var_count:>8} | {file_size:>8}B | {dotenv_time:>10.3f} | {'N/A':>13} | {'N/A':>8}")
+                    print(
+                        f"{var_count:>8} | {file_size:>8}B | {dotenv_time:>10.3f} | {'N/A':>13} | {'N/A':>8}"
+                    )
                 elif simpleenvs_time > 0:
-                    print(f"{var_count:>8} | {file_size:>8}B | {'N/A':>10} | {simpleenvs_time:>13.3f} | {'N/A':>8}")
+                    print(
+                        f"{var_count:>8} | {file_size:>8}B | {'N/A':>10} | {simpleenvs_time:>13.3f} | {'N/A':>8}"
+                    )
 
         # Secure API analysis
         if include_secure:
@@ -461,9 +513,9 @@ class BenchmarkRunner:
             count = 0
 
             for result in all_results:
-                if 'simpleenvs' in result and 'simpleenvs_secure' in result:
-                    base_time = result['simpleenvs']['mean']
-                    secure_time = result['simpleenvs_secure']['mean']
+                if "simpleenvs" in result and "simpleenvs_secure" in result:
+                    base_time = result["simpleenvs"]["mean"]
+                    secure_time = result["simpleenvs_secure"]["mean"]
                     overhead = (secure_time / base_time - 1) * 100
                     total_overhead += overhead
                     count += 1
@@ -483,11 +535,25 @@ def main():
     """Main execution function"""
     import argparse
 
-    parser = argparse.ArgumentParser(description="SimpleEnvs vs python-dotenv benchmark")
-    parser.add_argument("--rounds", "-r", type=int, default=10, help="Number of test rounds per benchmark")
-    parser.add_argument("--size", "-s", type=int, help="Test only specific size (number of variables)")
-    parser.add_argument("--quick", "-q", action="store_true", help="Quick test (3 rounds)")
-    parser.add_argument("--secure", action="store_true", help="Include Secure API benchmark")
+    parser = argparse.ArgumentParser(
+        description="SimpleEnvs vs python-dotenv benchmark"
+    )
+    parser.add_argument(
+        "--rounds",
+        "-r",
+        type=int,
+        default=10,
+        help="Number of test rounds per benchmark",
+    )
+    parser.add_argument(
+        "--size", "-s", type=int, help="Test only specific size (number of variables)"
+    )
+    parser.add_argument(
+        "--quick", "-q", action="store_true", help="Quick test (3 rounds)"
+    )
+    parser.add_argument(
+        "--secure", action="store_true", help="Include Secure API benchmark"
+    )
 
     args = parser.parse_args()
 

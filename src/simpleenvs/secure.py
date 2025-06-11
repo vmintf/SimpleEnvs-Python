@@ -144,12 +144,14 @@ class SecureEnvLoader:
         """배치로 전체 내용 보안 검증 - 한 번에 처리"""
         content_lower = content.lower()
 
-        # 🚀 최적화: 한 번의 검색으로 모든 위험 패턴 확인
+        # 🔒 Null byte Verification Adds.
+        if "\x00" in content:
+            raise InvalidInputError("Null byte detected in file content")
+
         for pattern in DANGEROUS_PATTERNS:
             if pattern in content_lower:
                 raise InvalidInputError(f"Dangerous pattern detected: {pattern}")
 
-        # 스크립트 인젝션 패턴도 배치로 확인
         script_patterns = ["<script", "</script>", "javascript:", "vbscript:"]
         for pattern in script_patterns:
             if pattern in content_lower:
@@ -197,7 +199,7 @@ class SecureEnvLoader:
             try:
                 num = int(value)
                 # Validate integer range (64-bit signed)
-                if -(2 ** 63) <= num <= (2 ** 63 - 1):
+                if -(2**63) <= num <= (2**63 - 1):
                     return num
                 else:
                     # Out of range, treat as string
@@ -264,7 +266,7 @@ class SecureEnvLoader:
 
                 # Remove quotes if present
                 if (value.startswith('"') and value.endswith('"')) or (
-                        value.startswith("'") and value.endswith("'")
+                    value.startswith("'") and value.endswith("'")
                 ):
                     value = value[1:-1]
 
