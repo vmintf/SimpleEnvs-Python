@@ -16,7 +16,10 @@ from typing import Any, Dict, List, Optional, Union
 import aiofiles
 
 # Import constants
-from .constants import DANGEROUS_PATTERNS, FALSE_VALUES
+from .constants import (
+    DANGEROUS_PATTERNS,
+    FALSE_VALUES,
+)
 from .constants import MAX_ENTRIES_PER_DIRECTORY as MAX_ENTRIES
 from .constants import (
     MAX_FILE_SIZE,

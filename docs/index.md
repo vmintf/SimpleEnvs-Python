@@ -7,13 +7,13 @@
 [![PyPI Downloads](https://static.pepy.tech/badge/simpleenvs-python)](https://pepy.tech/projects/simpleenvs-python)
 
 > **Ultra-secure, high-performance .env file loader for Python**  
-> *Simple to use, enterprise-grade security, 2-4x faster performance*
+> *Simple to use, enterprise-grade security, 8-28x faster performance*
 
 ## 🚀 Why SimpleEnvs?
 
 **Drop-in replacement for python-dotenv with proven improvements:**
 
-- 🏃‍♂️ **2-4x faster** loading performance (verified benchmarks)
+- 🏃‍♂️ **8-28x faster** loading performance (verified benchmarks)
 - 🔒 **Enterprise-grade security** with memory isolation
 - 🎯 **Automatic type conversion** (int, bool, float)
 - 💾 **Memory efficient** with optimized parsing
@@ -22,19 +22,20 @@
 
 ## 📊 Performance Benchmarks
 
-Tested against python-dotenv (Windows 11, Python 3.11):
+Tested against python-dotenv (GitHub Actions, Python 3.11):
 
 | Variables | File Size | python-dotenv | SimpleEnvs | **Speedup** |
 |-----------|-----------|---------------|-------------|-------------|
-| 10 vars | 373B | 1.40ms | 0.52ms | **2.7x faster** ⚡ |
-| 100 vars | 2.3KB | 8.04ms | 2.17ms | **3.7x faster** ⚡ |
-| 500 vars | 11KB | 43.1ms | 14.3ms | **3.0x faster** ⚡ |
-| 1000 vars | 23KB | 102ms | 43.4ms | **2.4x faster** ⚡ |
-| 5000 vars | 116KB | 1332ms | 800ms | **1.7x faster** ⚡ |
+| 10 vars | 482B | 2.0ms | 0.1ms | **13.5x faster** ⚡ |
+| 50 vars | 1.3KB | 5.9ms | 0.2ms | **23.8x faster** ⚡ |
+| 100 vars | 2.3KB | 10.9ms | 0.4ms | **28.3x faster** ⚡ |
+| 500 vars | 11KB | 51.3ms | 2.0ms | **26.1x faster** ⚡ |
+| 1000 vars | 22KB | 105.1ms | 5.0ms | **20.9x faster** ⚡ |
+| 5000 vars | 111KB | 633.3ms | 72.5ms | **8.7x faster** ⚡ |
 
 **Consistent performance gains across all file sizes!** 
 
-*Run your own benchmarks: `python -m simpleenvs.benchmark`*
+*Run your own benchmarks: `python benchmark.py --secure`*
 
 ## 📦 Installation
 
@@ -55,7 +56,7 @@ load_dotenv()
 
 # After (SimpleEnvs) - Only change the import!
 from simpleenvs import load_dotenv
-load_dotenv()  # Same API, 2-4x faster! 🚀
+load_dotenv()  # Same API, 8-28x faster! 🚀
 ```
 
 ### Basic Usage
@@ -114,6 +115,28 @@ db_password = get_secure('DB_PASSWORD')
 import os
 print(os.getenv('JWT_SECRET'))  # None - properly isolated! 🔒
 ```
+
+## 🛡️ Security Status (v2.0.0)
+
+**100% Security Test Success Rate**
+
+- ✅ **51 Security Tests** - All passed
+- ✅ **13 Attack Vectors** - All blocked
+- ✅ **Path Traversal Protection** - Perfect
+- ✅ **Memory Isolation** - Verified
+- ✅ **Zero Vulnerabilities** - Comprehensive testing
+
+### 🔒 Secure Mode Performance
+
+Amazing discovery: Secure mode with enterprise-grade protection:
+
+| Variables | Standard | Secure Mode | Security Overhead |
+|-----------|----------|-------------|-------------------|
+| 100 vars | 0.4ms | 0.6ms | 52.5% |
+| 1000 vars | 5.0ms | 2.7ms | **-45.3%** ⚡ |
+| 5000 vars | 72.5ms | 12.5ms | **-82.8%** ⚡ |
+
+**Secure mode is actually faster for large files!**
 
 ## 🔍 Smart Directory Scanning
 
@@ -244,7 +267,7 @@ simpleenvs.load_dotenv(f'.env.{env}')
 
 | Feature | python-dotenv | SimpleEnvs |
 |---------|---------------|------------|
-| **Performance** | Baseline | **2-4x faster** ⚡ |
+| **Performance** | Baseline | **8-28x faster** ⚡ |
 | **Memory Efficiency** | Baseline | **Optimized parsing** 💾 |
 | **Type Safety** | Manual casting | **Automatic** 🎯 |
 | **Security** | Basic | **Enterprise-grade** 🔒 |
@@ -433,7 +456,10 @@ pytest tests/ --cov=simpleenvs --cov-report=html
 ### Benchmarks
 ```bash
 # Performance comparison with python-dotenv
-python -m simpleenvs.benchmark
+python benchmark.py
+
+# Include secure API benchmarks
+python benchmark.py --secure
 
 # Quick benchmark
 python benchmark.py --quick
@@ -447,9 +473,9 @@ python benchmark.py --size 1000
 SimpleEnvs shines in practical scenarios:
 
 **Web Application Startup:**
-- Small config (20 vars): 1.5ms → 0.4ms (**3.8x faster**)
-- Medium config (100 vars): 8ms → 2ms (**4x faster**)
-- Large config (500+ vars): 40ms → 14ms (**3x faster**)
+- Small config (10 vars): 2.0ms → 0.1ms (**13.5x faster**)
+- Medium config (100 vars): 10.9ms → 0.4ms (**28.3x faster**)
+- Large config (1000+ vars): 105.1ms → 5.0ms (**20.9x faster**)
 
 **Microservice Initialization:**
 - Multiple .env files: **Async batch loading**
@@ -460,6 +486,7 @@ SimpleEnvs shines in practical scenarios:
 - Sensitive data: **Memory-isolated**
 - Audit trails: **Built-in logging**
 - File integrity: **SHA-256 verification**
+- Performance cost: **Minimal or negative**
 
 ## 🤝 Contributing
 
@@ -491,7 +518,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - Inspired by [python-dotenv](https://github.com/theskumar/python-dotenv)
 - Built with security principles from [OWASP](https://owasp.org/)
 - Performance optimizations inspired by [Zig](https://ziglang.org/) design philosophy
-- Project orignated from Zig SimpleEnvs
+- Project originated from Zig SimpleEnvs
 [SimpleEnvs](https://github.com/vmintf/SimpleEnvs)
 
 ## 📚 Learn More

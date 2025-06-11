@@ -3,7 +3,7 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ main, dev, dev/ongoing-improvement ]
   pull_request:
     branches: [ main ]
 

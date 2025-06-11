@@ -26,8 +26,7 @@ from typing import Any, Dict, List, Optional, Union
 from .constants import LIBRARY_NAME, VERSION, get_environment_type
 from .exceptions import *
 from .manager import SecureLoaderManager
-from .secure import SecureEnvLoader
-from .secure import load_secure
+from .secure import SecureEnvLoader, load_secure
 
 # Import all classes and exceptions
 from .simple import SimpleEnvLoader, load_env, load_env_sync
