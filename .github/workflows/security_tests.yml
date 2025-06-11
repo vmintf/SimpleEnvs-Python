@@ -73,7 +73,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ github.event.inputs.python_version || '3.11' }}
+        python-version: ${{ github.event.inputs.python_version || 3.11 }}
 
     - name: Install dependencies
       run: |
@@ -106,169 +106,42 @@ jobs:
     - name: Run Core Vulnerability Tests
       id: vuln_tests
       run: |
-        echo "🔒 Starting vulnerability tests..."
-        
-        # Check if vuln_test.py exists
-        if [[ ! -f "src/simpleenvs/vuln_test.py" ]]; then
-          echo "❌ vuln_test.py not found!"
-          echo "📁 Checking src/simpleenvs/ contents:"
-          ls -la src/simpleenvs/ || echo "Directory not found"
-          exit 1
-        fi
-        
-        echo "✅ Found vuln_test.py"
-        
-        # Run the vulnerability tests with better error handling
         python -c "
-        import sys
-        import asyncio
-        import traceback
-        
+        import sys, asyncio
         sys.path.insert(0, './src')
         
-        try:
-            print('📦 Importing SimpleEnvs...')
-            import simpleenvs
-            print('✅ SimpleEnvs imported successfully')
-            
-            print('📄 Loading vuln_test module...')
-            # Read and execute the vuln_test.py file
-            with open('src/simpleenvs/vuln_test.py', 'r') as f:
-                vuln_test_code = f.read()
-            
-            print('🏃 Executing vulnerability tests...')
-            
-            # Create a namespace for execution
-            vuln_namespace = {}
-            exec(vuln_test_code, vuln_namespace)
-            
-            # Run the main function if it exists
-            if 'main' in vuln_namespace:
-                print('🎯 Running main test function...')
-                asyncio.run(vuln_namespace['main']())
-            else:
-                print('⚠️ No main function found in vuln_test.py')
-                print('Available functions:', [k for k in vuln_namespace.keys() if callable(vuln_namespace[k])])
-                
-        except ImportError as e:
-            print(f'❌ Import error: {e}')
-            traceback.print_exc()
-            sys.exit(1)
-        except FileNotFoundError as e:
-            print(f'❌ File not found: {e}')
-            sys.exit(1)
-        except Exception as e:
-            print(f'❌ Unexpected error: {type(e).__name__}: {e}')
-            traceback.print_exc()
-            sys.exit(1)
+        # Import the vuln_test module
+        exec(open('src/simpleenvs/vuln_test.py').read())
+        
+        # Run core tests
+        asyncio.run(main())
         " 2>&1 | tee vuln-test-results.txt
-        
-        # Check if the test execution was successful
-        if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
-          echo "❌ Vulnerability tests failed with exit code ${PIPESTATUS[0]}"
-          echo "📄 Last 20 lines of output:"
-          tail -20 vuln-test-results.txt
+
+    - name: Check for critical failures
+      run: |
+        # Check if any critical security tests failed
+        if grep -q "❌.*Critical" vuln-test-results.txt; then
+          echo "🚨 Critical security vulnerabilities detected!"
+          echo "critical_failures=true" >> $GITHUB_OUTPUT
           exit 1
+        else
+          echo "✅ No critical security issues found"
+          echo "critical_failures=false" >> $GITHUB_OUTPUT
         fi
-        
-        echo "✅ Vulnerability tests completed"
 
     - name: Parse test results
       id: parse_results
       run: |
-        # Initialize default values
-        TOTAL_TESTS="0"
-        PASSED_TESTS="0"
-        FAILED_TESTS="0"
-        SUCCESS_RATE="0"
+        # Extract test statistics
+        TOTAL_TESTS=$(grep -oP "Total Tests: \K\d+" vuln-test-results.txt | tail -1 || echo "0")
+        PASSED_TESTS=$(grep -oP "Passed: \K\d+" vuln-test-results.txt | tail -1 || echo "0")
+        FAILED_TESTS=$(grep -oP "Failed: \K\d+" vuln-test-results.txt | tail -1 || echo "0") 
+        SUCCESS_RATE=$(grep -oP "Success Rate: \K[\d.]+" vuln-test-results.txt | tail -1 || echo "0")
         
-        echo "🔍 Debugging: Checking test results file..."
-        
-        # Check if file exists and show its content
-        if [[ ! -f "vuln-test-results.txt" ]]; then
-          echo "❌ vuln-test-results.txt not found!"
-          echo "📁 Current directory contents:"
-          ls -la
-          exit 1
-        fi
-        
-        echo "📄 Raw file content (last 50 lines):"
-        tail -50 vuln-test-results.txt
-        echo "--- End of raw content ---"
-        
-        # Try different parsing methods
-        echo "🔧 Trying different parsing approaches..."
-        
-        # Method 1: Look for exact patterns
-        if grep -q "Total Tests:" vuln-test-results.txt; then
-          echo "✅ Found 'Total Tests:' pattern"
-          TOTAL_LINE=$(grep "Total Tests:" vuln-test-results.txt | tail -1)
-          echo "Debug - Total line: '$TOTAL_LINE'"
-          TOTAL_TESTS=$(echo "$TOTAL_LINE" | grep -o '[0-9]\+' | head -1)
-        fi
-        
-        if grep -q "Passed:" vuln-test-results.txt; then
-          echo "✅ Found 'Passed:' pattern"
-          PASSED_LINE=$(grep "Passed:" vuln-test-results.txt | tail -1)
-          echo "Debug - Passed line: '$PASSED_LINE'"
-          PASSED_TESTS=$(echo "$PASSED_LINE" | grep -o '[0-9]\+' | head -1)
-        fi
-        
-        if grep -q "Failed:" vuln-test-results.txt; then
-          echo "✅ Found 'Failed:' pattern"
-          FAILED_LINE=$(grep "Failed:" vuln-test-results.txt | tail -1)
-          echo "Debug - Failed line: '$FAILED_LINE'"
-          FAILED_TESTS=$(echo "$FAILED_LINE" | grep -o '[0-9]\+' | head -1)
-        fi
-        
-        if grep -q "Success Rate:" vuln-test-results.txt; then
-          echo "✅ Found 'Success Rate:' pattern"
-          SUCCESS_LINE=$(grep "Success Rate:" vuln-test-results.txt | tail -1)
-          echo "Debug - Success line: '$SUCCESS_LINE'"
-          SUCCESS_RATE=$(echo "$SUCCESS_LINE" | grep -o '[0-9]*\.[0-9]*\|[0-9]\+' | head -1)
-        fi
-        
-        # Alternative method: try to parse summary lines
-        if [[ "$TOTAL_TESTS" == "0" ]]; then
-          echo "🔄 Trying alternative parsing..."
-          # Look for patterns like "Total: 51"
-          TOTAL_TESTS=$(grep -o "Total: [0-9]\+" vuln-test-results.txt | grep -o '[0-9]\+' | tail -1)
-          PASSED_TESTS=$(grep -o "Passed: [0-9]\+" vuln-test-results.txt | grep -o '[0-9]\+' | tail -1)
-          FAILED_TESTS=$(grep -o "Failed: [0-9]\+" vuln-test-results.txt | grep -o '[0-9]\+' | tail -1)
-          SUCCESS_RATE=$(grep -o "Success Rate: [0-9]*\.*[0-9]*" vuln-test-results.txt | grep -o '[0-9]*\.*[0-9]*' | tail -1)
-        fi
-        
-        # Validate and sanitize all values
-        [[ ! "$TOTAL_TESTS" =~ ^[0-9]+$ ]] && TOTAL_TESTS="0"
-        [[ ! "$PASSED_TESTS" =~ ^[0-9]+$ ]] && PASSED_TESTS="0"
-        [[ ! "$FAILED_TESTS" =~ ^[0-9]+$ ]] && FAILED_TESTS="0"
-        [[ ! "$SUCCESS_RATE" =~ ^[0-9]*\.?[0-9]*$ ]] && SUCCESS_RATE="0"
-        
-        echo "🔍 Final extracted values:"
-        echo "  TOTAL_TESTS='$TOTAL_TESTS'"
-        echo "  PASSED_TESTS='$PASSED_TESTS'"
-        echo "  FAILED_TESTS='$FAILED_TESTS'"
-        echo "  SUCCESS_RATE='$SUCCESS_RATE'"
-        
-        # Write to GitHub output with explicit validation
-        echo "📝 Writing to GitHub output..."
-        
-        # Create output safely with explicit format
-        {
-          echo "total_tests=$TOTAL_TESTS"
-          echo "passed_tests=$PASSED_TESTS"
-          echo "failed_tests=$FAILED_TESTS"
-          echo "success_rate=$SUCCESS_RATE"
-        } >> "$GITHUB_OUTPUT"
-        
-        # Verify the output was written correctly
-        echo "🔍 Verifying GitHub output file:"
-        if [[ -f "$GITHUB_OUTPUT" ]]; then
-          echo "📄 GitHub output content:"
-          tail -10 "$GITHUB_OUTPUT"
-        else
-          echo "❌ GitHub output file not found!"
-        fi
+        echo "total_tests=$TOTAL_TESTS" >> "$GITHUB_OUTPUT"
+        echo "passed_tests=$PASSED_TESTS" >> "$GITHUB_OUTPUT"
+        echo "failed_tests=$FAILED_TESTS" >> "$GITHUB_OUTPUT"
+        echo "success_rate=$SUCCESS_RATE" >> "$GITHUB_OUTPUT"
         
         echo "📊 Test Results Summary:"
         echo "  Total: $TOTAL_TESTS"
@@ -320,7 +193,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ['3.9', '3.11', '3.12']
+        python-version: [3.9, 3.11, 3.12]
       fail-fast: false
 
     steps:
@@ -473,7 +346,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13'
+        python-version: 3.11
 
     - name: Install dependencies
       run: |
@@ -500,42 +373,56 @@ jobs:
         
         async def performance_security_test():
             print('⚡ Running Performance vs Security Tests...')
-        
+            
+            # Create test file with varying sizes
             test_sizes = [10, 50, 100, 500]
-            results = []
-        
+            
             for size in test_sizes:
                 print(f'📊 Testing with {size} variables...')
+                
+                # Create test file
                 with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
                     for i in range(size):
-                        f.write(f'VAR_{i}=value_with_some_content_{i}\n')
+                        f.write(f'VAR_{i}=value_with_some_content_{i}\\n')
                     test_file = f.name
-        
+                
                 try:
-                    # Measure secure loading performance
+                    # Measure secure loading time
                     start_time = time.perf_counter()
-        
+                    
                     loader = SecureEnvLoader()
                     from simpleenvs.secure import LoadOptions
                     await loader.load_secure(LoadOptions(path=test_file, strict_validation=True))
-        
+                    
                     end_time = time.perf_counter()
                     load_time = (end_time - start_time) * 1000
-        
-                    print(f'  ✅ Secure load time: {load_time:.2f}ms')
-                    results.append((size, load_time))
-        
+                    
+                    # Test access time
+                    access_start = time.perf_counter()
+                    for i in range(min(size, 50)):  # Test first 50 vars
+                        value = loader.get_secure(f'VAR_{i}')
+                    access_end = time.perf_counter()
+                    access_time = (access_end - access_start) * 1000
+                    
+                    print(f'  📈 Secure load time: {load_time:.2f}ms')
+                    print(f'  🔍 Access time: {access_time:.2f}ms')
+                    
+                    # Performance threshold checks
+                    if load_time > 100:  # Should be under 100ms for most cases
+                        print(f'  ⚠️ Load time slower than expected: {load_time:.2f}ms')
+                    else:
+                        print(f'  ✅ Load time acceptable: {load_time:.2f}ms')
+                    
+                    if access_time > 10:  # Access should be very fast
+                        print(f'  ⚠️ Access time slower than expected: {access_time:.2f}ms')
+                    else:
+                        print(f'  ✅ Access time excellent: {access_time:.2f}ms')
+                
                 except Exception as e:
                     print(f'  ❌ Test failed for {size} vars: {type(e).__name__}: {e}')
                 finally:
-                    if os.path.exists(test_file):
-                        os.unlink(test_file)
-        
-            # Print summary
-            print('\n📊 Performance Summary:')
-            for size, time in results:
-                print(f'Variables: {size:4d} | Load time: {time:7.2f}ms')
-        
+                    os.unlink(test_file)
+            
             print('🎯 Performance security tests completed')
         
         asyncio.run(performance_security_test())

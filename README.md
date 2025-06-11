@@ -1,40 +1,23 @@
 # SimpleEnvs
 
-
 ![PyPI - Version](https://img.shields.io/pypi/v/simpleenvs-python?label=PyPI%20Package)
 [![Python](https://img.shields.io/pypi/pyversions/simpleenvs-python.svg)](https://pypi.org/project/simpleenvs-python/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PyPI Downloads](https://static.pepy.tech/badge/simpleenvs-python)](https://pepy.tech/projects/simpleenvs-python)
+[![CI Pipeline](https://github.com/vmintf/SimpleEnvs-Python/actions/workflows/ci.yml/badge.svg)](https://github.com/vmintf/SimpleEnvs-Python/actions/workflows/ci.yml)
+[![Security Vulnerability Tests](https://github.com/vmintf/SimpleEnvs-Python/actions/workflows/security_tests.yml/badge.svg)](https://github.com/vmintf/SimpleEnvs-Python/actions/workflows/security_tests.yml)
 
 > **Ultra-secure, high-performance .env file loader for Python**  
-> *Simple to use, enterprise-grade security, 2-4x faster performance*
+> *Drop-in replacement for python-dotenv with enterprise security and 2-40x performance*
 
 ## 🚀 Why SimpleEnvs?
 
-**Drop-in replacement for python-dotenv with proven improvements:**
-
-- 🏃‍♂️ **2-4x faster** loading performance (verified benchmarks)
+- 🏃‍♂️ **2-40x faster** than python-dotenv (verified benchmarks)
 - 🔒 **Enterprise-grade security** with memory isolation
 - 🎯 **Automatic type conversion** (int, bool, float)
-- 💾 **Memory efficient** with optimized parsing
 - ⚡ **Zero configuration** - works out of the box
 - 🔄 **100% python-dotenv compatible** API
-
-## 📊 Performance Benchmarks
-
-Tested against python-dotenv (Windows 11, Python 3.11):
-
-| Variables | File Size | python-dotenv | SimpleEnvs | **Speedup** |
-|-----------|-----------|---------------|-------------|-------------|
-| 10 vars | 373B | 1.40ms | 0.52ms | **2.7x faster** ⚡ |
-| 100 vars | 2.3KB | 8.04ms | 2.17ms | **3.7x faster** ⚡ |
-| 500 vars | 11KB | 43.1ms | 14.3ms | **3.0x faster** ⚡ |
-| 1000 vars | 23KB | 102ms | 43.4ms | **2.4x faster** ⚡ |
-| 5000 vars | 116KB | 1332ms | 800ms | **1.7x faster** ⚡ |
-
-**Consistent performance gains across all file sizes!** 
-
-*Run your own benchmarks: `python -m simpleenvs.benchmark`*
+- 🔍 **Smart directory scanning** - finds .env files automatically
 
 ## 📦 Installation
 
@@ -53,7 +36,7 @@ load_dotenv()
 
 # After (SimpleEnvs) - Only change the import!
 from simpleenvs import load_dotenv
-load_dotenv()  # Same API, 2-4x faster! 🚀
+load_dotenv()  # Same API, up to 40x faster! 🚀
 ```
 
 ### Basic Usage
@@ -86,6 +69,31 @@ debug = simpleenvs.get_bool('DEBUG', False)             # bool
 port = simpleenvs.get_int('PORT', 8080)                 # int
 ```
 
+## 📊 Performance
+[![Performance Benchmark](https://github.com/vmintf/SimpleEnvs-Python/actions/workflows/benchmark.yml/badge.svg)](https://github.com/vmintf/SimpleEnvs-Python/actions/workflows/benchmark.yml)
+
+**Latest GitHub Actions benchmark results:**
+
+| Variables | File Size | python-dotenv | SimpleEnvs Standard | **SimpleEnvs Secure** | **Speedup** |
+|-----------|-----------|---------------|---------------------|------------------------|-------------|
+| 10 vars | 482B | 2.0ms | 0.1ms | **0.4ms** | **13.5x faster** ⚡ |
+| 50 vars | 1.3KB | 5.9ms | 0.2ms | **0.5ms** | **23.8x faster** ⚡ |
+| 100 vars | 2.4KB | 10.9ms | 0.4ms | **0.6ms** | **28.3x faster** ⚡ |
+| 500 vars | 11KB | 51.3ms | 2.0ms | **1.7ms** | **26.1x faster** ⚡ |
+| 1000 vars | 22KB | 105.1ms | 5.0ms | **2.7ms** | **20.9x faster** ⚡ |
+| 5000 vars | 111KB | 633.3ms | 72.5ms | **12.5ms** | **8.7x faster** 🚀 |
+
+**Key discovery**: Secure mode (with enterprise security) can be **faster** than standard mode on larger files!
+
+**Test yourself:**
+```bash
+# Run the same benchmark as our CI
+python -m simpleenvs.benchmark --quick
+
+# Include secure mode testing
+python -m simpleenvs.benchmark --secure
+```
+
 ## 🔒 Security Features
 
 ### Simple Mode (Default)
@@ -97,6 +105,8 @@ load_dotenv()  # Variables stored in os.environ
 ```
 
 ### Secure Mode (Enterprise)
+[![Security Vulnerability Tests](https://github.com/vmintf/SimpleEnvs-Python/actions/workflows/security_tests.yml/badge.svg)](https://github.com/vmintf/SimpleEnvs-Python/actions/workflows/security_tests.yml)
+
 Memory-isolated environment variables that never touch `os.environ`:
 
 ```python
@@ -113,9 +123,36 @@ import os
 print(os.getenv('JWT_SECRET'))  # None - properly isolated! 🔒
 ```
 
+### 🛡️ Security Test Matrix
+
+| Attack Vector | Tests | Status | Protection Level |
+|---------------|-------|---------|------------------|
+| **Path Traversal** | 8/8 ✅ | `../../../etc/passwd` | 🔴 **BLOCKED** |
+| **Script Injection** | 7/7 ✅ | `<script>alert('xss')` | 🔴 **BLOCKED** |
+| **Command Injection** | 7/7 ✅ | `$(rm -rf /)` | 🔴 **BLOCKED** |
+| **File Size Attacks** | 4/4 ✅ | 15MB+ malicious files | 🔴 **BLOCKED** |
+| **Memory Security** | 3/3 ✅ | Isolation verification | 🟢 **SECURED** |
+| **Type Safety** | 5/5 ✅ | Invalid conversions | 🟡 **HANDLED** |
+| **Edge Cases** | 17/17 ✅ | Unicode, encoding, etc. | 🟢 **ROBUST** |
+
+### Security Testing
+
+```bash
+# Run comprehensive security tests
+python -m simpleenvs.vuln_test
+
+# Sample threats automatically blocked:
+# ❌ ../../../etc/passwd           # Path traversal
+# ❌ <script>alert('xss')</script> # Script injection  
+# ❌ $(rm -rf /)                   # Command injection
+# ❌ 15MB+ malicious files         # DoS attacks
+# ✅ Memory isolation verified     # Enterprise security
+# 📊 Total: 51/51 tests passed (100% success rate)
+```
+
 ## 🔍 Smart Directory Scanning
 
-**Unlike python-dotenv, SimpleEnvs automatically finds your .env files!**
+**Unlike python-dotenv, SimpleEnvs automatically finds your .env files:**
 
 ```bash
 # Your project structure
@@ -124,56 +161,21 @@ my-project/
 ├── config/
 │   └── .env                 # ✅ Found automatically!
 ├── environments/
-│   ├── .env.development     # ✅ Found automatically!
 │   └── .env.production      # ✅ Found automatically!
 └── docker/
     └── .env.docker          # ✅ Found automatically!
 ```
 
 ```python
-# python-dotenv (manual paths 😤)
-from dotenv import load_dotenv
-load_dotenv('config/.env')                    # Must specify each path
-load_dotenv('environments/.env.development')  # Must specify each path
-load_dotenv('docker/.env.docker')             # Must specify each path
-
-# SimpleEnvs (auto-discovery 🚀)
+# SimpleEnvs (auto-discovery)
 from simpleenvs import load_dotenv
 load_dotenv()  # Finds the first .env file automatically!
-```
 
-### Smart Search Priority
-
-SimpleEnvs searches in this order:
-1. `.env` (current directory)
-2. `.env.local` 
-3. `.env.development`
-4. `.env.production`
-5. `.env.staging`
-6. `config/.env` (subdirectories)
-7. `environments/.env.*`
-
-```python
-# 🤖 Auto-discovery (Zero Config)
-load_dotenv()                         # Finds first .env automatically
-
-# 🎯 Manual paths (Precise Control)
+# Manual control when needed
 load_dotenv('.env.production')         # Specific file
 load_dotenv('config/database.env')     # Custom path
-load_dotenv('/absolute/path/.env')     # Absolute path
-
-# 🔧 Advanced control
-simpleenvs.load(max_depth=3)          # Search 3 levels deep
-simpleenvs.load(max_depth=1)          # Current directory only
-simpleenvs.load('custom.env', max_depth=0)  # Exact file, no search
+simpleenvs.load(max_depth=3)          # Search deeper
 ```
-
-**Perfect for:**
-- 🐳 **Docker projects** with config folders
-- 🏗️ **Monorepos** with nested services  
-- 📁 **Organized projects** with config directories
-- 🔧 **CI/CD pipelines** with environment-specific configs
-- 🎯 **Custom setups** with precise file control
 
 ## 🎯 Advanced Features
 
@@ -186,7 +188,7 @@ import simpleenvs
 await simpleenvs.load('.env')
 await simpleenvs.load_secure('.env')
 
-# Or async one-liner
+# Or one-liner
 from simpleenvs import aload_dotenv
 await aload_dotenv()
 ```
@@ -201,7 +203,7 @@ app = FastAPI()
 
 @app.on_event("startup")
 async def startup():
-    # Non-sensitive config
+    # Public config
     await simpleenvs.load('config.env')
     
     # Sensitive secrets (memory-isolated)
@@ -214,12 +216,6 @@ def get_config():
         "debug": simpleenvs.get_bool("DEBUG"),
         "port": simpleenvs.get_int("PORT", 8000)
     }
-
-@app.get("/auth")  
-def authenticate():
-    # Secrets not in os.environ!
-    jwt_secret = simpleenvs.get_secure("JWT_SECRET")
-    return {"authenticated": jwt_secret is not None}
 ```
 
 ### Environment-Specific Loading
@@ -227,53 +223,25 @@ def authenticate():
 ```python
 import simpleenvs
 
-# Development
-simpleenvs.load_dotenv('.env.development')
-
-# Production with security
-simpleenvs.load_dotenv_secure('.env.production')
-
 # Auto-detect environment
 env = os.getenv('ENVIRONMENT', 'development')
 simpleenvs.load_dotenv(f'.env.{env}')
+
+# Production with security
+simpleenvs.load_dotenv_secure('.env.production')
 ```
 
 ## 🆚 SimpleEnvs vs python-dotenv
 
 | Feature | python-dotenv | SimpleEnvs |
 |---------|---------------|------------|
-| **Performance** | Baseline | **2-4x faster** ⚡ |
-| **Memory Efficiency** | Baseline | **Optimized parsing** 💾 |
+| **Performance** | Baseline | **2-40x faster** ⚡ |
 | **Type Safety** | Manual casting | **Automatic** 🎯 |
 | **Security** | Basic | **Enterprise-grade** 🔒 |
 | **Memory Isolation** | ❌ | **✅ Secure mode** |
 | **Async Support** | ❌ | **✅ Full support** |
 | **Auto-discovery** | ❌ | **✅ Smart scanning** |
 | **API Compatibility** | ✅ | **✅ Drop-in replacement** |
-
-### Type Conversion Differences
-
-```python
-# .env file
-DEBUG=true
-PORT=8080
-RATE=3.14
-
-# python-dotenv (all strings)
-os.getenv('DEBUG')  # "true"
-os.getenv('PORT')   # "8080"  
-os.getenv('RATE')   # "3.14"
-
-# SimpleEnvs (smart conversion)
-os.getenv('DEBUG')  # "True" (converted from bool)
-os.getenv('PORT')   # "8080" (stays string)
-os.getenv('RATE')   # "3.14" (stays string)
-
-# Type-safe access (recommended)
-simpleenvs.get_bool('DEBUG')  # True (actual bool)
-simpleenvs.get_int('PORT')    # 8080 (actual int)
-simpleenvs.get_float('RATE')  # 3.14 (actual float)
-```
 
 ## 🛠️ API Reference
 
@@ -325,27 +293,49 @@ get_all_keys()                   # All loaded keys
 clear()                          # Clear all loaded data
 ```
 
-### Classes (Advanced)
+## 🧪 Testing
 
-```python
-from simpleenvs import SimpleEnvLoader, SecureEnvLoader
+### Run Tests
+```bash
+# Install with test dependencies
+pip install simpleenvs[test]
 
-# Simple loader
-loader = SimpleEnvLoader()
-await loader.load('.env')
-value = loader.get('KEY')
+# Run full test suite  
+pytest tests/ -v
 
-# Secure loader  
-secure = SecureEnvLoader()
-await secure.load_secure()
-value = secure.get_secure('KEY')
+# Run with coverage
+pytest tests/ --cov=simpleenvs --cov-report=html
+```
+
+### Benchmarks
+```bash
+# Performance comparison with python-dotenv
+python -m simpleenvs.benchmark
+
+# Quick test (3 rounds)
+python -m simpleenvs.benchmark --quick
+
+# Include secure mode testing  
+python -m simpleenvs.benchmark --secure
+
+# More rounds for accuracy
+python -m simpleenvs.benchmark --rounds 10
+```
+
+### Security Testing
+```bash
+# Comprehensive security tests
+python -m simpleenvs.vuln_test
+
+# Tests path traversal, injection attacks, memory isolation, etc.
+# 51 security tests covering enterprise threat scenarios
 ```
 
 ## 🏗️ Use Cases
 
 ### Development
 ```python
-# Quick setup for development
+# Quick setup
 from simpleenvs import load_dotenv
 load_dotenv()  # Fast, simple, effective
 ```
@@ -373,92 +363,6 @@ logs = loader.get_access_log()
 integrity_ok = loader.verify_file_integrity('.env')
 ```
 
-### Microservices
-```python
-# Environment-aware loading
-import os
-from simpleenvs import load_dotenv_secure
-
-env = os.getenv('ENVIRONMENT', 'development')
-load_dotenv_secure(f'.env.{env}')
-
-# Service configuration
-service_name = simpleenvs.get_secure('SERVICE_NAME')
-database_url = simpleenvs.get_secure('DATABASE_URL')
-```
-
-## 🔧 Configuration
-
-### Environment Detection
-
-SimpleEnvs automatically detects your environment:
-
-```python
-# Automatic environment-specific settings
-ENVIRONMENT=production    # Strict validation, minimal logging
-ENVIRONMENT=development   # Relaxed validation, detailed errors  
-ENVIRONMENT=testing       # Strict validation, detailed errors
-```
-
-### Custom Configuration
-
-```python
-from simpleenvs.secure import LoadOptions
-
-# Custom secure loading
-options = LoadOptions(
-    path='.env.production',
-    max_depth=1,
-    strict_validation=True
-)
-await simpleenvs.load_secure(options)
-```
-
-## 🧪 Testing
-
-### Run Tests
-```bash
-# Install with test dependencies
-pip install simpleenvs[test]
-
-# Run full test suite  
-pytest tests/ -v
-
-# Run with coverage
-pytest tests/ --cov=simpleenvs --cov-report=html
-```
-
-### Benchmarks
-```bash
-# Performance comparison with python-dotenv
-python -m simpleenvs.benchmark
-
-# Quick benchmark
-python benchmark.py --quick
-
-# Specific size test
-python benchmark.py --size 1000
-```
-
-## 🚀 Real-World Performance
-
-SimpleEnvs shines in practical scenarios:
-
-**Web Application Startup:**
-- Small config (20 vars): 1.5ms → 0.4ms (**3.8x faster**)
-- Medium config (100 vars): 8ms → 2ms (**4x faster**)
-- Large config (500+ vars): 40ms → 14ms (**3x faster**)
-
-**Microservice Initialization:**
-- Multiple .env files: **Async batch loading**
-- Memory footprint: **Optimized parsing**
-- Cold start time: **Consistently faster**
-
-**Enterprise Security:**
-- Sensitive data: **Memory-isolated**
-- Audit trails: **Built-in logging**
-- File integrity: **SHA-256 verification**
-
 ## 🤝 Contributing
 
 We welcome contributions! Please see [CONTRIBUTING.md](Contributing.md) for guidelines.
@@ -466,8 +370,8 @@ We welcome contributions! Please see [CONTRIBUTING.md](Contributing.md) for guid
 ### Development Setup
 ```bash
 # Clone repository
-git clone https://github.com/vmintf/SimpleEnvs-Python/simpleenvs.git
-cd simpleenvs
+git clone https://github.com/vmintf/SimpleEnvs-Python.git
+cd SimpleEnvs-Python
 
 # Install in development mode
 pip install -e ".[dev]"
@@ -489,14 +393,13 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - Inspired by [python-dotenv](https://github.com/theskumar/python-dotenv)
 - Built with security principles from [OWASP](https://owasp.org/)
 - Performance optimizations inspired by [Zig](https://ziglang.org/) design philosophy
-- Project orignated from Zig SimpleEnvs
-[SimpleEnvs](https://github.com/vmintf/SimpleEnvs)
+- Project originated from Zig [SimpleEnvs](https://github.com/vmintf/SimpleEnvs)
 
 ## 📚 Learn More
 
 - 📖 [Full Documentation](https://vmintf.github.io/SimpleEnvs-Python)
-- 🐛 [Issue Tracker](https://github.com/vmintf/SimpleEnvs-Python/simpleenvs/issues)
-- 💬 [Discussions](https://github.com/vmintf/SimpleEnvs-Python/simpleenvs/discussions)
+- 🐛 [Issue Tracker](https://github.com/vmintf/SimpleEnvs-Python/issues)
+- 💬 [Discussions](https://github.com/vmintf/SimpleEnvs-Python/discussions)
 - 📦 [PyPI Package](https://pypi.org/project/simpleenvs-python/)
 
 ---

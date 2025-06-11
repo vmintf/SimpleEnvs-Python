@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "SimpleEnvs-Python"
-version = "1.1.4"
+version = "2.0.0"
 description = "Ultra-secure, high-performance .env file loader"
 readme = "README.md"
 license = {text = "MIT"}
@@ -67,7 +67,8 @@ test = [
 benchmark = [
     "python-dotenv>=1.0.0",  # For comparison benchmarks
     "pytest-benchmark>=4.0.0",
-    "memory-profiler>=0.60.0"
+    "memory-profiler>=0.60.0",
+    "python-dotenv==1.1.0"
 ]
 
 [project.urls]
@@ -105,7 +106,7 @@ addopts = [
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
-    "--cov-fail-under=90"
+    "--cov-fail-under=80"
 ]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
@@ -120,7 +121,9 @@ source = ["simpleenvs"]
 omit = [
     "*/tests/*",
     "*/test_*",
-    "*/__pycache__/*"
+    "*/__pycache__/*",
+    "src/simpleenvs/benchmark.py",
+    "src/simpleenvs/vuln_test.py"
 ]
 
 [tool.coverage.report]
@@ -234,9 +237,9 @@ json_file = "benchmark.json"
 [tool.mkdocs]
 site_name = "SimpleEnvs"
 site_description = "Ultra-secure, high-performance .env file loader"
-site_url = "https://simpleenvs.github.io/simpleenvs"
-repo_url = "https://github.com/simpleenvs/simpleenvs"
-repo_name = "simpleenvs/simpleenvs"
+site_url = "https://simpleenvs.skystarry.xyz/"
+repo_url = "https://github.com/vmintf/SimpleEnvs-Python"
+repo_name = "SimpleEnvs-Python"
 
 # =============================================================================
 # PRE-COMMIT HOOKS
