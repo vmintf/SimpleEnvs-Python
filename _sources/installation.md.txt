@@ -4,7 +4,7 @@
 
 ### Python Version
 - **Python 3.7+** (recommended: Python 3.9+)
-- Compatible with Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12
+- Compatible with Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12, **3.13**
 
 ### System Requirements
 - **Operating Systems**: Windows, macOS, Linux
@@ -23,7 +23,7 @@ pip install simpleenvs-python
 
 Add to your `requirements.txt`:
 ```
-simpleenvs-python>=1.0.0
+simpleenvs-python>=2.0.0
 ```
 
 Then install:
@@ -49,7 +49,7 @@ For contributing or development:
 
 ```bash
 # Clone repository
-git clone https://github.com/vmintf/SimpleEnvs-Python/simpleenvs.git
+git clone https://github.com/vmintf/SimpleEnvs-Python.git
 cd simpleenvs
 
 # Install in development mode
@@ -106,7 +106,7 @@ load_dotenv()
 ### After (SimpleEnvs)
 ```python
 from simpleenvs import load_dotenv
-load_dotenv()  # Same API, 2-4x faster! 🚀
+load_dotenv()  # Same API, 8-28x faster! 🚀
 ```
 
 **That's it!** No other changes needed.
@@ -133,6 +133,16 @@ Includes:
 - `pytest`
 - `pytest-cov` - Coverage reporting
 - `pytest-asyncio` - Async testing
+
+### For Benchmarking
+```bash
+pip install simpleenvs-python[benchmark]
+```
+
+Includes:
+- `python-dotenv` - For performance comparison
+- `pytest-benchmark` - Benchmarking tools
+- `memory-profiler` - Memory usage analysis
 
 ## Common Issues & Solutions
 
@@ -198,7 +208,7 @@ pip install simpleenvs-python
 ### Using conda
 ```bash
 # Create environment
-conda create -n myproject python=3.9
+conda create -n myproject python=3.12
 
 # Activate
 conda activate myproject
@@ -211,7 +221,7 @@ pip install simpleenvs-python
 
 ### Dockerfile
 ```dockerfile
-FROM python:3.9-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 
@@ -240,7 +250,14 @@ services:
 Run the built-in benchmark to verify performance improvements:
 
 ```bash
-python -m simpleenvs.benchmark
+# Basic benchmark
+python benchmark.py
+
+# Include secure API benchmarks
+python benchmark.py --secure
+
+# Quick test (3 rounds)
+python benchmark.py --quick
 ```
 
 Expected output:
@@ -248,10 +265,32 @@ Expected output:
 SimpleEnvs vs python-dotenv Performance Comparison
 ==================================================
 Testing with 100 variables...
-python-dotenv: 8.04ms
-SimpleEnvs:    2.17ms
-Speedup:       3.7x faster ⚡
+python-dotenv: 10.9ms
+SimpleEnvs:    0.4ms
+Speedup:       28.3x faster ⚡
+
+🔒 Secure Mode Performance:
+SimpleEnvs Secure: 0.6ms
+Security overhead: 52.5%
 ```
+
+## Python Version Compatibility
+
+### Python 3.13 Support
+SimpleEnvs v2.0.0 fully supports Python 3.13:
+
+```bash
+# Install Python 3.13
+python3.13 -m pip install simpleenvs-python
+
+# Verify compatibility
+python3.13 -c "import simpleenvs; print('✅ Python 3.13 compatible!')"
+```
+
+### Legacy Python Support
+- **Python 3.7-3.8**: Full support with some performance optimizations
+- **Python 3.9-3.12**: Optimal performance and all features
+- **Python 3.13**: Latest features and maximum performance
 
 ## Environment-Specific Installation
 
@@ -269,6 +308,28 @@ pip install simpleenvs-python[dev]
 ```bash
 pip install simpleenvs-python[test]
 ```
+
+### Benchmarking & Comparison
+```bash
+pip install simpleenvs-python[benchmark]
+```
+
+## Platform-Specific Notes
+
+### Windows
+- Use `pip install --user simpleenvs-python` if permission issues
+- PowerShell and Command Prompt both supported
+- Works with WSL and native Windows Python
+
+### macOS
+- Compatible with both Intel and Apple Silicon (M1/M2/M3)
+- Works with system Python and Homebrew Python
+- Supports pyenv and conda environments
+
+### Linux
+- Tested on Ubuntu, CentOS, Alpine, and Debian
+- Compatible with system package managers
+- Works in containers and serverless environments
 
 ## Next Steps
 

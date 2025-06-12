@@ -860,7 +860,6 @@ def log_security_event(event_type, details):
 **Resources:**
 - 📚 [API Reference](api-reference.md)
 - 🚀 [Quick Start](quickstart.md)
-- 🏗️ [Best Practices](best-practices.md)
 
 ---
 

@@ -1,23 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation Guide &mdash; SimpleEnvs 1.0.5 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Installation Guide &mdash; SimpleEnvs 2.0.0-beta.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=038308c8" />
+
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=edd7a392"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +35,6 @@
           <a href="index.html" class="icon icon-home">
             SimpleEnvs
           </a>
-              <div class="version">
-                1.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -47,7 +43,8 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#python-version">Python Version</a></li>
@@ -75,6 +72,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#optional-dependencies">Optional Dependencies</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#for-development">For Development</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#for-testing">For Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#for-benchmarking">For Benchmarking</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#common-issues-solutions">Common Issues &amp; Solutions</a><ul>
@@ -95,10 +93,22 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#performance-verification">Performance Verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#python-version-compatibility">Python Version Compatibility</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#python-3-13-support">Python 3.13 Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#legacy-python-support">Legacy Python Support</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#environment-specific-installation">Environment-Specific Installation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#production">Production</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#development">Development</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ci-cd">CI/CD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#benchmarking-comparison">Benchmarking &amp; Comparison</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#platform-specific-notes">Platform-Specific Notes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#windows">Windows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#macos">macOS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#linux">Linux</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
@@ -106,7 +116,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">SimpleEnvs API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="security.html">Security Guide</a></li>
 </ul>
 
@@ -135,18 +145,18 @@
            <div itemprop="articleBody">
              
   <section id="installation-guide">
-<h1>Installation Guide<a class="headerlink" href="#installation-guide" title="Permalink to this heading"></a></h1>
+<h1>Installation Guide<a class="headerlink" href="#installation-guide" title="Link to this heading"></a></h1>
 <section id="requirements">
-<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading"></a></h2>
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
 <section id="python-version">
-<h3>Python Version<a class="headerlink" href="#python-version" title="Permalink to this heading"></a></h3>
+<h3>Python Version<a class="headerlink" href="#python-version" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Python 3.7+</strong> (recommended: Python 3.9+)</p></li>
-<li><p>Compatible with Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12</p></li>
+<li><p>Compatible with Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12, <strong>3.13</strong></p></li>
 </ul>
 </section>
 <section id="system-requirements">
-<h3>System Requirements<a class="headerlink" href="#system-requirements" title="Permalink to this heading"></a></h3>
+<h3>System Requirements<a class="headerlink" href="#system-requirements" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Operating Systems</strong>: Windows, macOS, Linux</p></li>
 <li><p><strong>Memory</strong>: Minimal requirements (&lt; 10MB)</p></li>
@@ -155,17 +165,17 @@
 </section>
 </section>
 <section id="installation-methods">
-<h2>Installation Methods<a class="headerlink" href="#installation-methods" title="Permalink to this heading"></a></h2>
+<h2>Installation Methods<a class="headerlink" href="#installation-methods" title="Link to this heading"></a></h2>
 <section id="pypi-recommended">
-<h3>📦 PyPI (Recommended)<a class="headerlink" href="#pypi-recommended" title="Permalink to this heading"></a></h3>
+<h3>📦 PyPI (Recommended)<a class="headerlink" href="#pypi-recommended" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>simpleenvs-python
 </pre></div>
 </div>
 </section>
 <section id="requirements-txt">
-<h3>📋 Requirements.txt<a class="headerlink" href="#requirements-txt" title="Permalink to this heading"></a></h3>
+<h3>📋 Requirements.txt<a class="headerlink" href="#requirements-txt" title="Link to this heading"></a></h3>
 <p>Add to your <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">simpleenvs</span><span class="o">-</span><span class="n">python</span><span class="o">&gt;=</span><span class="mf">1.0.0</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">simpleenvs</span><span class="o">-</span><span class="n">python</span><span class="o">&gt;=</span><span class="mf">2.0.0</span>
 </pre></div>
 </div>
 <p>Then install:</p>
@@ -174,22 +184,22 @@
 </div>
 </section>
 <section id="poetry">
-<h3>🔒 Poetry<a class="headerlink" href="#poetry" title="Permalink to this heading"></a></h3>
+<h3>🔒 Poetry<a class="headerlink" href="#poetry" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>add<span class="w"> </span>simpleenvs-python
 </pre></div>
 </div>
 </section>
 <section id="pipenv">
-<h3>📝 Pipenv<a class="headerlink" href="#pipenv" title="Permalink to this heading"></a></h3>
+<h3>📝 Pipenv<a class="headerlink" href="#pipenv" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pipenv<span class="w"> </span>install<span class="w"> </span>simpleenvs-python
 </pre></div>
 </div>
 </section>
 <section id="development-installation">
-<h3>🔧 Development Installation<a class="headerlink" href="#development-installation" title="Permalink to this heading"></a></h3>
+<h3>🔧 Development Installation<a class="headerlink" href="#development-installation" title="Link to this heading"></a></h3>
 <p>For contributing or development:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone repository</span>
-git<span class="w"> </span>clone<span class="w"> </span>https://github.com/vmintf/SimpleEnvs-Python/simpleenvs.git
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/vmintf/SimpleEnvs-Python.git
 <span class="nb">cd</span><span class="w"> </span>simpleenvs
 
 <span class="c1"># Install in development mode</span>
@@ -202,9 +212,9 @@ poetry<span class="w"> </span>install<span class="w"> </span>--with<span class="
 </section>
 </section>
 <section id="verification">
-<h2>Verification<a class="headerlink" href="#verification" title="Permalink to this heading"></a></h2>
+<h2>Verification<a class="headerlink" href="#verification" title="Link to this heading"></a></h2>
 <section id="quick-test">
-<h3>Quick Test<a class="headerlink" href="#quick-test" title="Permalink to this heading"></a></h3>
+<h3>Quick Test<a class="headerlink" href="#quick-test" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># test_installation.py</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">simpleenvs</span>
 
@@ -217,7 +227,7 @@ poetry<span class="w"> </span>install<span class="w"> </span>--with<span class="
 </div>
 </section>
 <section id="advanced-test">
-<h3>Advanced Test<a class="headerlink" href="#advanced-test" title="Permalink to this heading"></a></h3>
+<h3>Advanced Test<a class="headerlink" href="#advanced-test" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create test .env file</span>
 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;.env&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;TEST_VAR=hello_world</span><span class="se">\n</span><span class="s1">DEBUG=true</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -237,28 +247,28 @@ poetry<span class="w"> </span>install<span class="w"> </span>--with<span class="
 </section>
 </section>
 <section id="migration-from-python-dotenv">
-<h2>Migration from python-dotenv<a class="headerlink" href="#migration-from-python-dotenv" title="Permalink to this heading"></a></h2>
+<h2>Migration from python-dotenv<a class="headerlink" href="#migration-from-python-dotenv" title="Link to this heading"></a></h2>
 <p>SimpleEnvs is designed as a <strong>drop-in replacement</strong> for python-dotenv:</p>
 <section id="before-python-dotenv">
-<h3>Before (python-dotenv)<a class="headerlink" href="#before-python-dotenv" title="Permalink to this heading"></a></h3>
+<h3>Before (python-dotenv)<a class="headerlink" href="#before-python-dotenv" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
 <span class="n">load_dotenv</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 <section id="after-simpleenvs">
-<h3>After (SimpleEnvs)<a class="headerlink" href="#after-simpleenvs" title="Permalink to this heading"></a></h3>
+<h3>After (SimpleEnvs)<a class="headerlink" href="#after-simpleenvs" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">simpleenvs</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
-<span class="n">load_dotenv</span><span class="p">()</span>  <span class="c1"># Same API, 2-4x faster! 🚀</span>
+<span class="n">load_dotenv</span><span class="p">()</span>  <span class="c1"># Same API, 8-28x faster! 🚀</span>
 </pre></div>
 </div>
 <p><strong>That’s it!</strong> No other changes needed.</p>
 </section>
 </section>
 <section id="optional-dependencies">
-<h2>Optional Dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this heading"></a></h2>
+<h2>Optional Dependencies<a class="headerlink" href="#optional-dependencies" title="Link to this heading"></a></h2>
 <section id="for-development">
-<h3>For Development<a class="headerlink" href="#for-development" title="Permalink to this heading"></a></h3>
+<h3>For Development<a class="headerlink" href="#for-development" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>simpleenvs-python<span class="o">[</span>dev<span class="o">]</span>
 </pre></div>
 </div>
@@ -271,7 +281,7 @@ poetry<span class="w"> </span>install<span class="w"> </span>--with<span class="
 </ul>
 </section>
 <section id="for-testing">
-<h3>For Testing<a class="headerlink" href="#for-testing" title="Permalink to this heading"></a></h3>
+<h3>For Testing<a class="headerlink" href="#for-testing" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>simpleenvs-python<span class="o">[</span>test<span class="o">]</span>
 </pre></div>
 </div>
@@ -282,11 +292,23 @@ poetry<span class="w"> </span>install<span class="w"> </span>--with<span class="
 <li><p><code class="docutils literal notranslate"><span class="pre">pytest-asyncio</span></code> - Async testing</p></li>
 </ul>
 </section>
+<section id="for-benchmarking">
+<h3>For Benchmarking<a class="headerlink" href="#for-benchmarking" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>simpleenvs-python<span class="o">[</span>benchmark<span class="o">]</span>
+</pre></div>
+</div>
+<p>Includes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">python-dotenv</span></code> - For performance comparison</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pytest-benchmark</span></code> - Benchmarking tools</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">memory-profiler</span></code> - Memory usage analysis</p></li>
+</ul>
+</section>
 </section>
 <section id="common-issues-solutions">
-<h2>Common Issues &amp; Solutions<a class="headerlink" href="#common-issues-solutions" title="Permalink to this heading"></a></h2>
+<h2>Common Issues &amp; Solutions<a class="headerlink" href="#common-issues-solutions" title="Link to this heading"></a></h2>
 <section id="issue-module-not-found">
-<h3>Issue: “Module not found”<a class="headerlink" href="#issue-module-not-found" title="Permalink to this heading"></a></h3>
+<h3>Issue: “Module not found”<a class="headerlink" href="#issue-module-not-found" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ModuleNotFoundError:<span class="w"> </span>No<span class="w"> </span>module<span class="w"> </span>named<span class="w"> </span><span class="s1">&#39;simpleenvs&#39;</span>
 </pre></div>
 </div>
@@ -298,7 +320,7 @@ poetry<span class="w"> </span>install<span class="w"> </span>--with<span class="
 </ol>
 </section>
 <section id="issue-import-error">
-<h3>Issue: Import Error<a class="headerlink" href="#issue-import-error" title="Permalink to this heading"></a></h3>
+<h3>Issue: Import Error<a class="headerlink" href="#issue-import-error" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ne">ImportError</span><span class="p">:</span> <span class="n">cannot</span> <span class="kn">import</span><span class="w"> </span><span class="nn">name</span> <span class="s1">&#39;load_dotenv&#39;</span> <span class="kn">from</span><span class="w"> </span><span class="s1">&#39;simpleenvs&#39;</span>
 </pre></div>
 </div>
@@ -314,7 +336,7 @@ poetry<span class="w"> </span>install<span class="w"> </span>--with<span class="
 </ol>
 </section>
 <section id="issue-permission-error-windows">
-<h3>Issue: Permission Error (Windows)<a class="headerlink" href="#issue-permission-error-windows" title="Permalink to this heading"></a></h3>
+<h3>Issue: Permission Error (Windows)<a class="headerlink" href="#issue-permission-error-windows" title="Link to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">PermissionError</span><span class="p">:</span> <span class="p">[</span><span class="n">WinError</span> <span class="mi">5</span><span class="p">]</span> <span class="n">Access</span> <span class="ow">is</span> <span class="n">denied</span>
 </pre></div>
 </div>
@@ -326,7 +348,7 @@ poetry<span class="w"> </span>install<span class="w"> </span>--with<span class="
 </ol>
 </section>
 <section id="issue-ssl-certificate-error">
-<h3>Issue: SSL Certificate Error<a class="headerlink" href="#issue-ssl-certificate-error" title="Permalink to this heading"></a></h3>
+<h3>Issue: SSL Certificate Error<a class="headerlink" href="#issue-ssl-certificate-error" title="Link to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SSL</span><span class="p">:</span> <span class="n">CERTIFICATE_VERIFY_FAILED</span>
 </pre></div>
 </div>
@@ -338,9 +360,9 @@ poetry<span class="w"> </span>install<span class="w"> </span>--with<span class="
 </section>
 </section>
 <section id="virtual-environment-setup">
-<h2>Virtual Environment Setup<a class="headerlink" href="#virtual-environment-setup" title="Permalink to this heading"></a></h2>
+<h2>Virtual Environment Setup<a class="headerlink" href="#virtual-environment-setup" title="Link to this heading"></a></h2>
 <section id="using-venv-recommended">
-<h3>Using venv (Recommended)<a class="headerlink" href="#using-venv-recommended" title="Permalink to this heading"></a></h3>
+<h3>Using venv (Recommended)<a class="headerlink" href="#using-venv-recommended" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create virtual environment</span>
 python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
 
@@ -356,9 +378,9 @@ pip<span class="w"> </span>install<span class="w"> </span>simpleenvs-python
 </div>
 </section>
 <section id="using-conda">
-<h3>Using conda<a class="headerlink" href="#using-conda" title="Permalink to this heading"></a></h3>
+<h3>Using conda<a class="headerlink" href="#using-conda" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create environment</span>
-conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>myproject<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.9
+conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>myproject<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.12
 
 <span class="c1"># Activate</span>
 conda<span class="w"> </span>activate<span class="w"> </span>myproject
@@ -370,10 +392,10 @@ pip<span class="w"> </span>install<span class="w"> </span>simpleenvs-python
 </section>
 </section>
 <section id="docker-installation">
-<h2>Docker Installation<a class="headerlink" href="#docker-installation" title="Permalink to this heading"></a></h2>
+<h2>Docker Installation<a class="headerlink" href="#docker-installation" title="Link to this heading"></a></h2>
 <section id="dockerfile">
-<h3>Dockerfile<a class="headerlink" href="#dockerfile" title="Permalink to this heading"></a></h3>
-<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.9-slim</span>
+<h3>Dockerfile<a class="headerlink" href="#dockerfile" title="Link to this heading"></a></h3>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.13-slim</span>
 
 <span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app</span>
 
@@ -387,7 +409,7 @@ pip<span class="w"> </span>install<span class="w"> </span>simpleenvs-python
 </div>
 </section>
 <section id="docker-compose">
-<h3>Docker Compose<a class="headerlink" href="#docker-compose" title="Permalink to this heading"></a></h3>
+<h3>Docker Compose<a class="headerlink" href="#docker-compose" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.8&#39;</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">app</span><span class="p">:</span>
@@ -401,44 +423,110 @@ pip<span class="w"> </span>install<span class="w"> </span>simpleenvs-python
 </section>
 </section>
 <section id="performance-verification">
-<h2>Performance Verification<a class="headerlink" href="#performance-verification" title="Permalink to this heading"></a></h2>
+<h2>Performance Verification<a class="headerlink" href="#performance-verification" title="Link to this heading"></a></h2>
 <p>Run the built-in benchmark to verify performance improvements:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>simpleenvs.benchmark
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Basic benchmark</span>
+python<span class="w"> </span>benchmark.py
+
+<span class="c1"># Include secure API benchmarks</span>
+python<span class="w"> </span>benchmark.py<span class="w"> </span>--secure
+
+<span class="c1"># Quick test (3 rounds)</span>
+python<span class="w"> </span>benchmark.py<span class="w"> </span>--quick
 </pre></div>
 </div>
 <p>Expected output:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>SimpleEnvs vs python-dotenv Performance Comparison
 ==================================================
 Testing with 100 variables...
-python-dotenv: 8.04ms
-SimpleEnvs:    2.17ms
-Speedup:       3.7x faster ⚡
+python-dotenv: 10.9ms
+SimpleEnvs:    0.4ms
+Speedup:       28.3x faster ⚡
+
+🔒 Secure Mode Performance:
+SimpleEnvs Secure: 0.6ms
+Security overhead: 52.5%
 </pre></div>
 </div>
 </section>
+<section id="python-version-compatibility">
+<h2>Python Version Compatibility<a class="headerlink" href="#python-version-compatibility" title="Link to this heading"></a></h2>
+<section id="python-3-13-support">
+<h3>Python 3.13 Support<a class="headerlink" href="#python-3-13-support" title="Link to this heading"></a></h3>
+<p>SimpleEnvs v2.0.0 fully supports Python 3.13:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install Python 3.13</span>
+python3.13<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>simpleenvs-python
+
+<span class="c1"># Verify compatibility</span>
+python3.13<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import simpleenvs; print(&#39;✅ Python 3.13 compatible!&#39;)&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="legacy-python-support">
+<h3>Legacy Python Support<a class="headerlink" href="#legacy-python-support" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Python 3.7-3.8</strong>: Full support with some performance optimizations</p></li>
+<li><p><strong>Python 3.9-3.12</strong>: Optimal performance and all features</p></li>
+<li><p><strong>Python 3.13</strong>: Latest features and maximum performance</p></li>
+</ul>
+</section>
+</section>
 <section id="environment-specific-installation">
-<h2>Environment-Specific Installation<a class="headerlink" href="#environment-specific-installation" title="Permalink to this heading"></a></h2>
+<h2>Environment-Specific Installation<a class="headerlink" href="#environment-specific-installation" title="Link to this heading"></a></h2>
 <section id="production">
-<h3>Production<a class="headerlink" href="#production" title="Permalink to this heading"></a></h3>
+<h3>Production<a class="headerlink" href="#production" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>simpleenvs-python<span class="w"> </span>--no-dev
 </pre></div>
 </div>
 </section>
 <section id="development">
-<h3>Development<a class="headerlink" href="#development" title="Permalink to this heading"></a></h3>
+<h3>Development<a class="headerlink" href="#development" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>simpleenvs-python<span class="o">[</span>dev<span class="o">]</span>
 </pre></div>
 </div>
 </section>
 <section id="ci-cd">
-<h3>CI/CD<a class="headerlink" href="#ci-cd" title="Permalink to this heading"></a></h3>
+<h3>CI/CD<a class="headerlink" href="#ci-cd" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>simpleenvs-python<span class="o">[</span>test<span class="o">]</span>
 </pre></div>
 </div>
 </section>
+<section id="benchmarking-comparison">
+<h3>Benchmarking &amp; Comparison<a class="headerlink" href="#benchmarking-comparison" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>simpleenvs-python<span class="o">[</span>benchmark<span class="o">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="platform-specific-notes">
+<h2>Platform-Specific Notes<a class="headerlink" href="#platform-specific-notes" title="Link to this heading"></a></h2>
+<section id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--user</span> <span class="pre">simpleenvs-python</span></code> if permission issues</p></li>
+<li><p>PowerShell and Command Prompt both supported</p></li>
+<li><p>Works with WSL and native Windows Python</p></li>
+</ul>
+</section>
+<section id="macos">
+<h3>macOS<a class="headerlink" href="#macos" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Compatible with both Intel and Apple Silicon (M1/M2/M3)</p></li>
+<li><p>Works with system Python and Homebrew Python</p></li>
+<li><p>Supports pyenv and conda environments</p></li>
+</ul>
+</section>
+<section id="linux">
+<h3>Linux<a class="headerlink" href="#linux" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Tested on Ubuntu, CentOS, Alpine, and Debian</p></li>
+<li><p>Compatible with system package managers</p></li>
+<li><p>Works in containers and serverless environments</p></li>
+</ul>
+</section>
 </section>
 <section id="next-steps">
-<h2>Next Steps<a class="headerlink" href="#next-steps" title="Permalink to this heading"></a></h2>
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
 <p>After successful installation:</p>
 <ol class="arabic simple">
 <li><p>📖 Read the <a class="reference internal" href="quickstart.html"><span class="std std-doc">Quick Start Guide</span></a></p></li>
@@ -448,7 +536,7 @@ Speedup:       3.7x faster ⚡
 </ol>
 </section>
 <section id="getting-help">
-<h2>Getting Help<a class="headerlink" href="#getting-help" title="Permalink to this heading"></a></h2>
+<h2>Getting Help<a class="headerlink" href="#getting-help" title="Link to this heading"></a></h2>
 <p>If you encounter any installation issues:</p>
 <ol class="arabic simple">
 <li><p>🐛 <a class="reference external" href="https://github.com/vmintf/SimpleEnvs-Python/issues">Report a bug</a></p></li>
