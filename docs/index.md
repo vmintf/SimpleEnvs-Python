@@ -25,6 +25,9 @@ Welcome to SimpleEnvs - the ultra-secure, high-performance .env file loader for 
    :target: https://github.com/vmintf/SimpleEnvs-Python/actions/workflows/security_tests.yml
    :alt: Security Grade
 ```
+> ⚠️ **Beta Documentation**: This is documentation for SimpleEnvs v2.0.0-beta.1
+> 
+> For stable v1.1.4 documentation, see: [v1.1.4 docs](https://github.com/vmintf/SimpleEnvs-Python/tree/v1.1.4/docs)
 
 ## 🚀 Why SimpleEnvs v2.0?
 
