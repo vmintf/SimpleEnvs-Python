@@ -9,10 +9,10 @@ Usage:
 """
 
 import re
-import sys
 import subprocess
+import sys
 from pathlib import Path
-from typing import Tuple, List
+from typing import List, Tuple
 
 
 class VersionBumper:
@@ -34,7 +34,7 @@ class VersionBumper:
 
     def parse_version(self, version: str) -> Tuple[int, int, int]:
         """Parse version string into tuple"""
-        parts = version.split('.')
+        parts = version.split(".")
         if len(parts) != 3:
             raise ValueError(f"Invalid version format: {version}")
 
@@ -59,9 +59,7 @@ class VersionBumper:
 
         # Replace version
         new_content = re.sub(
-            self.version_pattern,
-            f'VERSION = "{new_version}"',
-            content
+            self.version_pattern, f'VERSION = "{new_version}"', content
         )
 
         if new_content == content:
@@ -74,13 +72,19 @@ class VersionBumper:
         """Get recent commit messages"""
         try:
             if since_tag:
-                cmd = ["git", "log", f"{since_tag}..HEAD", "--oneline", "--pretty=format:%s"]
+                cmd = [
+                    "git",
+                    "log",
+                    f"{since_tag}..HEAD",
+                    "--oneline",
+                    "--pretty=format:%s",
+                ]
             else:
                 cmd = ["git", "log", "-10", "--oneline", "--pretty=format:%s"]
 
             result = subprocess.run(cmd, capture_output=True, text=True)
             if result.returncode == 0:
-                return result.stdout.strip().split('\n')
+                return result.stdout.strip().split("\n")
         except Exception:
             pass
         return []
@@ -92,11 +96,29 @@ class VersionBumper:
         # Keywords for different bump types
         major_keywords = ["BREAKING", "breaking change", "major:", "!:"]
         minor_keywords = ["feat:", "feature:", "minor:", "add:", "new:"]
-        patch_keywords = ["fix:", "patch:", "docs:", "doc:", "chore:", "style:", "refactor:", "test:"]
+        patch_keywords = [
+            "fix:",
+            "patch:",
+            "docs:",
+            "doc:",
+            "chore:",
+            "style:",
+            "refactor:",
+            "test:",
+        ]
 
-        has_major = any(any(keyword in commit.lower() for keyword in major_keywords) for commit in commits)
-        has_minor = any(any(keyword in commit.lower() for keyword in minor_keywords) for commit in commits)
-        has_patch = any(any(keyword in commit.lower() for keyword in patch_keywords) for commit in commits)
+        has_major = any(
+            any(keyword in commit.lower() for keyword in major_keywords)
+            for commit in commits
+        )
+        has_minor = any(
+            any(keyword in commit.lower() for keyword in minor_keywords)
+            for commit in commits
+        )
+        has_patch = any(
+            any(keyword in commit.lower() for keyword in patch_keywords)
+            for commit in commits
+        )
 
         if has_major:
             return "major"
@@ -112,10 +134,11 @@ class VersionBumper:
         try:
             result = subprocess.run(
                 ["git", "describe", "--tags", "--abbrev=0"],
-                capture_output=True, text=True
+                capture_output=True,
+                text=True,
             )
             if result.returncode == 0:
-                return result.stdout.strip().lstrip('v')
+                return result.stdout.strip().lstrip("v")
         except Exception:
             pass
         return None
@@ -126,7 +149,9 @@ class VersionBumper:
             tag_name = f"v{version}"
 
             # Create tag
-            subprocess.run(["git", "tag", "-a", tag_name, "-m", f"Release {version}"], check=True)
+            subprocess.run(
+                ["git", "tag", "-a", tag_name, "-m", f"Release {version}"], check=True
+            )
             print(f"✅ Created git tag: {tag_name}")
 
             if push:
@@ -137,7 +162,9 @@ class VersionBumper:
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed to create/push git tag: {e}")
 
-    def bump(self, bump_type: str, create_tag: bool = False, push_tag: bool = False) -> str:
+    def bump(
+        self, bump_type: str, create_tag: bool = False, push_tag: bool = False
+    ) -> str:
         """Main bump function"""
         # Get current version
         current_version = self.get_current_version()
@@ -170,7 +197,9 @@ def main():
         print("Examples:")
         print("  python version_bump.py patch          # Bump patch version")
         print("  python version_bump.py minor --tag    # Bump minor and create tag")
-        print("  python version_bump.py auto --tag --push  # Auto-detect, tag, and push")
+        print(
+            "  python version_bump.py auto --tag --push  # Auto-detect, tag, and push"
+        )
         sys.exit(1)
 
     bump_type = sys.argv[1]
@@ -190,14 +219,26 @@ def main():
 
         if create_tag:
             print("\n📋 Next steps:")
-            print("1. Commit the version change: git add . && git commit -m 'Bump version to v{}'".format(new_version))
+            print(
+                "1. Commit the version change: git add . && git commit -m 'Bump version to v{}'".format(
+                    new_version
+                )
+            )
             if not push_tag:
                 print("2. Push the tag: git push origin v{}".format(new_version))
             print("3. Create a GitHub release")
         else:
             print("\n📋 Next steps:")
-            print("1. Commit the changes: git add . && git commit -m 'Bump version to v{}'".format(new_version))
-            print("2. Create a tag: python version_bump.py {} --tag --push".format(bump_type))
+            print(
+                "1. Commit the changes: git add . && git commit -m 'Bump version to v{}'".format(
+                    new_version
+                )
+            )
+            print(
+                "2. Create a tag: python version_bump.py {} --tag --push".format(
+                    bump_type
+                )
+            )
 
     except Exception as e:
         print(f"❌ Error: {e}")

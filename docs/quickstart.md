@@ -61,7 +61,7 @@ import simpleenvs
 # Load environment
 simpleenvs.load_dotenv()
 
-# Type-safe getters
+# Type-safe getters with automatic conversion
 app_name = simpleenvs.get_str('APP_NAME', 'DefaultApp')  # str
 debug = simpleenvs.get_bool('DEBUG', False)             # bool
 port = simpleenvs.get_int('PORT', 8080)                 # int
@@ -76,7 +76,7 @@ import asyncio
 import simpleenvs
 
 async def main():
-    # Async loading
+    # Async loading - perfect for modern Python apps
     await simpleenvs.load()
     
     # Access variables
@@ -87,12 +87,13 @@ async def main():
 asyncio.run(main())
 ```
 
-## 6. Secure Mode (Enterprise)
+## 6. Secure Mode (Enterprise) 🔒
 
 For sensitive data that should **never** touch `os.environ`:
 
 ```python
 import simpleenvs
+import os
 
 # Load with maximum security (memory-isolated)
 simpleenvs.load_dotenv_secure()
@@ -101,10 +102,16 @@ simpleenvs.load_dotenv_secure()
 api_key = simpleenvs.get_secure('API_KEY')
 db_password = simpleenvs.get_secure('DATABASE_PASSWORD')
 
-# Verify security
-import os
-print(os.getenv('API_KEY'))  # None - properly isolated! 🔒
+# Verify security isolation
+print(f"API Key loaded: {api_key is not None}")
+print(f"In os.environ: {os.getenv('API_KEY')}")  # None - properly isolated! 🔒
 ```
+
+**Security Benefits:**
+- ✅ Memory isolation - secrets never touch system environment
+- ✅ Access logging for security auditing
+- ✅ File integrity verification with SHA-256
+- ✅ Protection against path traversal attacks
 
 ## 7. Auto-Discovery
 
@@ -117,8 +124,10 @@ my-project/
 ├── .env                      # ✅ Found automatically!
 ├── config/
 │   └── .env.production       # ✅ Found automatically!
-└── environments/
-    └── .env.development      # ✅ Found automatically!
+├── environments/
+│   └── .env.development      # ✅ Found automatically!
+└── docker/
+    └── .env.docker          # ✅ Found automatically!
 ```
 
 ```python
@@ -127,7 +136,20 @@ from simpleenvs import load_dotenv
 load_dotenv()  # Finds the first .env file automatically
 ```
 
-## 8. Common Patterns
+## 8. Performance Comparison ⚡
+
+**SimpleEnvs vs python-dotenv benchmark results:**
+
+| Variables | python-dotenv | SimpleEnvs | **Speedup** |
+|-----------|---------------|-------------|-------------|
+| 10 vars | 2.0ms | 0.1ms | **13.5x faster** ⚡ |
+| 100 vars | 10.9ms | 0.4ms | **28.3x faster** ⚡ |
+| 1000 vars | 105.1ms | 5.0ms | **20.9x faster** ⚡ |
+| 5000 vars | 633.3ms | 72.5ms | **8.7x faster** ⚡ |
+
+*Real benchmark data from our test suite*
+
+## 9. Common Patterns
 
 ### Web Application Startup
 
@@ -140,17 +162,19 @@ app = FastAPI()
 
 @app.on_event("startup")
 async def startup():
-    # Load configuration
+    # Load public configuration
     await simpleenvs.load()
     
-    # Load secrets securely
+    # Load secrets securely (memory-isolated)
     await simpleenvs.load_secure()
 
 @app.get("/")
 def read_root():
     return {
         "app": simpleenvs.get_str("APP_NAME"),
-        "version": simpleenvs.get_str("VERSION", "1.0.0")
+        "version": simpleenvs.get_str("VERSION", "1.0.0"),
+        # Secure data remains isolated
+        "has_secrets": simpleenvs.get_secure("JWT_SECRET") is not None
     }
 ```
 
@@ -164,7 +188,7 @@ import simpleenvs
 env = os.getenv('ENVIRONMENT', 'development')
 simpleenvs.load_dotenv(f'.env.{env}')
 
-# Now use environment-specific settings
+# Use environment-specific settings
 debug = simpleenvs.get_bool('DEBUG')
 db_url = simpleenvs.get_str('DATABASE_URL')
 ```
@@ -178,17 +202,21 @@ class Config:
     def __init__(self):
         simpleenvs.load_dotenv()
         
+        # Public configuration
         self.app_name = simpleenvs.get_str('APP_NAME', 'MyApp')
         self.debug = simpleenvs.get_bool('DEBUG', False)
         self.port = simpleenvs.get_int('PORT', 8080)
-        self.database_url = simpleenvs.get_str('DATABASE_URL')
+        
+        # Load secrets separately
+        simpleenvs.load_dotenv_secure()
+        self.jwt_secret = simpleenvs.get_secure('JWT_SECRET')
 
 # Usage
 config = Config()
 print(f"Starting {config.app_name} on port {config.port}")
 ```
 
-## 9. Migration from python-dotenv
+## 10. Migration from python-dotenv
 
 **Instant migration** - just change the import:
 
@@ -199,12 +227,12 @@ load_dotenv()
 
 # After (SimpleEnvs) - Only change the import!
 from simpleenvs import load_dotenv
-load_dotenv()  # 2-4x faster performance! ⚡
+load_dotenv()  # Same API, 2-28x faster performance! ⚡
 ```
 
-**That's it!** Your existing code works unchanged.
+**That's it!** Your existing code works unchanged with massive performance gains.
 
-## 10. Performance Comparison
+## 11. Quick Performance Test
 
 Create a test with many variables to see the speed difference:
 
@@ -224,10 +252,10 @@ load_dotenv('.env.test')
 load_time = (time.time() - start_time) * 1000
 
 print(f"Loaded 1000 variables in {load_time:.2f}ms")
-# Expected: ~43ms (vs python-dotenv: ~102ms)
+# Expected: ~5ms (vs python-dotenv: ~105ms - 20x faster!)
 ```
 
-## 11. Error Handling
+## 12. Error Handling
 
 ```python
 import simpleenvs
@@ -235,7 +263,7 @@ import simpleenvs
 try:
     simpleenvs.load_dotenv()
     
-    # Required variables
+    # Validate required variables
     required_vars = ['DATABASE_URL', 'API_KEY']
     for var in required_vars:
         if not simpleenvs.get_str(var):
@@ -243,40 +271,72 @@ try:
             
 except FileNotFoundError:
     print("No .env file found - using defaults")
-except Exception as e:
+except simpleenvs.SimpleEnvsError as e:
     print(f"Configuration error: {e}")
 ```
 
-## 12. Best Practices
+## 13. Best Practices ✅
 
 ### ✅ Do This
 
 ```python
-# Use type-safe getters
+# Use type-safe getters with defaults
 debug = simpleenvs.get_bool('DEBUG', False)
 port = simpleenvs.get_int('PORT', 8080)
-
-# Provide sensible defaults
 timeout = simpleenvs.get_int('TIMEOUT', 30)
 
 # Use secure mode for sensitive data
+jwt_secret = simpleenvs.get_secure('JWT_SECRET')
 api_key = simpleenvs.get_secure('API_KEY')
+
+# Provide meaningful defaults
+app_name = simpleenvs.get_str('APP_NAME', 'MyApplication')
 ```
 
 ### ❌ Avoid This
 
 ```python
-# Don't rely on string conversion
-port = int(os.getenv('PORT'))  # Can crash!
+# Don't rely on manual string conversion
+port = int(os.getenv('PORT'))  # Can crash if PORT is not set!
 
 # Don't expose secrets in system environment
-os.environ['SECRET_KEY'] = secret  # Visible to all processes
+os.environ['SECRET_KEY'] = secret  # Visible to all processes ⚠️
 
-# Don't hardcode paths
-load_dotenv('/absolute/path/.env')  # Not portable
+# Don't hardcode configuration
+database_url = "postgresql://..."  # Not flexible ❌
 ```
 
-## 13. IDE Setup
+## 14. Advanced Features
+
+### Cross-Module Access
+
+```python
+# main.py - Load secrets once
+import simpleenvs
+await simpleenvs.load_secure('.env.production')
+
+# utils.py - Automatic access
+import simpleenvs
+api_key = simpleenvs.get_secure('API_KEY')  # Works automatically! 🎯
+```
+
+### Security Monitoring
+
+```python
+# Get security information
+info = simpleenvs.get_security_info()
+print(f"Session ID: {info['session_id']}")
+print(f"Access count: {info['access_count']}")
+
+# Verify file integrity
+loader = simpleenvs.SecureEnvLoader()
+if loader.verify_file_integrity('.env'):
+    print("✅ File integrity verified")
+else:
+    print("⚠️ File may have been tampered with")
+```
+
+## 15. IDE Setup
 
 ### VS Code Settings
 
@@ -294,20 +354,54 @@ Add to `.vscode/settings.json`:
 2. Add **Environment Variables**
 3. Click **Load from file** → Select `.env`
 
-## 14. Next Steps
+## 16. Security Best Practices 🛡️
+
+### Separate Public and Private Config
+
+```python
+import simpleenvs
+
+# Public configuration (can be in os.environ)
+await simpleenvs.load('config.env')
+app_name = simpleenvs.get_str('APP_NAME')
+
+# Sensitive secrets (memory-isolated)
+await simpleenvs.load_secure('secrets.env')
+jwt_secret = simpleenvs.get_secure('JWT_SECRET')
+
+# Verify secrets are NOT in os.environ
+import os
+assert os.getenv('JWT_SECRET') is None  # ✅ Properly isolated
+```
+
+### Environment-Specific Security
+
+```python
+import os
+env = os.getenv('ENVIRONMENT', 'development')
+
+if env == 'production':
+    # Maximum security in production
+    await simpleenvs.load_secure(strict=True)
+else:
+    # Development flexibility
+    await simpleenvs.load(strict=False)
+```
+
+## 17. Next Steps
 
 🎉 **Congratulations!** You're now using SimpleEnvs effectively.
 
 **Continue learning:**
 - 📖 [API Reference](api-reference.md) - Complete function documentation
-- 🔒 [Security Guide](security.md) - Advanced security features
-- 🏗️ [Best Practices](best-practices.md) - Production-ready patterns
-- 🔧 [Examples](../examples/) - Real-world usage examples
+- 🔒 [Security Guide](security.md) - Advanced security features  
+- 🏗️ [Examples](../examples/) - Real-world usage examples
+- ⚡ [Benchmark Suite](../benchmark.py) - Run your own performance tests
 
 **Need help?**
 - 🐛 [Report issues](https://github.com/vmintf/SimpleEnvs-Python/issues)
 - 💬 [Join discussions](https://github.com/vmintf/SimpleEnvs-Python/discussions)
-- 📚 [Read full docs](https://vmintf.github.io/SimpleEnvs-Python)
+- 📧 [Contact support](mailto:vmintf@gmail.com)
 
 ---
 

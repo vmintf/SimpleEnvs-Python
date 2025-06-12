@@ -5,16 +5,16 @@ Demonstrates how SimpleEnvs works seamlessly with FastAPI applications
 """
 
 import asyncio
-import tempfile
 import os
+import tempfile
 from contextlib import asynccontextmanager
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 try:
-    from fastapi import FastAPI, HTTPException, Depends
-    from fastapi.responses import JSONResponse
-    from fastapi.middleware.cors import CORSMiddleware
     import uvicorn
+    from fastapi import Depends, FastAPI, HTTPException
+    from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.responses import JSONResponse
 
     FASTAPI_AVAILABLE = True
 except ImportError:
@@ -22,12 +22,12 @@ except ImportError:
     print("⚠️  FastAPI not installed. Install with: pip install fastapi uvicorn")
 
 import simpleenvs
-from simpleenvs import SimpleEnvLoader, SecureEnvLoader
-
+from simpleenvs import SecureEnvLoader, SimpleEnvLoader
 
 # =============================================================================
 # ENVIRONMENT SETUP
 # =============================================================================
+
 
 async def setup_environment():
     """Setup environment variables for the example"""
@@ -68,7 +68,7 @@ ENABLE_METRICS=false
 
     # Write to temporary .env file
     env_file = ".env.example"
-    with open(env_file, 'w') as f:
+    with open(env_file, "w") as f:
         f.write(env_content.strip())
 
     print(f"📝 Created example .env file: {env_file}")
@@ -78,6 +78,7 @@ ENABLE_METRICS=false
 # =============================================================================
 # FASTAPI APPLICATION SETUP
 # =============================================================================
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -118,7 +119,7 @@ if FASTAPI_AVAILABLE:
         title=os.getenv("APP_NAME", "SimpleEnvs Demo"),
         version=os.getenv("APP_VERSION", "1.0.0"),
         description="FastAPI application demonstrating SimpleEnvs integration",
-        lifespan=lifespan
+        lifespan=lifespan,
     )
 
     # CORS middleware (using simple env var)
@@ -136,12 +137,13 @@ if FASTAPI_AVAILABLE:
 # DEPENDENCY INJECTION
 # =============================================================================
 
+
 def get_database_config() -> Dict[str, Any]:
     """Get database configuration from simple environment"""
     return {
         "url": os.getenv("DATABASE_URL"),
         "pool_size": int(os.getenv("DATABASE_POOL_SIZE", "5")),
-        "timeout": int(os.getenv("DATABASE_TIMEOUT", "30"))
+        "timeout": int(os.getenv("DATABASE_TIMEOUT", "30")),
     }
 
 
@@ -151,7 +153,7 @@ def get_secure_config() -> Dict[str, Any]:
         "secret_key": simpleenvs.get_secure("SECRET_KEY"),
         "api_secret": simpleenvs.get_secure("API_SECRET"),
         "encryption_key": simpleenvs.get_secure("ENCRYPTION_KEY"),
-        "admin_password": simpleenvs.get_secure("ADMIN_PASSWORD")
+        "admin_password": simpleenvs.get_secure("ADMIN_PASSWORD"),
     }
 
 
@@ -178,9 +180,8 @@ if FASTAPI_AVAILABLE:
             "version": os.getenv("APP_VERSION"),
             "environment": os.getenv("ENVIRONMENT"),
             "debug": os.getenv("DEBUG", "false").lower() == "true",
-            "message": "SimpleEnvs + FastAPI Integration Demo"
+            "message": "SimpleEnvs + FastAPI Integration Demo",
         }
-
 
     @app.get("/health")
     async def health_check():
@@ -189,9 +190,8 @@ if FASTAPI_AVAILABLE:
             "status": "healthy",
             "timestamp": "2025-01-01T00:00:00Z",
             "environment_loaded": simpleenvs.is_loaded(),
-            "secure_loaded": simpleenvs.is_loaded_secure()
+            "secure_loaded": simpleenvs.is_loaded_secure(),
         }
-
 
     @app.get("/config/simple")
     async def get_simple_config():
@@ -206,13 +206,12 @@ if FASTAPI_AVAILABLE:
             "workers": int(os.getenv("WORKERS", "1")),
             "cors_enabled": os.getenv("ENABLE_CORS", "false").lower() == "true",
             "logging_enabled": os.getenv("ENABLE_LOGGING", "false").lower() == "true",
-            "metrics_enabled": os.getenv("ENABLE_METRICS", "false").lower() == "true"
+            "metrics_enabled": os.getenv("ENABLE_METRICS", "false").lower() == "true",
         }
-
 
     @app.get("/config/database")
     async def get_database_config_endpoint(
-            db_config: Dict[str, Any] = Depends(get_database_config)
+        db_config: Dict[str, Any] = Depends(get_database_config),
     ):
         """Get database configuration"""
         # Hide password in URL
@@ -222,7 +221,6 @@ if FASTAPI_AVAILABLE:
                 db_config["url"] = f"postgresql://***:***@{url_parts[1]}"
 
         return db_config
-
 
     @app.get("/config/secure")
     async def get_secure_config_endpoint(api_secret: str):
@@ -239,9 +237,8 @@ if FASTAPI_AVAILABLE:
             "api_secret": "***" if secure_config["api_secret"] else None,
             "encryption_key": "***" if secure_config["encryption_key"] else None,
             "admin_password": "***" if secure_config["admin_password"] else None,
-            "note": "Actual values are memory-isolated and not in os.environ"
+            "note": "Actual values are memory-isolated and not in os.environ",
         }
-
 
     @app.get("/security/verify")
     async def verify_security():
@@ -259,7 +256,7 @@ if FASTAPI_AVAILABLE:
             security_check[key] = {
                 "in_os_environ": in_os_environ,
                 "available_secure": available_secure,
-                "properly_isolated": not in_os_environ and available_secure
+                "properly_isolated": not in_os_environ and available_secure,
             }
 
         all_properly_isolated = all(
@@ -273,10 +270,9 @@ if FASTAPI_AVAILABLE:
             "explanation": {
                 "in_os_environ": "Variable is accessible via os.getenv() (BAD for secrets)",
                 "available_secure": "Variable is accessible via simpleenvs.get_secure()",
-                "properly_isolated": "Variable is secure (not in os.environ but available via secure API)"
-            }
+                "properly_isolated": "Variable is secure (not in os.environ but available via secure API)",
+            },
         }
-
 
     @app.get("/info")
     async def get_environment_info():
@@ -286,9 +282,8 @@ if FASTAPI_AVAILABLE:
             "security_info": simpleenvs.get_security_info(),
             "simple_keys": simpleenvs.get_all_keys(),
             "os_environ_count": len(os.environ),
-            "note": "This demonstrates the dual-layer environment system"
+            "note": "This demonstrates the dual-layer environment system",
         }
-
 
     @app.post("/auth/login")
     async def login(username: str, password: str):
@@ -304,7 +299,7 @@ if FASTAPI_AVAILABLE:
             return {
                 "message": "Login successful",
                 "token": "fake-jwt-token-would-be-generated-here",
-                "note": f"Used secret key: {'***' if secret_key else 'None'}"
+                "note": f"Used secret key: {'***' if secret_key else 'None'}",
             }
         else:
             raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -313,6 +308,7 @@ if FASTAPI_AVAILABLE:
 # =============================================================================
 # TESTING FUNCTIONS
 # =============================================================================
+
 
 async def test_fastapi_integration():
     """Test the FastAPI integration without actually starting the server"""
@@ -391,7 +387,9 @@ def run_server():
         host=os.getenv("HOST", "0.0.0.0"),
         port=int(os.getenv("PORT", "8000")),
         reload=os.getenv("DEBUG", "false").lower() == "true",
-        log_level="info" if os.getenv("ENABLE_LOGGING", "true").lower() == "true" else "error"
+        log_level=(
+            "info" if os.getenv("ENABLE_LOGGING", "true").lower() == "true" else "error"
+        ),
     )
 
 

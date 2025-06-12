@@ -20,15 +20,13 @@ Usage:
     loader = SimpleEnvLoader()
     await loader.load()
 """
-
-import gc
 import os
 from typing import Any, Dict, List, Optional, Union
 
 from .constants import LIBRARY_NAME, VERSION, get_environment_type
 from .exceptions import *
-from .secure import SecureEnvLoader
-from .secure import load_secure as _load_secure_func
+from .manager import SecureLoaderManager
+from .secure import SecureEnvLoader, load_secure
 
 # Import all classes and exceptions
 from .simple import SimpleEnvLoader, load_env, load_env_sync
@@ -45,6 +43,9 @@ __description__ = "Ultra-secure, high-performance .env file loader"
 # Global instances for convenience API
 _simple_loader: Optional[SimpleEnvLoader] = None
 _secure_loader: Optional[SecureEnvLoader] = None
+
+# Global SecureLoaderManager instance
+_secure_manager = SecureLoaderManager()
 
 
 # =============================================================================
@@ -156,7 +157,7 @@ async def load_secure(
         await simpleenvs.load_secure()
         db_host = simpleenvs.get_secure("DB_HOST")  # NOT in os.environ!
     """
-    global _secure_loader
+    global _secure_loader, _secure_manager
     if _secure_loader is None:
         _secure_loader = SecureEnvLoader()
 
@@ -164,6 +165,9 @@ async def load_secure(
 
     options = LoadOptions(path=path, max_depth=max_depth, strict_validation=strict)
     await _secure_loader.load_secure(options)
+
+    # Update manager reference
+    _secure_manager._global_loader_ref = _secure_loader
 
 
 def get_secure(key: str, default: Optional[EnvValue] = None) -> Optional[EnvValue]:
@@ -180,106 +184,42 @@ def get_secure(key: str, default: Optional[EnvValue] = None) -> Optional[EnvValu
     Note:
         This accesses memory-isolated data, not system environment
     """
-    if _secure_loader is None:
-        # Try to find existing SecureEnvLoader in memory
-        found_loader = _find_secure_loader_in_memory()
-        if found_loader:
-            return found_loader.get_secure(key) or default
-        return default
-
-    return _secure_loader.get_secure(key) or default
+    loader = _secure_manager.get_active_loader()
+    return loader.get_secure(key) if loader else default
 
 
 def get_int_secure(key: str, default: Optional[int] = None) -> Optional[int]:
     """Get secure environment variable as integer"""
-    if _secure_loader is None:
-        found_loader = _find_secure_loader_in_memory()
-        if found_loader:
-            return found_loader.get_int_secure(key, default)
-        return default
-
-    return _secure_loader.get_int_secure(key, default)
+    loader = _secure_manager.get_active_loader()
+    return loader.get_int_secure(key, default) if loader else default
 
 
 def get_bool_secure(key: str, default: Optional[bool] = None) -> Optional[bool]:
     """Get secure environment variable as boolean"""
-    if _secure_loader is None:
-        found_loader = _find_secure_loader_in_memory()
-        if found_loader:
-            return found_loader.get_bool_secure(key, default)
-        return default
-
-    return _secure_loader.get_bool_secure(key, default)
+    loader = _secure_manager.get_active_loader()
+    return loader.get_bool_secure(key, default) if loader else default
 
 
 def get_str_secure(key: str, default: Optional[str] = None) -> Optional[str]:
     """Get secure environment variable as string"""
-    if _secure_loader is None:
-        found_loader = _find_secure_loader_in_memory()
-        if found_loader:
-            return found_loader.get_str_secure(key, default)
-        return default
-
-    return _secure_loader.get_str_secure(key, default)
+    loader = _secure_manager.get_active_loader()
+    return loader.get_str_secure(key, default) if loader else default
 
 
 def is_loaded_secure() -> bool:
     """Check if secure environment is loaded"""
-    if _secure_loader is not None:
-        return _secure_loader.is_loaded()
-
-    # Check memory for existing loaded instances
-    found_loader = _find_secure_loader_in_memory()
-    return found_loader is not None and found_loader.is_loaded()
+    return bool(_secure_manager)  # Uses SecureLoaderManager.__bool__()
 
 
 def get_security_info() -> Optional[Dict[str, Any]]:
     """Get security information from secure loader"""
-    if _secure_loader is not None:
-        return _secure_loader.get_security_info()
-
-    found_loader = _find_secure_loader_in_memory()
-    if found_loader:
-        return found_loader.get_security_info()
-
-    return None
-
-
-# =============================================================================
-# MEMORY INTROSPECTION (for finding existing SecureEnvLoader instances)
-# =============================================================================
-
-
-def _find_secure_loader_in_memory() -> Optional[SecureEnvLoader]:
-    """
-    Find existing SecureEnvLoader instance in memory
-    This enables access to secure environment variables from anywhere in the codebase
-    """
-    try:
-        for obj in gc.get_objects():
-            if (
-                isinstance(obj, SecureEnvLoader)
-                and hasattr(obj, "_SecureEnvLoader__env_data")
-                and obj._SecureEnvLoader__env_data
-            ):  # Has loaded data
-                return obj
-    except Exception:
-        pass  # Silently fail if introspection not possible
-
-    return None
+    loader = _secure_manager.get_active_loader()
+    return loader.get_security_info() if loader else None
 
 
 def get_all_secure_loaders() -> List[SecureEnvLoader]:
     """Get all SecureEnvLoader instances in memory (for debugging)"""
-    loaders = []
-    try:
-        for obj in gc.get_objects():
-            if isinstance(obj, SecureEnvLoader):
-                loaders.append(obj)
-    except Exception:
-        pass
-
-    return loaders
+    return _secure_manager.get_all_loaders()
 
 
 # =============================================================================
@@ -295,27 +235,27 @@ def get_all_keys() -> List[str]:
     if _simple_loader and _simple_loader.is_loaded():
         keys.update(_simple_loader.keys())
 
-    # From secure loader (memory-isolated)
-    if _secure_loader and _secure_loader.is_loaded():
-        keys.update(_secure_loader.get_all_keys_secure())
-    else:
-        # Check memory for other secure loaders
-        found_loader = _find_secure_loader_in_memory()
-        if found_loader:
-            keys.update(found_loader.get_all_keys_secure())
+    # From secure loader (memory-isolated) - using manager
+    active_secure_loader = _secure_manager.get_active_loader()
+    if active_secure_loader:
+        keys.update(active_secure_loader.get_all_keys_secure())
 
     return sorted(list(keys))
 
 
 def clear() -> None:
     """Clear all loaded environment data"""
-    global _simple_loader, _secure_loader
+    global _simple_loader, _secure_loader, _secure_manager
 
     if _simple_loader:
         _simple_loader.clear()
 
     if _secure_loader:
         _secure_loader.secure_wipe()
+        _secure_loader = None
+
+    # Update manager reference
+    _secure_manager._global_loader_ref = None
 
 
 def get_info() -> Dict[str, Any]:
@@ -328,7 +268,7 @@ def get_info() -> Dict[str, Any]:
         "total_keys": len(get_all_keys()),
         "simple_loader": _simple_loader is not None,
         "secure_loader": _secure_loader is not None,
-        "secure_loaders_in_memory": len(get_all_secure_loaders()),
+        "secure_loaders_in_memory": len(_secure_manager),  # ← Magic method!
     }
 
 
@@ -396,6 +336,7 @@ __all__ = [
     # Classes
     "SimpleEnvLoader",
     "SecureEnvLoader",
+    "SecureLoaderManager",  # ← New export!
     # Simple API (system-level)
     "load",
     "load_sync",
@@ -412,6 +353,7 @@ __all__ = [
     "get_str_secure",
     "is_loaded_secure",
     "get_security_info",
+    "get_all_secure_loaders",  # ← Now using manager
     # Utilities
     "get_all_keys",
     "clear",
@@ -497,6 +439,19 @@ def _example_usage():
         # Access security info
         security_info = secure_loader.get_security_info()
 
+    # Manager usage (new!)
+    def manager_example():
+        # Pythonic access to secure loaders
+        if _secure_manager:
+            print(f"Found {len(_secure_manager)} secure loaders")
+
+            # Direct key access
+            secret = _secure_manager["SECRET_KEY"]
+
+            # Iterate over loaders
+            for loader in _secure_manager:
+                print(f"Loader: {loader}")
+
 
 if __name__ == "__main__":
     # Display library information
@@ -506,6 +461,7 @@ if __name__ == "__main__":
     print(f"Simple loaded: {is_loaded()}")
     print(f"Secure loaded: {is_loaded_secure()}")
     print(f"Available keys: {len(get_all_keys())}")
+    print(f"Secure loaders in memory: {len(_secure_manager)}")  # ← New!
 
     # Example quick test
     import asyncio
