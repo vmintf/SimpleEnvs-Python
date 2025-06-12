@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "SimpleEnvs-Python"
-version = "2.0.0"
+version = "2.0.0-beta.1"
 description = "Ultra-secure, high-performance .env file loader"
 readme = "README.md"
 license = {text = "MIT"}
