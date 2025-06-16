@@ -89,9 +89,15 @@ if DOTENV_AVAILABLE:
 
 if SIMPLEENVS_AVAILABLE:
     import simpleenvs
-    from simpleenvs import get_secure
+    from simpleenvs import (
+        get_secure,
+    )
     from simpleenvs import load_dotenv as simpleenvs_load
-    from simpleenvs import load_dotenv_secure
+    from simpleenvs import (
+        load_dotenv_secure,
+        load_dotenv_secure_async,
+        load_secure_async,
+    )
 
     SIMPLEENVS_SECURE_AVAILABLE = True
 else:
@@ -309,7 +315,7 @@ class BenchmarkRunner:
 
                 # Asynchronous secure benchmark
                 async def async_secure_load(file_path):
-                    await simpleenvs.load_secure(file_path)
+                    await simpleenvs.load_secure_async(file_path)
 
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)

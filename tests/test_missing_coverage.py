@@ -112,7 +112,7 @@ class TestInitMissingCoverage:
             temp_file = f.name
 
         try:
-            asyncio.run(simpleenvs.load(temp_file))
+            simpleenvs.load(temp_file)
             keys = simpleenvs.get_all_keys()
             assert "SIMPLE_KEY" in keys
         finally:
@@ -530,13 +530,13 @@ class TestFinalCoveragePush:
         """Test global API edge cases"""
         # Test load without any .env file in current directory
         try:
-            await simpleenvs.load()  # Should raise FileNotFoundError
+            simpleenvs.load()  # Should raise FileNotFoundError
         except FileNotFoundError:
             pass  # Expected
 
         # Test secure loading edge cases
         try:
-            await simpleenvs.load_secure(strict=False)
+            simpleenvs.load_secure(strict=False)
         except FileNotFoundError:
             pass  # Expected
 

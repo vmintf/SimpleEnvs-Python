@@ -9,6 +9,7 @@ import gc
 import os
 import tempfile
 from pathlib import Path
+from typing import Any, Generator
 from unittest.mock import mock_open, patch
 
 import pytest
@@ -24,7 +25,7 @@ from simpleenvs.exceptions import *
 
 
 @pytest.fixture
-def temp_env_file():
+def temp_env_file() -> Generator[str, Any, str | None]:
     """Create temporary .env file for testing"""
     content = """
 # Test .env file
@@ -610,7 +611,7 @@ class TestIntegration:
     async def test_global_api(self, temp_env_file):
         """Test global simpleenvs API"""
         # Test simple loading
-        await simpleenvs.load(temp_env_file)
+        simpleenvs.load_dotenv(temp_env_file)
         assert simpleenvs.is_loaded()
 
         # Test global get functions
@@ -620,7 +621,7 @@ class TestIntegration:
         assert simpleenvs.get_str("APP_NAME") == "TestApp"
 
         # Test secure loading
-        await simpleenvs.load_secure(temp_env_file)
+        await simpleenvs.load_secure_async(temp_env_file)
         assert simpleenvs.is_loaded_secure()
 
         # Test secure get functions
@@ -661,9 +662,10 @@ class TestIntegration:
         loop.run_until_complete(loader.load_secure(options))
 
         # Test memory introspection
-        from simpleenvs import _find_secure_loader_in_memory, get_all_secure_loaders
+        from simpleenvs import get_all_secure_loaders
+        from simpleenvs.manager import SecureLoaderManager
 
-        found_loader = _find_secure_loader_in_memory()
+        found_loader = SecureLoaderManager()._find_loader_in_memory()
         assert found_loader is not None
         assert found_loader.is_loaded()
 
