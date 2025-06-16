@@ -6,7 +6,7 @@ permissions:
 
 on:
   push:
-    branches: [ main, dev/ongoing-improvement ]
+    branches: [ main, dev/* ]
   workflow_dispatch:
 
 jobs:
