@@ -511,9 +511,6 @@ async def main():
     test_suite = FinalCorrectedTestSuite()
     await test_suite.run_all_final_tests()
 
-    print("\n🎉 Final understanding complete!")
-    print("We now have a clear picture of how SimpleEnvs actually behaves.")
-
 
 if __name__ == "__main__":
     asyncio.run(main())
