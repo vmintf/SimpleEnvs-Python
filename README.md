@@ -4,6 +4,7 @@
 [![Python](https://img.shields.io/pypi/pyversions/simpleenvs-python.svg)](https://pypi.org/project/simpleenvs-python/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PyPI Downloads](https://static.pepy.tech/badge/simpleenvs-python)](https://pepy.tech/projects/simpleenvs-python)
+
 [![CI Pipeline](https://github.com/vmintf/SimpleEnvs-Python/actions/workflows/ci.yml/badge.svg)](https://github.com/vmintf/SimpleEnvs-Python/actions/workflows/ci.yml)
 [![Security Vulnerability Tests](https://github.com/vmintf/SimpleEnvs-Python/actions/workflows/security_tests.yml/badge.svg)](https://github.com/vmintf/SimpleEnvs-Python/actions/workflows/security_tests.yml)
 

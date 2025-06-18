@@ -341,8 +341,8 @@ FEATURES = {
 # =============================================================================
 
 # Version information
-VERSION = "2.0.0-beta.1"
-API_VERSION = "1.0"
+VERSION = "2.0.0-beta.2"
+API_VERSION = "1.1"
 MIN_PYTHON_VERSION = (3, 7)
 
 # Library metadata

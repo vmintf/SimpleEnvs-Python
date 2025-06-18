@@ -20,13 +20,14 @@ Usage:
     loader = SimpleEnvLoader()
     await loader.load()
 """
+import asyncio
 import os
 from typing import Any, Dict, List, Optional, Union
 
 from .constants import LIBRARY_NAME, VERSION, get_environment_type
 from .exceptions import *
 from .manager import SecureLoaderManager
-from .secure import SecureEnvLoader, load_secure
+from .secure import SecureEnvLoader
 
 # Import all classes and exceptions
 from .simple import SimpleEnvLoader, load_env, load_env_sync
@@ -53,7 +54,7 @@ _secure_manager = SecureLoaderManager()
 # =============================================================================
 
 
-async def load(path: Optional[str] = None, max_depth: int = 2) -> None:
+def load(path: Optional[str] = None, max_depth: int = 2) -> None:
     """
     Load environment variables using SimpleEnvLoader (syncs to os.environ)
 
@@ -69,7 +70,11 @@ async def load(path: Optional[str] = None, max_depth: int = 2) -> None:
     if _simple_loader is None:
         _simple_loader = SimpleEnvLoader()
 
-    await _simple_loader.load(path, max_depth)
+    try:
+        loop = asyncio.get_running_loop()
+        loop.create_task(_simple_loader.load(path, max_depth))
+    except RuntimeError:
+        asyncio.run(_simple_loader.load(path, max_depth))
 
 
 def load_sync(path: Optional[str] = None, max_depth: int = 2) -> None:
@@ -142,11 +147,38 @@ def is_loaded() -> bool:
 # =============================================================================
 
 
-async def load_secure(
+def load_secure(
+    path: Optional[str] = None, strict: bool = True, max_depth: int = 2
+) -> None:
+    global _secure_loader, _secure_manager
+    if _secure_loader is None:
+        _secure_loader = SecureEnvLoader()
+
+    from .secure import LoadOptions
+
+    options = LoadOptions(path=path, max_depth=max_depth, strict_validation=strict)
+    try:
+        # 현재 실행 중인 이벤트 루프 가져오기
+        loop = asyncio.get_running_loop()
+        task = loop.create_task(_secure_loader.load_secure(options))
+
+        # 현재 태스크가 루프의 유일한 태스크인지 확인 (기본 태스크 외에 다른 태스크가 없는 경우)
+        if len(asyncio.all_tasks(loop)) <= 1:
+            # 기본 태스크만 있고 다른 태스크가 없으면 루프 종료 예약
+            loop.call_soon(lambda: loop.stop() if not loop.is_closed() else None)
+
+    except RuntimeError:
+        asyncio.run(_secure_loader.load_secure(options))
+    # Update manager reference
+    _secure_manager._global_loader_ref = _secure_loader
+
+
+# Async loader version - 2025/06/16 15:38 (KST)
+async def load_secure_async(
     path: Optional[str] = None, strict: bool = True, max_depth: int = 2
 ) -> None:
     """
-    Load environment variables using SecureEnvLoader (memory-isolated)
+    Load environment variables using SecureEnvLoader (memory-isolated) - ASYNC VERSION
 
     Args:
         path: Specific .env file path, or None for auto-discovery
@@ -154,7 +186,7 @@ async def load_secure(
         max_depth: Maximum directory depth to search for .env files
 
     Usage:
-        await simpleenvs.load_secure()
+        await simpleenvs.load_secure_async()  # Asynchronous version
         db_host = simpleenvs.get_secure("DB_HOST")  # NOT in os.environ!
     """
     global _secure_loader, _secure_manager
@@ -168,6 +200,39 @@ async def load_secure(
 
     # Update manager reference
     _secure_manager._global_loader_ref = _secure_loader
+
+
+# 기존 load_dotenv_secure도 비동기 버전 추가
+def load_dotenv_secure(path: Optional[str] = None, strict: bool = True) -> None:
+    """
+    One-liner to load .env file with maximum security (memory-isolated) - SYNC VERSION
+
+    Args:
+        path: Path to .env file, or None for auto-discovery
+        strict: Enable strict security validation
+
+    Usage:
+        from simpleenvs import load_dotenv_secure
+        load_dotenv_secure()  # Maximum security!
+    """
+    load_secure(path, strict)
+
+
+async def load_dotenv_secure_async(
+    path: Optional[str] = None, strict: bool = True
+) -> None:
+    """
+    One-liner to load .env file with maximum security (memory-isolated) - ASYNC VERSION
+
+    Args:
+        path: Path to .env file, or None for auto-discovery
+        strict: Enable strict security validation
+
+    Usage:
+        from simpleenvs import load_dotenv_secure_async
+        await load_dotenv_secure_async()  # Maximum security!
+    """
+    await load_secure_async(path, strict)
 
 
 def get_secure(key: str, default: Optional[EnvValue] = None) -> Optional[EnvValue]:
@@ -254,8 +319,9 @@ def clear() -> None:
         _secure_loader.secure_wipe()
         _secure_loader = None
 
-    # Update manager reference
-    _secure_manager._global_loader_ref = None
+    # 메모리에서 모든 로더 강제 삭제
+    _secure_manager.force_delete_all_loaders()  # 이 메서드가 _global_loader_ref = None도 처리함
+    print(bool(get_all_secure_loaders()))
 
 
 def get_info() -> Dict[str, Any]:
@@ -309,9 +375,13 @@ async def aload_dotenv(path: Optional[str] = None) -> None:
 
     Usage:
         from simpleenvs import aload_dotenv
-        await aload_dotenv()  # Async version
+        await aload_dotenv() # Async version
     """
-    await load(path)
+    global _simple_loader
+    if _simple_loader is None:
+        _simple_loader = SimpleEnvLoader()
+
+    await _simple_loader.load(path)
 
 
 def load_dotenv_secure(path: Optional[str] = None, strict: bool = True) -> None:
@@ -326,9 +396,7 @@ def load_dotenv_secure(path: Optional[str] = None, strict: bool = True) -> None:
         from simpleenvs import load_dotenv_secure
         load_dotenv_secure()  # Maximum security!
     """
-    import asyncio
-
-    asyncio.run(load_secure(path, strict))
+    load_secure(path, strict)
 
 
 # Class exports
@@ -347,6 +415,8 @@ __all__ = [
     "is_loaded",
     # Secure API (memory-isolated)
     "load_secure",
+    "load_secure_async",
+    "load_dotenv_secure_async",
     "get_secure",
     "get_int_secure",
     "get_bool_secure",
@@ -409,7 +479,7 @@ def _example_usage():
     # Secure usage (enterprise/production)
     async def secure_example():
         # Load with maximum security (memory-isolated)
-        await load_secure()
+        load_secure()
         jwt_secret = get_secure("JWT_SECRET")
 
         # NOT available via os.getenv (memory-isolated!)
@@ -420,11 +490,11 @@ def _example_usage():
     # Mixed usage
     async def mixed_example():
         # Simple for non-sensitive config
-        await load()
+        load()
         app_name = get("APP_NAME", "MyApp")
 
         # Secure for sensitive data
-        await load_secure()
+        load_secure()
         database_password = get_secure("DATABASE_PASSWORD")
 
     # Direct class usage
@@ -464,7 +534,6 @@ if __name__ == "__main__":
     print(f"Secure loaders in memory: {len(_secure_manager)}")  # ← New!
 
     # Example quick test
-    import asyncio
 
     async def quick_test():
         try:

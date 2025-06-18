@@ -64,6 +64,36 @@ class SecureLoaderManager:
             pass
         return loaders
 
+    def force_delete_all_loaders(self) -> None:
+        """
+        메모리에서 모든 SecureEnvLoader 인스턴스를 강제로 삭제합니다.
+        1. 각 로더의 데이터를 지웁니다 (secure_wipe)
+        2. del을 사용해 객체 자체를 메모리에서 제거합니다
+        3. 가비지 컬렉션을 강제 실행합니다
+        """
+        # 현재 메모리에 있는 모든 로더 찾기
+        loaders = self.get_all_loaders()
+
+        # 각 로더의 secure_wipe 호출 후 삭제
+        for loader in loaders:
+            try:
+                if hasattr(loader, "secure_wipe"):
+                    loader.secure_wipe()
+                    # 해당 객체에 대한 참조를 del로 제거
+                    del loader
+            except Exception:
+                pass  # 개별 로더 정리 실패 시 계속 진행
+
+        # 글로벌 참조 정리
+        self._global_loader_ref = None
+
+        # 리스트 자체를 비우고 삭제
+        loaders.clear()
+        del loaders
+
+        # 가비지 컬렉션 강제 실행 (남은 객체들 정리)
+        gc.collect()
+
     # =============================================================================
     # MAGIC METHODS - Pythonic Interface
     # =============================================================================
@@ -74,7 +104,7 @@ class SecureLoaderManager:
 
     def __bool__(self) -> bool:
         """Return True if there's an active loader"""
-        return self.get_active_loader() is not None
+        return bool(self.get_active_loader())
 
     def __iter__(self):
         """Iterate over all loaders in memory"""
