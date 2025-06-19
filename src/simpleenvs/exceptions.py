@@ -3,7 +3,7 @@
 SimpleEnvs: Exception classes for error handling
 """
 
-from typing import Any, Optional
+from typing import Any, ContextManager, Literal, Optional, TypeVar, Union
 
 
 class SimpleEnvsError(Exception):
@@ -220,7 +220,7 @@ class SecureErrorHandler:
         self.operation = operation
         self.suppress_details = suppress_details
 
-    def __enter__(self):
+    def __enter__(self) -> "SecureErrorHandler":
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):

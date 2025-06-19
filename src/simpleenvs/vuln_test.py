@@ -61,6 +61,7 @@ class FinalCorrectedTestSuite:
         """Cleanup temporary files and restore working directory"""
         os.chdir(self.original_cwd)
         import shutil
+
         try:
             shutil.rmtree(self.temp_dir)
             print(f"\n🧹 Cleaned up temporary directory: {self.temp_dir}")
@@ -68,8 +69,12 @@ class FinalCorrectedTestSuite:
             print(f"\n⚠️  Failed to clean up temporary directory: {e}")
 
     def log_test(
-            self, test_name: str, expected_behavior: str, actual_result: str,
-            success: bool, details: str = ""
+        self,
+        test_name: str,
+        expected_behavior: str,
+        actual_result: str,
+        success: bool,
+        details: str = "",
     ):
         """정확한 동작 vs 실제 결과 로그"""
         result = {
@@ -135,14 +140,18 @@ class FinalCorrectedTestSuite:
             await loader.load_secure(LoadOptions(path=file_path))
             self.log_test(
                 "Normal file loading",
-                "Success", "Success", True,
-                "File loaded successfully"
+                "Success",
+                "Success",
+                True,
+                "File loaded successfully",
             )
         except Exception as e:
             self.log_test(
                 "Normal file loading",
-                "Success", f"Failed({type(e).__name__})", False,
-                f"Unexpected failure: {e}"
+                "Success",
+                f"Failed({type(e).__name__})",
+                False,
+                f"Unexpected failure: {e}",
             )
 
         # 2. 빈 파일 처리
@@ -154,20 +163,26 @@ class FinalCorrectedTestSuite:
             await loader.load_secure(LoadOptions(path=empty_file))
             self.log_test(
                 "Empty file",
-                "InvalidInputError", "Success", False,
-                "Empty file should be rejected"
+                "InvalidInputError",
+                "Success",
+                False,
+                "Empty file should be rejected",
             )
         except InvalidInputError as e:
             self.log_test(
                 "Empty file",
-                "InvalidInputError", "InvalidInputError", True,
-                f"Correctly rejected: {e}"
+                "InvalidInputError",
+                "InvalidInputError",
+                True,
+                f"Correctly rejected: {e}",
             )
         except Exception as e:
             self.log_test(
                 "Empty file",
-                "InvalidInputError", type(e).__name__, True,
-                f"Rejected with: {e}"
+                "InvalidInputError",
+                type(e).__name__,
+                True,
+                f"Rejected with: {e}",
             )
 
         # 3. 파일 크기 제한
@@ -179,20 +194,26 @@ class FinalCorrectedTestSuite:
             await loader.load_secure(LoadOptions(path=large_file))
             self.log_test(
                 "Large file (15MB)",
-                "FileSizeError", "Success", False,
-                "Large file should be rejected"
+                "FileSizeError",
+                "Success",
+                False,
+                "Large file should be rejected",
             )
         except FileSizeError as e:
             self.log_test(
                 "Large file (15MB)",
-                "FileSizeError", "FileSizeError", True,
-                f"Correctly rejected: {e}"
+                "FileSizeError",
+                "FileSizeError",
+                True,
+                f"Correctly rejected: {e}",
             )
         except Exception as e:
             self.log_test(
                 "Large file (15MB)",
-                "FileSizeError", type(e).__name__, True,
-                f"Rejected with: {e}"
+                "FileSizeError",
+                type(e).__name__,
+                True,
+                f"Rejected with: {e}",
             )
 
         # 4. 보안 패턴 검증 - FileParsingError로 감싸짐
@@ -211,27 +232,35 @@ class FinalCorrectedTestSuite:
                 await loader.load_secure(LoadOptions(path=file_path))
                 self.log_test(
                     f"Dangerous pattern: {filename}",
-                    "FileParsingError", "Success", False,
-                    "Dangerous pattern should be blocked"
+                    "FileParsingError",
+                    "Success",
+                    False,
+                    "Dangerous pattern should be blocked",
                 )
             except FileParsingError as e:
                 # 실제로는 FileParsingError로 감싸져서 나옴
                 self.log_test(
                     f"Dangerous pattern: {filename}",
-                    "FileParsingError", "FileParsingError", True,
-                    f"Correctly blocked (wrapped): {e}"
+                    "FileParsingError",
+                    "FileParsingError",
+                    True,
+                    f"Correctly blocked (wrapped): {e}",
                 )
             except InvalidInputError as e:
                 self.log_test(
                     f"Dangerous pattern: {filename}",
-                    "FileParsingError", "InvalidInputError", True,
-                    f"Blocked directly: {e}"
+                    "FileParsingError",
+                    "InvalidInputError",
+                    True,
+                    f"Blocked directly: {e}",
                 )
             except Exception as e:
                 self.log_test(
                     f"Dangerous pattern: {filename}",
-                    "FileParsingError", type(e).__name__, True,
-                    f"Blocked with: {e}"
+                    "FileParsingError",
+                    type(e).__name__,
+                    True,
+                    f"Blocked with: {e}",
                 )
 
     async def test_simple_vs_secure_loader_differences(self):
@@ -259,21 +288,27 @@ LARGE_NUM=999999999999999999999999999999999999999
                 port_int = simple_loader.get_int("PORT")
                 self.log_test(
                     "SimpleLoader: PORT as int",
-                    "TypeConversionError or Success", "Success", True,
-                    f"Gracefully handled: {port_int}"
+                    "TypeConversionError or Success",
+                    "Success",
+                    True,
+                    f"Gracefully handled: {port_int}",
                 )
             except TypeConversionError as e:
                 self.log_test(
                     "SimpleLoader: PORT as int",
-                    "TypeConversionError or Success", "TypeConversionError", True,
-                    f"Correctly failed: {e}"
+                    "TypeConversionError or Success",
+                    "TypeConversionError",
+                    True,
+                    f"Correctly failed: {e}",
                 )
 
         except Exception as e:
             self.log_test(
                 "SimpleLoader type test setup",
-                "Success", type(e).__name__, False,
-                f"Setup failed: {e}"
+                "Success",
+                type(e).__name__,
+                False,
+                f"Setup failed: {e}",
             )
 
         # SecureEnvLoader (엄격함)
@@ -282,20 +317,26 @@ LARGE_NUM=999999999999999999999999999999999999999
             await secure_loader.load_secure(LoadOptions(path=file_path))
             self.log_test(
                 "SecureLoader: Load with type issues",
-                "Success or FileParsingError", "Success", True,
-                "Loaded successfully despite type issues"
+                "Success or FileParsingError",
+                "Success",
+                True,
+                "Loaded successfully despite type issues",
             )
         except FileParsingError as e:
             self.log_test(
                 "SecureLoader: Load with type issues",
-                "Success or FileParsingError", "FileParsingError", True,
-                f"Rejected during parsing: {e}"
+                "Success or FileParsingError",
+                "FileParsingError",
+                True,
+                f"Rejected during parsing: {e}",
             )
         except Exception as e:
             self.log_test(
                 "SecureLoader: Load with type issues",
-                "Success or FileParsingError", type(e).__name__, True,
-                f"Handled with: {e}"
+                "Success or FileParsingError",
+                type(e).__name__,
+                True,
+                f"Handled with: {e}",
             )
 
     async def test_error_hierarchy_understanding(self):
@@ -314,20 +355,26 @@ LARGE_NUM=999999999999999999999999999999999999999
             await loader.load_secure(LoadOptions(path=file_path))
             self.log_test(
                 "Null byte detection",
-                "InvalidInputError or FileParsingError", "Success", False,
-                "Null byte should be blocked"
+                "InvalidInputError or FileParsingError",
+                "Success",
+                False,
+                "Null byte should be blocked",
             )
         except InvalidInputError as e:
             self.log_test(
                 "Null byte detection",
-                "InvalidInputError or FileParsingError", "InvalidInputError", True,
-                f"Direct InvalidInputError: {e}"
+                "InvalidInputError or FileParsingError",
+                "InvalidInputError",
+                True,
+                f"Direct InvalidInputError: {e}",
             )
         except FileParsingError as e:
             self.log_test(
                 "Null byte detection",
-                "InvalidInputError or FileParsingError", "FileParsingError", True,
-                f"Wrapped in FileParsingError: {e}"
+                "InvalidInputError or FileParsingError",
+                "FileParsingError",
+                True,
+                f"Wrapped in FileParsingError: {e}",
             )
 
         # 2. 파일 자체 속성으로 인한 에러
@@ -347,27 +394,35 @@ LARGE_NUM=999999999999999999999999999999999999999
                 await loader.load_secure(LoadOptions(path=symlink_path))
                 self.log_test(
                     "Symbolic link detection",
-                    "InvalidInputError", "Success", False,
-                    "Symbolic links should be blocked"
+                    "InvalidInputError",
+                    "Success",
+                    False,
+                    "Symbolic links should be blocked",
                 )
             except InvalidInputError as e:
                 self.log_test(
                     "Symbolic link detection",
-                    "InvalidInputError", "InvalidInputError", True,
-                    f"Correctly blocked: {e}"
+                    "InvalidInputError",
+                    "InvalidInputError",
+                    True,
+                    f"Correctly blocked: {e}",
                 )
             except OSError:
                 self.log_test(
                     "Symbolic link test",
-                    "N/A", "Skipped", True,
-                    "Symbolic links not supported on this system"
+                    "N/A",
+                    "Skipped",
+                    True,
+                    "Symbolic links not supported on this system",
                 )
 
         except Exception as e:
             self.log_test(
                 "Symbolic link test setup",
-                "N/A", "Error", True,
-                f"Test skipped due to: {e}"
+                "N/A",
+                "Error",
+                True,
+                f"Test skipped due to: {e}",
             )
 
     async def test_environment_not_loaded_precision(self):
@@ -390,8 +445,10 @@ LARGE_NUM=999999999999999999999999999999999999999
 
                 self.log_test(
                     f"Not loaded: {op_name}",
-                    "EnvNotLoadedError", "Success", False,
-                    f"Should have failed but got: {result}"
+                    "EnvNotLoadedError",
+                    "Success",
+                    False,
+                    f"Should have failed but got: {result}",
                 )
 
             except EnvNotLoadedError as e:
@@ -400,26 +457,34 @@ LARGE_NUM=999999999999999999999999999999999999999
 
                 # 메시지에 오타가 있는지 확인
                 error_msg = str(e)
-                has_typo = any(typo in error_msg for typo in ['opperation', 'booll', 'mmax'])
+                has_typo = any(
+                    typo in error_msg for typo in ["opperation", "booll", "mmax"]
+                )
 
                 if has_typo:
                     self.log_test(
                         f"Not loaded: {op_name}",
-                        "EnvNotLoadedError", "EnvNotLoadedError", True,
-                        f"⚠️ Message has typos: {e}"
+                        "EnvNotLoadedError",
+                        "EnvNotLoadedError",
+                        True,
+                        f"⚠️ Message has typos: {e}",
                     )
                 else:
                     self.log_test(
                         f"Not loaded: {op_name}",
-                        "EnvNotLoadedError", "EnvNotLoadedError", True,
-                        f"✅ Clean message: {e}"
+                        "EnvNotLoadedError",
+                        "EnvNotLoadedError",
+                        True,
+                        f"✅ Clean message: {e}",
                     )
 
             except Exception as e:
                 self.log_test(
                     f"Not loaded: {op_name}",
-                    "EnvNotLoadedError", type(e).__name__, False,
-                    f"Unexpected error type: {e}"
+                    "EnvNotLoadedError",
+                    type(e).__name__,
+                    False,
+                    f"Unexpected error type: {e}",
                 )
 
     # =============================================================================
@@ -457,8 +522,11 @@ LARGE_NUM=999999999999999999999999999999999999999
 
         total_tests = len(self.test_results)
         successful_tests = sum(1 for r in self.test_results if r["success"])
-        perfect_matches = sum(1 for r in self.test_results
-                              if r["success"] and r["expected_behavior"] == r["actual_result"])
+        perfect_matches = sum(
+            1
+            for r in self.test_results
+            if r["success"] and r["expected_behavior"] == r["actual_result"]
+        )
 
         print(f"Total Tests: {total_tests}")
         print(f"Successful Tests: {successful_tests}")
@@ -468,18 +536,25 @@ LARGE_NUM=999999999999999999999999999999999999999
         # SimpleEnvs 실제 동작 패턴 요약
         print(f"\n🔍 SIMPLEENVS REAL BEHAVIOR PATTERNS:")
 
-        parsing_errors = sum(1 for r in self.test_results
-                             if "FileParsingError" in r["actual_result"])
+        parsing_errors = sum(
+            1 for r in self.test_results if "FileParsingError" in r["actual_result"]
+        )
         if parsing_errors > 0:
-            print(f"   • Security errors wrapped in FileParsingError: {parsing_errors} cases")
+            print(
+                f"   • Security errors wrapped in FileParsingError: {parsing_errors} cases"
+            )
 
-        type_tolerance = sum(1 for r in self.test_results
-                             if "Type conversion" in r["test_name"] and "Success" in r["actual_result"])
+        type_tolerance = sum(
+            1
+            for r in self.test_results
+            if "Type conversion" in r["test_name"] and "Success" in r["actual_result"]
+        )
         if type_tolerance > 0:
-            print(f"   • Type conversion tolerance: {type_tolerance} cases handled gracefully")
+            print(
+                f"   • Type conversion tolerance: {type_tolerance} cases handled gracefully"
+            )
 
-        typo_count = sum(1 for r in self.test_results
-                         if "typos" in r["details"])
+        typo_count = sum(1 for r in self.test_results if "typos" in r["details"])
         if typo_count > 0:
             print(f"   • Error message typos detected: {typo_count} cases")
 
@@ -500,6 +575,7 @@ LARGE_NUM=999999999999999999999999999999999999999
 # =============================================================================
 # MAIN EXECUTION
 # =============================================================================
+
 
 async def main():
     """메인 실행 함수"""
