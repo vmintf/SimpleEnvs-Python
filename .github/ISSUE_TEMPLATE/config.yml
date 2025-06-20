@@ -10,7 +10,7 @@ contact_links:
     about: Report security vulnerabilities privately (DO NOT create public issues for security problems)
 
   - name: 📚 Documentation
-    url: https://vmintf.github.io/SimpleEnvs-Python
+    url: https://simpleenvs.skystarry.xyz/docs/stable/quickstart
     about: Read the full documentation and API reference
 
   - name: 📦 PyPI Package
