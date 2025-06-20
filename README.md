@@ -333,7 +333,7 @@ python -m simpleenvs.benchmark --rounds 10
 python -m simpleenvs.vuln_test
 
 # Tests path traversal, injection attacks, memory isolation, etc.
-# 51 security tests covering enterprise threat scenarios
+# 16 security tests covering enterprise threat scenarios
 ```
 
 ## 🏗️ Use Cases
