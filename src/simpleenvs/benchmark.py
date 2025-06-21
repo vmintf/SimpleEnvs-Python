@@ -11,7 +11,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 def check_dependencies():
@@ -180,7 +180,7 @@ class BenchmarkRunner:
         return end_time - start_time
 
     def run_benchmark(
-        self, name: str, func, test_file: str, rounds: int = None
+        self, name: str, func, test_file: str, rounds: Optional[int] = None
     ) -> Dict[str, float]:
         """Run individual benchmark"""
         if rounds is None:

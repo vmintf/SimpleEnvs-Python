@@ -9,7 +9,7 @@
 [![Security Vulnerability Tests](https://github.com/vmintf/SimpleEnvs-Python/actions/workflows/security_tests.yml/badge.svg)](https://github.com/vmintf/SimpleEnvs-Python/actions/workflows/security_tests.yml)
 
 <div align="center">
-<img src="assets/logo.jpg" alt="Logo" width="128" height="128" style="border-radius: 15%;"/>
+<img src="https://raw.githubusercontent.com/vmintf/SimpleEnvs-Python/refs/heads/main/assets/logo.jpg" alt="Logo" width="128" height="128" style="border-radius: 15%;"/>
 </div>
 
 > **Ultra-secure, high-performance .env file loader for Python**  

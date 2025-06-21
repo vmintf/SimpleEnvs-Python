@@ -384,21 +384,6 @@ async def aload_dotenv(path: Optional[str] = None) -> None:
     await _simple_loader.load(path)
 
 
-def load_dotenv_secure(path: Optional[str] = None, strict: bool = True) -> None:
-    """
-    One-liner to load .env file with maximum security (memory-isolated)
-
-    Args:
-        path: Path to .env file, or None for auto-discovery
-        strict: Enable strict security validation
-
-    Usage:
-        from simpleenvs import load_dotenv_secure
-        load_dotenv_secure()  # Maximum security!
-    """
-    load_secure(path, strict)
-
-
 # Class exports
 __all__ = [
     # Classes
@@ -460,13 +445,13 @@ __all__ = [
 # =============================================================================
 
 
-def _example_usage():
+def _example_usage() -> None:
     """Example usage patterns (for documentation)"""
 
     # Simple usage (most common)
     async def simple_example():
         # Load and use immediately
-        await load()
+        load()
         db_host = get("DB_HOST", "localhost")
         db_port = get_int("DB_PORT", 5432)
         debug = get_bool("DEBUG", False)
@@ -535,10 +520,10 @@ if __name__ == "__main__":
 
     # Example quick test
 
-    async def quick_test():
+    async def quick_test() -> None:
         try:
             print("\nTesting simple loading...")
-            await load()
+            load()
             print(f"Simple loaded: {is_loaded()}")
         except FileNotFoundError:
             print("No .env file found for testing")

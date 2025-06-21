@@ -106,7 +106,7 @@ class SecureLoaderManager:
         """Return True if there's an active loader"""
         return bool(self.get_active_loader())
 
-    def __iter__(self):
+    def __iter__(self) -> object:
         """Iterate over all loaders in memory"""
         return iter(self.get_all_loaders())
 

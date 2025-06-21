@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "SimpleEnvs-Python"
-version = "2.0.0-beta.2"
+version = "2.0.0-beta.3"
 description = "Ultra-secure, high-performance .env file loader"
 readme = "README.md"
 license = {text = "MIT"}
@@ -73,7 +73,7 @@ benchmark = [
 
 [project.urls]
 Homepage = "https://github.com/vmintf/SimpleEnvs-Python"
-Documentation = "https://vmintf.github.io/SimpleEnvs-Python"
+Documentation = "https://simpleenvs.skystarry.xyz/docs/stable/quickstart"
 Repository = "https://github.com/vmintf/SimpleEnvs-Python.git"
 "Bug Tracker" = "https://github.com/vmintf/SimpleEnvs-Python/issues"
 Changelog = "https://github.com/vmintf/SimpleEnvs-Python/blob/main/CHANGELOG.md"

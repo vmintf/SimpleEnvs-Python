@@ -376,7 +376,7 @@ class SecureEnvLoader:
                 return int(value)
             except ValueError:
                 return default
-        return default
+        return int(default) if default is not None else None
 
     def get_bool_secure(
         self, key: str, default: Optional[bool] = None
@@ -442,7 +442,7 @@ class SecureEnvLoader:
         return self.__access_log.copy()
 
     @staticmethod
-    def __cleanup_handler():
+    def __cleanup_handler() -> None:
         """Cleanup handler for security"""
         # This runs when object is garbage collected
         pass
@@ -486,7 +486,7 @@ async def load_from_path_secure(path: str) -> SecureEnvLoader:
 
 if __name__ == "__main__":
     # Example usage
-    async def main():
+    async def main() -> None:
         """Secure usage example"""
         try:
             # Create secure loader

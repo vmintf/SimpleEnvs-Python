@@ -28,7 +28,7 @@ from .exceptions import (
 )
 
 # Type definitions
-EnvValue = Union[str, int, bool]
+EnvValue = Union[str, int, bool, float]
 EnvMap = Dict[str, EnvValue]
 
 
@@ -37,7 +37,7 @@ EnvMap = Dict[str, EnvValue]
 # =============================================================================
 
 
-def parse_env_value(value: str, strict: bool = False) -> EnvValue:
+def parse_env_value(value: Any, strict: bool = False) -> EnvValue:
     """
     Parse environment variable value to appropriate type
 
@@ -83,7 +83,7 @@ def parse_env_value(value: str, strict: bool = False) -> EnvValue:
             elif strict:
                 raise TypeConversionError("value", value, "64-bit integer")
             else:
-                return value  # Return as string if out of range
+                return int(value)  # Return as string if out of range
         except ValueError:
             if strict:
                 raise TypeConversionError("value", value, "integer")
@@ -99,11 +99,11 @@ def parse_env_value(value: str, strict: bool = False) -> EnvValue:
     # Default to string with encoding validation
     try:
         value.encode("utf-8")
-        return value
+        return str(value)
     except UnicodeEncodeError:
         if strict:
             raise InvalidInputError("Invalid UTF-8 encoding in value", value)
-        return value
+        return str(value)
 
 
 def normalize_boolean(value: Any) -> bool:
@@ -159,7 +159,7 @@ def normalize_env_key(key: str) -> str:
 # =============================================================================
 
 
-def validate_value_security(value: str) -> None:
+def validate_value_security(value: Any) -> None:
     """
     Validate value for security issues
 
@@ -507,7 +507,7 @@ def get_env_info(env_data: EnvMap) -> Dict[str, Any]:
     if not env_data:
         return {"count": 0, "types": {}, "keys": []}
 
-    type_counts = {}
+    type_counts: Dict[str, int | bool] = {}
     for value in env_data.values():
         type_name = type(value).__name__
         type_counts[type_name] = type_counts.get(type_name, 0) + 1

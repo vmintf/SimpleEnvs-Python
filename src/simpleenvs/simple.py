@@ -43,14 +43,14 @@ from .utils import (
 )
 
 # Type definitions
-EnvValue = Union[str, int, bool]
+EnvValue = Union[str, int, bool, float]
 EnvMap = Dict[str, EnvValue]
 
 
 class SimpleEnvLoader:
     """Simple, fast .env loader that syncs to system environment variables"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize simple loader"""
         self.env_data: EnvMap = {}
 
@@ -297,7 +297,7 @@ def load_env_sync(path: Optional[str] = None) -> SimpleEnvLoader:
 
 if __name__ == "__main__":
     # Example usage
-    async def main():
+    async def main() -> None:
         try:
             # Async loading
             loader = SimpleEnvLoader()

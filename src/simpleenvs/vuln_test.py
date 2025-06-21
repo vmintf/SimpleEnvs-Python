@@ -50,7 +50,7 @@ except ImportError as e:
 class FinalCorrectedTestSuite:
     """SimpleEnvs의 실제 동작에 맞춘 최종 테스트 스위트"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.test_results: List[Dict] = []
         self.original_cwd = os.getcwd()
         self.temp_dir = tempfile.mkdtemp()
