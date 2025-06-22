@@ -37,6 +37,7 @@ EnvMap = Dict[str, EnvValue]
 # =============================================================================
 
 
+
 def parse_env_value(value: Any, strict: bool = False) -> EnvValue:
     """
     Parse environment variable value to appropriate type
@@ -83,7 +84,7 @@ def parse_env_value(value: Any, strict: bool = False) -> EnvValue:
             elif strict:
                 raise TypeConversionError("value", value, "64-bit integer")
             else:
-                return int(value)  # Return as string if out of range
+                return value  # 여기를 수정: int(value) 대신 value(문자열)을 반환
         except ValueError:
             if strict:
                 raise TypeConversionError("value", value, "integer")
