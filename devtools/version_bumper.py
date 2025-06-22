@@ -17,7 +17,7 @@ from typing import List, Tuple
 
 class VersionBumper:
     def __init__(self):
-        self.constants_file = Path("src/simpleenvs/constants.py")
+        self.constants_file = Path("../src/simpleenvs/constants.py")
         self.version_pattern = r'VERSION = ["\']([0-9]+\.[0-9]+\.[0-9]+)["\']'
 
     def get_current_version(self) -> str:
