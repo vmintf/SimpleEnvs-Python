@@ -3,7 +3,7 @@
 SimpleEnvs: Exception classes for error handling
 """
 
-from typing import Any, ContextManager, Literal, Optional, TypeVar, Union, Type
+from typing import Any, ContextManager, Literal, Optional, Type, TypeVar, Union
 
 
 class SimpleEnvsError(Exception):
@@ -223,7 +223,12 @@ class SecureErrorHandler:
     def __enter__(self) -> "SecureErrorHandler":
         return self
 
-    def __exit__(self, exc_type: Optional[Type[BaseException]], exc_value: EnvSecurityError, traceback: Optional[object]) -> Literal[False]:
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: EnvSecurityError,
+        traceback: Optional[object],
+    ) -> Literal[False]:
         if exc_type and issubclass(exc_type, EnvSecurityError):
             # Log security error without exposing sensitive details
             if self.suppress_details:

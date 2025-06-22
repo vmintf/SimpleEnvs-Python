@@ -371,12 +371,12 @@ class SecureEnvLoader:
             return default
         if isinstance(value, int):
             return value
-        if isinstance(value, str):
-            try:
-                return int(value)
-            except ValueError:
-                return default
-        return int(default) if default is not None else None
+        try:
+            return int(value)
+        except (ValueError, TypeError):
+            pass
+
+        return default
 
     def get_bool_secure(
         self, key: str, default: Optional[bool] = None

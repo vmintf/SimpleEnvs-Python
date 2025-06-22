@@ -11,7 +11,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 
 def check_dependencies():
@@ -231,7 +231,7 @@ class BenchmarkRunner:
 
     async def run_async_benchmark(
         self, name: str, func, test_file: str, rounds: int = None
-    ) -> Dict[str, float]:
+    ) -> Union[str, float]:
         """Run async benchmark"""
         if rounds is None:
             rounds = self.rounds
@@ -537,7 +537,7 @@ class BenchmarkRunner:
                     print("   ⚠️  Noticeable performance impact from security features")
 
 
-def main():
+def main() -> None:
     """Main execution function"""
     import argparse
 

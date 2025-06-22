@@ -6,7 +6,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/src/SimpleEnvs_Python.egg-info" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.10.12 WSL (Ubuntu-22.04): (/home/skystarry/.cache/pypoetry/virtualenvs/simplewebsdk-yDu99-pp-py3.10/bin/python)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="simple_envs" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
