@@ -260,7 +260,7 @@ class SecureEnvLoader:
 
                 # Remove quotes if present
                 if (value.startswith('"') and value.endswith('"')) or (
-                        value.startswith("'") and value.endswith("'")
+                    value.startswith("'") and value.endswith("'")
                 ):
                     value = value[1:-1]
 
@@ -319,7 +319,7 @@ class SecureEnvLoader:
 
         # 멀티 스레드로 청크 읽기
         def read_chunk(start: int, size: int) -> bytes:
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 f.seek(start)
                 return f.read(size)
 
@@ -337,8 +337,8 @@ class SecureEnvLoader:
                 results[chunk_idx] = future.result()
 
         # 바이트를 합치고 디코딩
-        combined = b''.join(results)
-        return combined.decode('utf-8')
+        combined = b"".join(results)
+        return combined.decode("utf-8")
 
     async def __scan_directory_secure(self, path: str, max_depth: int) -> Optional[str]:
         """Securely scan directory for .env file"""

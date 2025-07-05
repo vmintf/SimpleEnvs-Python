@@ -123,10 +123,14 @@ class SimpleEnvLoader:
                     return file.read()
             except UnicodeDecodeError:
                 try:
-                    with open(file_path, "r", encoding="latin-1", buffering=8192) as file:
+                    with open(
+                        file_path, "r", encoding="latin-1", buffering=8192
+                    ) as file:
                         return file.read()
                 except Exception:
-                    raise InvalidInputError("Unable to decode file with supported encodings")
+                    raise InvalidInputError(
+                        "Unable to decode file with supported encodings"
+                    )
 
     def _parse_file_sync(self, file_path: str) -> EnvMap:
         """Parse .env file synchronously - GIL OPTIMIZED"""
