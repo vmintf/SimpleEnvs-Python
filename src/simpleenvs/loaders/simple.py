@@ -7,39 +7,27 @@ Simple version - syncs to system environment variables
 import asyncio
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
-
-import aiofiles
+from typing import Dict, List, Optional, Union
 
 # Import constants
-from .constants import (
-    DEFAULT_ENCODING,
-    ENV_FILE_PATTERNS,
-    EXCLUDED_DIRECTORIES,
-    FALSE_VALUES,
+from simpleenvs.constants import (
     MAX_SCAN_DEPTH,
-    SUPPORTED_ENCODINGS,
-    TRUE_VALUES,
 )
 
 # Import exceptions
-from .exceptions import (
+from simpleenvs.exceptions.exceptions import (
     EnvNotLoadedError,
     FileParsingError,
     InvalidInputError,
-    KeyNotFoundError,
     SimpleEnvsError,
     TypeConversionError,
 )
 
 # Import utilities
-from .utils import (
-    detect_file_encoding,
+from simpleenvs.utils import (
     find_env_files,
     parse_env_content,
     parse_env_value,
-    safe_file_read,
-    validate_key_format,
 )
 
 # Type definitions
@@ -82,15 +70,17 @@ class SimpleEnvLoader:
         return found_files[0] if found_files else None
 
     async def _parse_file(self, file_path: str) -> EnvMap:
-        """Parse .env file asynchronously"""
+        """Parse .env file asynchronously - GIL OPTIMIZED"""
         if not isinstance(file_path, str):
             raise InvalidInputError("file_path must be string", file_path)
 
         try:
-            # Use utils for safe file reading
-            content, encoding = safe_file_read(file_path)
+            # 🚀 GIL 최적화: aiofiles와 utils 의존성 제거!
+            from simpleenvs.filestream import read_env_file_optimized
 
-            # Use utils for parsing
+            content = read_env_file_optimized(file_path, encoding="utf-8")
+
+            # Use utils for parsing (파싱 로직은 유지)
             return parse_env_content(content, strict=False)
 
         except (FileNotFoundError, FileParsingError):
@@ -99,15 +89,17 @@ class SimpleEnvLoader:
             raise FileParsingError(file_path, original_error=e)
 
     def _parse_file_sync(self, file_path: str) -> EnvMap:
-        """Parse .env file synchronously"""
+        """Parse .env file synchronously - GIL OPTIMIZED"""
         if not isinstance(file_path, str):
             raise InvalidInputError("file_path must be string", file_path)
 
         try:
-            # Use utils for safe file reading
-            content, encoding = safe_file_read(file_path)
+            # 🚀 GIL 최적화: 동기/비동기 구분 없이 통일!
+            from simpleenvs.filestream import read_env_file_optimized
 
-            # Use utils for parsing
+            content = read_env_file_optimized(file_path, encoding="utf-8")
+
+            # Use utils for parsing (파싱 로직은 유지)
             return parse_env_content(content, strict=False)
 
         except (FileNotFoundError, FileParsingError):

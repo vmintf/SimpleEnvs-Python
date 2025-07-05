@@ -7,13 +7,12 @@ import asyncio
 import gc
 import os
 import tempfile
-from pathlib import Path
 
 import pytest
 
 import simpleenvs
 from simpleenvs import SecureEnvLoader, SimpleEnvLoader
-from simpleenvs.exceptions import *
+from simpleenvs.exceptions.exceptions import *
 
 # =============================================================================
 # __INIT__.PY MISSING COVERAGE (54% → 90%+)
@@ -218,7 +217,7 @@ class TestExceptionsMissingCoverage:
 
     def test_secure_error_handler_with_non_security_error(self):
         """Test SecureErrorHandler with non-security errors"""
-        from simpleenvs.exceptions import SecureErrorHandler
+        from simpleenvs.exceptions.exceptions import SecureErrorHandler
 
         # Test with non-security error (should not be handled specially)
         with SecureErrorHandler("test_op", suppress_details=False):
@@ -229,7 +228,7 @@ class TestExceptionsMissingCoverage:
 
     def test_secure_error_handler_suppress_details(self):
         """Test SecureErrorHandler with suppress_details=True"""
-        from simpleenvs.exceptions import SecureErrorHandler
+        from simpleenvs.exceptions.exceptions import SecureErrorHandler
 
         # Capture output to test suppression
         with SecureErrorHandler("test_op", suppress_details=True):
@@ -264,11 +263,9 @@ class TestExceptionsMissingCoverage:
 
     def test_exception_utilities_edge_cases(self):
         """Test exception utility functions edge cases"""
-        from simpleenvs.exceptions import (
-            format_security_error,
+        from simpleenvs.exceptions.exceptions import (
             get_error_code,
             handle_simpleenvs_error,
-            is_security_critical,
         )
 
         # Test with non-SimpleEnvsError
@@ -332,7 +329,7 @@ class TestSecureMissingCoverage:
 
     def test_load_secure_with_different_options(self):
         """Test load_secure with different LoadOptions"""
-        from simpleenvs.secure import LoadOptions
+        from simpleenvs.loaders.secure import LoadOptions
 
         loader = SecureEnvLoader()
 
@@ -459,7 +456,7 @@ class TestFinalCoveragePush:
         SecureEnvLoader._SecureEnvLoader__cleanup_handler()  # Should not raise
 
         # Test error logging paths with proper exception handling
-        from simpleenvs.secure import LoadOptions
+        from simpleenvs.loaders.secure import LoadOptions
 
         # Test path traversal detection (this will raise PathTraversalError)
         with pytest.raises(PathTraversalError):
@@ -478,7 +475,7 @@ class TestFinalCoveragePush:
 
     def test_exceptions_py_missing_lines(self):
         """Test specific missing lines in exceptions.py"""
-        from simpleenvs.exceptions import SecureErrorHandler
+        from simpleenvs.exceptions.exceptions import SecureErrorHandler
 
         # Test __exit__ method with different exception types
         handler = SecureErrorHandler("test_op")
@@ -488,7 +485,7 @@ class TestFinalCoveragePush:
         assert result is False
 
         # Test error code for unknown type
-        from simpleenvs.exceptions import get_error_code
+        from simpleenvs.exceptions.exceptions import get_error_code
 
         class UnknownError(Exception):
             pass

@@ -8,8 +8,7 @@ import asyncio
 import os
 import tempfile
 import time
-from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 # Import SimpleEnvs components
 try:
@@ -38,7 +37,7 @@ try:
         MAX_LINE_LENGTH,
         MAX_VALUE_LENGTH,
     )
-    from simpleenvs.secure import LoadOptions
+    from simpleenvs.loaders.secure import LoadOptions
 
     USING_REAL_SIMPLEENVS = True
 except ImportError as e:

@@ -13,15 +13,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-import aiofiles
-
 # Import constants
-from .constants import (
+from simpleenvs.constants import (
     DANGEROUS_PATTERNS,
     FALSE_VALUES,
 )
-from .constants import MAX_ENTRIES_PER_DIRECTORY as MAX_ENTRIES
-from .constants import (
+from simpleenvs.constants import MAX_ENTRIES_PER_DIRECTORY as MAX_ENTRIES
+from simpleenvs.constants import (
     MAX_FILE_SIZE,
     MAX_KEY_LENGTH,
     MAX_LINE_LENGTH,
@@ -31,8 +29,7 @@ from .constants import (
 )
 
 # Import exceptions
-from .exceptions import (
-    AccessDeniedError,
+from simpleenvs.exceptions.exceptions import (
     EnvSecurityError,
     FileParsingError,
     FileSizeError,
@@ -40,7 +37,6 @@ from .exceptions import (
     InvalidInputError,
     MemorySecurityError,
     PathTraversalError,
-    SessionError,
 )
 
 # Type definitions
@@ -215,7 +211,7 @@ class SecureEnvLoader:
             raise InvalidInputError("Invalid UTF-8 encoding in value")
 
     async def __parse_file_secure(self, file_path: str) -> EnvMap:
-        """Securely parse .env file with comprehensive validation - OPTIMIZED"""
+        """Securely parse .env file with comprehensive validation - GIL OPTIMIZED"""
         self.__validate_path_security(file_path)
         self.__validate_file_security(file_path)
 
@@ -223,16 +219,10 @@ class SecureEnvLoader:
         line_count = 0
 
         try:
-            # 🚀 최적화 1: 파일 크기에 따른 읽기 전략 선택
-            file_size = Path(file_path).stat().st_size
+            # 🚀 GIL 최적화: aiofiles 완전 제거!
+            from simpleenvs.filestream import read_env_file_optimized
 
-            if file_size < 1024 * 1024:  # 1MB 미만은 동기 읽기가 더 빠름
-                with open(file_path, "r", encoding="utf-8") as file:
-                    content = file.read()
-            else:
-                # 큰 파일만 비동기로 (청크 단위 또는 전체 읽기)
-                async with aiofiles.open(file_path, "r", encoding="utf-8") as file:
-                    content = await file.read()  # ✅ 한 번에 읽기
+            content = read_env_file_optimized(file_path, encoding="utf-8")
 
             # 🚀 최적화 2: 배치 보안 검증 (전체 내용 한 번에)
             self.__validate_content_security_batch(content)
@@ -333,7 +323,7 @@ class SecureEnvLoader:
             else:
                 # Auto-scan for .env file
                 env_path = await self.__scan_directory_secure(
-                    "./", min(options.max_depth, MAX_SCAN_DEPTH)
+                    "../", min(options.max_depth, MAX_SCAN_DEPTH)
                 )
                 if not env_path:
                     raise FileNotFoundError("No .env file found")
