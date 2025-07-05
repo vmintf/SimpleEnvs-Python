@@ -37,7 +37,6 @@ EnvMap = Dict[str, EnvValue]
 # =============================================================================
 
 
-
 def parse_env_value(value: Any, strict: bool = False) -> EnvValue:
     """
     Parse environment variable value to appropriate type
