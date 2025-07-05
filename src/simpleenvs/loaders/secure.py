@@ -220,9 +220,13 @@ class SecureEnvLoader:
 
         try:
             # 🚀 GIL 최적화: aiofiles 완전 제거!
-            from simpleenvs.filestream import read_env_file_optimized
+            # 기존: aiofiles 의존성
+            # 신규: 순수 Python + GIL 해제 최적화
 
-            content = read_env_file_optimized(file_path, encoding="utf-8")
+            file_size = Path(file_path).stat().st_size
+
+            # 모든 크기에서 GIL 최적화 방식 사용
+            content = self._read_with_gil_optimization(file_path, file_size)
 
             # 🚀 최적화 2: 배치 보안 검증 (전체 내용 한 번에)
             self.__validate_content_security_batch(content)
@@ -256,7 +260,7 @@ class SecureEnvLoader:
 
                 # Remove quotes if present
                 if (value.startswith('"') and value.endswith('"')) or (
-                    value.startswith("'") and value.endswith("'")
+                        value.startswith("'") and value.endswith("'")
                 ):
                     value = value[1:-1]
 
@@ -274,6 +278,67 @@ class SecureEnvLoader:
 
         self.__log_access("file_parse", file_path, True)
         return env_data
+
+    def _read_with_gil_optimization(self, file_path: str, file_size: int) -> str:
+        """GIL 최적화된 파일 읽기 - aiofiles 대체"""
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+
+        # 작은 파일 (< 1MB): 직접 읽기가 가장 빠름
+        if file_size < 1024 * 1024:
+            with open(file_path, "r", encoding="utf-8", buffering=8192) as file:
+                return file.read()
+
+        # 중간 파일 (1MB ~ 4MB): 최적화된 버퍼링
+        elif file_size < 4 * 1024 * 1024:
+            with open(file_path, "r", encoding="utf-8", buffering=64 * 1024) as file:
+                return file.read()
+
+        # 큰 파일 (> 4MB): 스레드 기반 청크 읽기
+        else:
+            return self._read_large_file_threaded(file_path, file_size)
+
+    def _read_large_file_threaded(self, file_path: str, file_size: int) -> str:
+        """큰 파일을 스레드 기반으로 읽기"""
+        import threading
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        # 청크 크기 계산 (256KB ~ 1MB)
+        chunk_size = min(1024 * 1024, max(256 * 1024, file_size // 4))
+
+        # 청크 정보 생성
+        chunks = []
+        for start in range(0, file_size, chunk_size):
+            size = min(chunk_size, file_size - start)
+            chunks.append((start, size))
+
+        # 단일 청크면 그냥 직접 읽기
+        if len(chunks) <= 1:
+            with open(file_path, "r", encoding="utf-8") as file:
+                return file.read()
+
+        # 멀티 스레드로 청크 읽기
+        def read_chunk(start: int, size: int) -> bytes:
+            with open(file_path, 'rb') as f:
+                f.seek(start)
+                return f.read(size)
+
+        # 스레드 풀로 병렬 읽기
+        with ThreadPoolExecutor(max_workers=min(4, len(chunks))) as executor:
+            future_to_chunk = {
+                executor.submit(read_chunk, start, size): idx
+                for idx, (start, size) in enumerate(chunks)
+            }
+
+            # 결과를 순서대로 정렬
+            results = [None] * len(chunks)
+            for future in as_completed(future_to_chunk):
+                chunk_idx = future_to_chunk[future]
+                results[chunk_idx] = future.result()
+
+        # 바이트를 합치고 디코딩
+        combined = b''.join(results)
+        return combined.decode('utf-8')
 
     async def __scan_directory_secure(self, path: str, max_depth: int) -> Optional[str]:
         """Securely scan directory for .env file"""
