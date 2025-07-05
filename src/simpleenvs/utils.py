@@ -5,26 +5,25 @@ Shared utilities for parsing, validation, and file operations
 """
 
 import hashlib
-import os
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from simpleenvs.exceptions.exceptions import (
+    FileParsingError,
+    InvalidInputError,
+    PathTraversalError,
+    TypeConversionError,
+)
 
 from .constants import (
     DANGEROUS_PATTERNS,
-    DEFAULT_ENCODING,
     ENV_FILE_PATTERNS,
     EXCLUDED_DIRECTORIES,
     FALSE_VALUES,
     PATH_TRAVERSAL_PATTERNS,
     SUPPORTED_ENCODINGS,
     TRUE_VALUES,
-)
-from .exceptions import (
-    FileParsingError,
-    InvalidInputError,
-    PathTraversalError,
-    TypeConversionError,
 )
 
 # Type definitions

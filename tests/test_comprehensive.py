@@ -4,20 +4,16 @@ Comprehensive test suite for SimpleEnvs
 Designed to achieve 90%+ code coverage
 """
 
-import asyncio
-import gc
-import os
 import tempfile
 from pathlib import Path
-from typing import Any, Generator
-from unittest.mock import mock_open, patch
+from typing import Generator
 
 import pytest
 
 import simpleenvs
 from simpleenvs import SecureEnvLoader, SimpleEnvLoader, utils
 from simpleenvs.constants import *
-from simpleenvs.exceptions import *
+from simpleenvs.exceptions.exceptions import *
 
 # =============================================================================
 # FIXTURES
@@ -258,7 +254,7 @@ class TestSecureEnvLoader:
         loader = SecureEnvLoader()
 
         # Test with specific file (don't try auto-discovery without .env file)
-        from simpleenvs.secure import LoadOptions
+        from simpleenvs.loaders.secure import LoadOptions
 
         options = LoadOptions(path=temp_env_file, strict_validation=True)
         await loader.load_secure(options)
@@ -281,7 +277,7 @@ class TestSecureEnvLoader:
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        from simpleenvs.secure import LoadOptions
+        from simpleenvs.loaders.secure import LoadOptions
 
         options = LoadOptions(path=temp_env_file)
         loop.run_until_complete(loader.load_secure(options))
@@ -324,7 +320,7 @@ class TestSecureEnvLoader:
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        from simpleenvs.secure import LoadOptions
+        from simpleenvs.loaders.secure import LoadOptions
 
         options = LoadOptions(path=temp_env_file)
         loop.run_until_complete(loader.load_secure(options))
@@ -348,7 +344,7 @@ class TestSecureEnvLoader:
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        from simpleenvs.secure import LoadOptions
+        from simpleenvs.loaders.secure import LoadOptions
 
         options = LoadOptions(path=temp_env_file)
         loop.run_until_complete(loader.load_secure(options))
@@ -369,7 +365,7 @@ class TestSecureEnvLoader:
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        from simpleenvs.secure import LoadOptions
+        from simpleenvs.loaders.secure import LoadOptions
 
         options = LoadOptions(path=temp_env_file)
         loop.run_until_complete(loader.load_secure(options))
@@ -572,7 +568,7 @@ class TestExceptions:
 
     def test_exception_utilities(self):
         """Test exception utility functions"""
-        from simpleenvs.exceptions import (
+        from simpleenvs.exceptions.exceptions import (
             format_security_error,
             get_error_code,
             handle_simpleenvs_error,
@@ -656,14 +652,14 @@ class TestIntegration:
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        from simpleenvs.secure import LoadOptions
+        from simpleenvs.loaders.secure import LoadOptions
 
         options = LoadOptions(path=temp_env_file)
         loop.run_until_complete(loader.load_secure(options))
 
         # Test memory introspection
         from simpleenvs import get_all_secure_loaders
-        from simpleenvs.manager import SecureLoaderManager
+        from simpleenvs.loaders.manager import SecureLoaderManager
 
         found_loader = SecureLoaderManager()._find_loader_in_memory()
         assert found_loader is not None
@@ -698,7 +694,7 @@ class TestErrorHandling:
 
         # Secure loader should be more strict
         secure_loader = SecureEnvLoader()
-        from simpleenvs.secure import LoadOptions
+        from simpleenvs.loaders.secure import LoadOptions
 
         options = LoadOptions(path=malformed_env_file, strict_validation=True)
 
@@ -814,7 +810,7 @@ class TestAdditionalCoverage:
 
     def test_exception_edge_cases(self):
         """Test exception edge cases"""
-        from simpleenvs.exceptions import SecureErrorHandler
+        from simpleenvs.exceptions.exceptions import SecureErrorHandler
 
         # Test SecureErrorHandler
         with SecureErrorHandler("test_op", suppress_details=True):
@@ -920,8 +916,8 @@ EMPTY_KEY=
     @pytest.mark.asyncio
     async def test_module_level_functions(self, temp_env_file):
         """Test module-level convenience functions"""
-        from simpleenvs.secure import load_from_path_secure, load_secure
-        from simpleenvs.simple import load_env, load_env_sync
+        from simpleenvs.loaders.secure import load_from_path_secure, load_secure
+        from simpleenvs.loaders.simple import load_env, load_env_sync
 
         # Test simple module functions
         loader1 = await load_env(temp_env_file)

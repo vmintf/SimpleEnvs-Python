@@ -22,15 +22,16 @@ Usage:
 """
 import asyncio
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List
 
-from .constants import LIBRARY_NAME, VERSION, get_environment_type
-from .exceptions import *
-from .manager import SecureLoaderManager
-from .secure import SecureEnvLoader
+from simpleenvs.exceptions.exceptions import *
+from simpleenvs.loaders.manager import SecureLoaderManager
+from simpleenvs.loaders.secure import SecureEnvLoader
 
 # Import all classes and exceptions
-from .simple import SimpleEnvLoader, load_env, load_env_sync
+from simpleenvs.loaders.simple import SimpleEnvLoader, load_env, load_env_sync
+
+from .constants import LIBRARY_NAME, VERSION, get_environment_type
 
 # Type definitions
 EnvValue = Union[str, int, bool]
@@ -154,7 +155,7 @@ def load_secure(
     if _secure_loader is None:
         _secure_loader = SecureEnvLoader()
 
-    from .secure import LoadOptions
+    from simpleenvs.loaders.secure import LoadOptions
 
     options = LoadOptions(path=path, max_depth=max_depth, strict_validation=strict)
     try:
@@ -193,7 +194,7 @@ async def load_secure_async(
     if _secure_loader is None:
         _secure_loader = SecureEnvLoader()
 
-    from .secure import LoadOptions
+    from simpleenvs.loaders.secure import LoadOptions
 
     options = LoadOptions(path=path, max_depth=max_depth, strict_validation=strict)
     await _secure_loader.load_secure(options)

@@ -13,15 +13,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-import aiofiles
-
 # Import constants
-from .constants import (
+from simpleenvs.constants import (
     DANGEROUS_PATTERNS,
     FALSE_VALUES,
 )
-from .constants import MAX_ENTRIES_PER_DIRECTORY as MAX_ENTRIES
-from .constants import (
+from simpleenvs.constants import MAX_ENTRIES_PER_DIRECTORY as MAX_ENTRIES
+from simpleenvs.constants import (
     MAX_FILE_SIZE,
     MAX_KEY_LENGTH,
     MAX_LINE_LENGTH,
@@ -31,8 +29,7 @@ from .constants import (
 )
 
 # Import exceptions
-from .exceptions import (
-    AccessDeniedError,
+from simpleenvs.exceptions.exceptions import (
     EnvSecurityError,
     FileParsingError,
     FileSizeError,
@@ -40,7 +37,6 @@ from .exceptions import (
     InvalidInputError,
     MemorySecurityError,
     PathTraversalError,
-    SessionError,
 )
 
 # Type definitions
@@ -215,7 +211,7 @@ class SecureEnvLoader:
             raise InvalidInputError("Invalid UTF-8 encoding in value")
 
     async def __parse_file_secure(self, file_path: str) -> EnvMap:
-        """Securely parse .env file with comprehensive validation - OPTIMIZED"""
+        """Securely parse .env file with comprehensive validation - GIL OPTIMIZED"""
         self.__validate_path_security(file_path)
         self.__validate_file_security(file_path)
 
@@ -223,16 +219,14 @@ class SecureEnvLoader:
         line_count = 0
 
         try:
-            # 🚀 최적화 1: 파일 크기에 따른 읽기 전략 선택
+            # 🚀 GIL 최적화: aiofiles 완전 제거!
+            # 기존: aiofiles 의존성
+            # 신규: 순수 Python + GIL 해제 최적화
+
             file_size = Path(file_path).stat().st_size
 
-            if file_size < 1024 * 1024:  # 1MB 미만은 동기 읽기가 더 빠름
-                with open(file_path, "r", encoding="utf-8") as file:
-                    content = file.read()
-            else:
-                # 큰 파일만 비동기로 (청크 단위 또는 전체 읽기)
-                async with aiofiles.open(file_path, "r", encoding="utf-8") as file:
-                    content = await file.read()  # ✅ 한 번에 읽기
+            # 모든 크기에서 GIL 최적화 방식 사용
+            content = self._read_with_gil_optimization(file_path, file_size)
 
             # 🚀 최적화 2: 배치 보안 검증 (전체 내용 한 번에)
             self.__validate_content_security_batch(content)
@@ -285,6 +279,67 @@ class SecureEnvLoader:
         self.__log_access("file_parse", file_path, True)
         return env_data
 
+    def _read_with_gil_optimization(self, file_path: str, file_size: int) -> str:
+        """GIL 최적화된 파일 읽기 - aiofiles 대체"""
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+
+        # 작은 파일 (< 1MB): 직접 읽기가 가장 빠름
+        if file_size < 1024 * 1024:
+            with open(file_path, "r", encoding="utf-8", buffering=8192) as file:
+                return file.read()
+
+        # 중간 파일 (1MB ~ 4MB): 최적화된 버퍼링
+        elif file_size < 4 * 1024 * 1024:
+            with open(file_path, "r", encoding="utf-8", buffering=64 * 1024) as file:
+                return file.read()
+
+        # 큰 파일 (> 4MB): 스레드 기반 청크 읽기
+        else:
+            return self._read_large_file_threaded(file_path, file_size)
+
+    def _read_large_file_threaded(self, file_path: str, file_size: int) -> str:
+        """큰 파일을 스레드 기반으로 읽기"""
+        import threading
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        # 청크 크기 계산 (256KB ~ 1MB)
+        chunk_size = min(1024 * 1024, max(256 * 1024, file_size // 4))
+
+        # 청크 정보 생성
+        chunks = []
+        for start in range(0, file_size, chunk_size):
+            size = min(chunk_size, file_size - start)
+            chunks.append((start, size))
+
+        # 단일 청크면 그냥 직접 읽기
+        if len(chunks) <= 1:
+            with open(file_path, "r", encoding="utf-8") as file:
+                return file.read()
+
+        # 멀티 스레드로 청크 읽기
+        def read_chunk(start: int, size: int) -> bytes:
+            with open(file_path, "rb") as f:
+                f.seek(start)
+                return f.read(size)
+
+        # 스레드 풀로 병렬 읽기
+        with ThreadPoolExecutor(max_workers=min(4, len(chunks))) as executor:
+            future_to_chunk = {
+                executor.submit(read_chunk, start, size): idx
+                for idx, (start, size) in enumerate(chunks)
+            }
+
+            # 결과를 순서대로 정렬
+            results = [None] * len(chunks)
+            for future in as_completed(future_to_chunk):
+                chunk_idx = future_to_chunk[future]
+                results[chunk_idx] = future.result()
+
+        # 바이트를 합치고 디코딩
+        combined = b"".join(results)
+        return combined.decode("utf-8")
+
     async def __scan_directory_secure(self, path: str, max_depth: int) -> Optional[str]:
         """Securely scan directory for .env file"""
         self.__validate_path_security(path)
@@ -333,7 +388,7 @@ class SecureEnvLoader:
             else:
                 # Auto-scan for .env file
                 env_path = await self.__scan_directory_secure(
-                    "./", min(options.max_depth, MAX_SCAN_DEPTH)
+                    "../", min(options.max_depth, MAX_SCAN_DEPTH)
                 )
                 if not env_path:
                     raise FileNotFoundError("No .env file found")

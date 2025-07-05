@@ -1,8 +1,8 @@
 import gc
 from typing import List, Optional
 
-from .secure import SecureEnvLoader
-from .utils import EnvValue
+from simpleenvs.loaders.secure import SecureEnvLoader
+from simpleenvs.utils import EnvValue
 
 
 class SecureLoaderManager:

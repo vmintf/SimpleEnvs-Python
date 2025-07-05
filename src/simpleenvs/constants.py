@@ -342,8 +342,8 @@ FEATURES = {
 
 # Version information
 VERSION = "2.0.0-beta.3"
-API_VERSION = "1.1"
-MIN_PYTHON_VERSION = (3, 7)
+API_VERSION = "1.2"
+MIN_PYTHON_VERSION = (3, 8)
 
 # Library metadata
 LIBRARY_NAME = "SimpleEnvs-Python"
