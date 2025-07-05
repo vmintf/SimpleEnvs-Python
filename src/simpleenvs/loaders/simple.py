@@ -176,8 +176,7 @@ class SimpleEnvLoader:
             self.env_data = env_data
 
             # Sync to system environment variables
-            for key, value in env_data.items():
-                os.environ[key] = str(value)
+            os.environ.update({k: str(v) for k, v in env_data.items()})
 
         except (FileNotFoundError, FileParsingError, InvalidInputError):
             raise  # Re-raise these specific exceptions
@@ -212,8 +211,7 @@ class SimpleEnvLoader:
             self.env_data = env_data
 
             # Sync to system environment variables
-            for key, value in env_data.items():
-                os.environ[key] = str(value)
+            os.environ.update({k: str(v) for k, v in env_data.items()})
 
         except (FileNotFoundError, FileParsingError, InvalidInputError):
             raise  # Re-raise these specific exceptions
