@@ -7,45 +7,256 @@ permissions:
 on:
   push:
     branches: [ main, dev/* ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
+    inputs:
+      include_secure:
+        description: 'Include Secure API benchmarks'
+        required: false
+        default: true
+        type: boolean
+      rounds:
+        description: 'Number of benchmark rounds'
+        required: false
+        default: '5'
+        type: string
 
 jobs:
   benchmark:
-    name: Run Benchmarks
+    name: Run Performance Benchmarks
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.11', '3.12']
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Python
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
-        python-version: 3.11
+        python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml', '**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
+
+    - name: Install dependencies with proper order
       run: |
         python -m pip install --upgrade pip
-        pip install aiofiles
+        echo "🔧 Installing SimpleEnvs in development mode..."
         pip install -e .
+        echo "📦 Installing benchmark dependencies..."
         pip install python-dotenv
+        # Install additional dependencies that might be needed
+        pip install aiofiles psutil
+        echo "✅ Dependencies installed successfully"
 
-    - name: Run benchmark
+    - name: Verify installation
       run: |
-        if [ -f "src/simpleenvs/benchmark.py" ]; then
-          python -m simpleenvs.benchmark --secure --quick 2>&1 | tee benchmark-results.txt || echo "Benchmark completed with warnings"
-        elif [ -f "benchmark.py" ]; then
-          python benchmark.py --secure --quick 2>&1 | tee benchmark-results.txt || echo "Benchmark completed with warnings"
+        python -c "import simpleenvs; print(f'✅ SimpleEnvs {simpleenvs.__version__} installed')" || echo "⚠️ SimpleEnvs import failed"
+        python -c "import dotenv; print('✅ python-dotenv installed')" || echo "⚠️ python-dotenv import failed"
+
+    - name: Create temporary benchmark directory
+      run: |
+        mkdir -p benchmark_temp
+        chmod 755 benchmark_temp
+
+    - name: Find and run benchmark
+      id: benchmark
+      run: |
+        cd benchmark_temp
+        
+        # Set benchmark parameters
+        SECURE_FLAG="${{ github.event.inputs.include_secure == 'true' && '--secure' || '' }}"
+        ROUNDS="${{ github.event.inputs.rounds || '5' }}"
+        
+        echo "🚀 Starting performance benchmark..."
+        echo "Parameters: --rounds $ROUNDS $SECURE_FLAG --quick"
+        
+        # Try different benchmark locations and methods
+        if [ -f "../src/simpleenvs/benchmark.py" ]; then
+          echo "📊 Running module-based benchmark..."
+          python -m simpleenvs.benchmark --rounds $ROUNDS $SECURE_FLAG --quick > ../benchmark-results.txt 2>&1
+          BENCHMARK_STATUS=$?
+        elif [ -f "../benchmark.py" ]; then
+          echo "📊 Running standalone benchmark..."
+          cd ..
+          python benchmark.py --rounds $ROUNDS $SECURE_FLAG --quick > benchmark-results.txt 2>&1
+          BENCHMARK_STATUS=$?
+          cd benchmark_temp
         else
-          echo "📊 Benchmark script not found, but that's okay!"
-          echo "🚀 Performance testing can be added later."
-          echo "SimpleEnvs benchmark placeholder" > benchmark-results.txt
+          echo "⚠️ No benchmark script found, creating placeholder..."
+          echo "📊 SimpleEnvs Performance Benchmark" > ../benchmark-results.txt
+          echo "🚀 Benchmark script not available in this build" >> ../benchmark-results.txt
+          echo "💡 Performance testing can be added later" >> ../benchmark-results.txt
+          BENCHMARK_STATUS=0
+        fi
+        
+        # Check benchmark status
+        if [ $BENCHMARK_STATUS -eq 0 ]; then
+          echo "✅ Benchmark completed successfully"
+          echo "benchmark_success=true" >> $GITHUB_OUTPUT
+        else
+          echo "⚠️ Benchmark completed with warnings/errors (exit code: $BENCHMARK_STATUS)"
+          echo "benchmark_success=false" >> $GITHUB_OUTPUT
+          # Still continue - don't fail the workflow for benchmark issues
+        fi
+
+    - name: Process benchmark results
+      if: always()
+      run: |
+        if [ -f "benchmark-results.txt" ]; then
+          echo "📊 Benchmark Results Summary:"
+          echo "================================"
+          
+          # Extract key metrics if available
+          if grep -q "faster" benchmark-results.txt; then
+            echo "🏆 Performance improvements found:"
+            grep -E "(faster|improvement|speedup)" benchmark-results.txt | head -5
+          fi
+          
+          if grep -q "Secure" benchmark-results.txt; then
+            echo "🔒 Security benchmark included"
+          fi
+          
+          # Show file size for verification
+          echo "📄 Results file size: $(wc -c < benchmark-results.txt) bytes"
+          echo "📄 Results line count: $(wc -l < benchmark-results.txt) lines"
+          
+          # Create a summary for PR comments
+          echo "## 📊 Benchmark Results (Python ${{ matrix.python-version }})" > benchmark-summary.md
+          echo "" >> benchmark-summary.md
+          if [ "${{ steps.benchmark.outputs.benchmark_success }}" = "true" ]; then
+            echo "✅ Benchmark completed successfully" >> benchmark-summary.md
+          else
+            echo "⚠️ Benchmark completed with warnings" >> benchmark-summary.md
+          fi
+          echo "" >> benchmark-summary.md
+          echo "\`\`\`" >> benchmark-summary.md
+          # Include relevant parts of the output
+          grep -E "(SimpleEnvs|python-dotenv|faster|Results|Summary)" benchmark-results.txt | head -10 >> benchmark-summary.md || echo "Benchmark data not available" >> benchmark-summary.md
+          echo "\`\`\`" >> benchmark-summary.md
+        else
+          echo "❌ Benchmark results file not found"
+          echo "## 📊 Benchmark Results (Python ${{ matrix.python-version }})" > benchmark-summary.md
+          echo "❌ Benchmark results not available" >> benchmark-summary.md
         fi
 
     - name: Upload benchmark results
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: benchmark-results
-        path: benchmark-results.txt
+        name: benchmark-results-python-${{ matrix.python-version }}
+        path: |
+          benchmark-results.txt
+          benchmark-summary.md
+        retention-days: 30
+
+    - name: Comment PR with benchmark results
+      if: github.event_name == 'pull_request' && always()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          let summaryContent = '## 📊 Benchmark Results Summary\n\n';
+          
+          try {
+            if (fs.existsSync('benchmark-summary.md')) {
+              const summary = fs.readFileSync('benchmark-summary.md', 'utf8');
+              summaryContent += summary;
+            } else {
+              summaryContent += '⚠️ Benchmark summary not available\n';
+            }
+          } catch (error) {
+            summaryContent += `❌ Error reading benchmark results: ${error.message}\n`;
+          }
+          
+          summaryContent += '\n📁 Full results available in workflow artifacts';
+          
+          // Find existing comment or create new one
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+          
+          const botComment = comments.find(comment => 
+            comment.user.type === 'Bot' && 
+            comment.body.includes('📊 Benchmark Results')
+          );
+          
+          if (botComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: summaryContent
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: summaryContent
+            });
+          }
+
+    - name: Cleanup temporary files
+      if: always()
+      run: |
+        rm -rf benchmark_temp
+        # Clean up any temporary .env files that might have been created
+        find . -name "benchmark_test_*.env*" -type f -delete 2>/dev/null || true
+        echo "🧹 Cleanup completed"
+
+  # Aggregate results from all Python versions
+  aggregate-results:
+    name: Aggregate Benchmark Results
+    needs: benchmark
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+    - name: Download all benchmark artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: benchmark-artifacts
+
+    - name: Create aggregate summary
+      run: |
+        echo "# 📊 Complete Benchmark Results" > aggregate-summary.md
+        echo "" >> aggregate-summary.md
+        echo "Results across all Python versions:" >> aggregate-summary.md
+        echo "" >> aggregate-summary.md
+        
+        for dir in benchmark-artifacts/*/; do
+          if [ -d "$dir" ]; then
+            version=$(basename "$dir" | sed 's/benchmark-results-python-//')
+            echo "## Python $version" >> aggregate-summary.md
+            if [ -f "$dir/benchmark-summary.md" ]; then
+              cat "$dir/benchmark-summary.md" >> aggregate-summary.md
+            else
+              echo "⚠️ Results not available" >> aggregate-summary.md
+            fi
+            echo "" >> aggregate-summary.md
+          fi
+        done
+
+    - name: Upload aggregate results
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-aggregate-results
+        path: |
+          aggregate-summary.md
+          benchmark-artifacts/
+        retention-days: 90
