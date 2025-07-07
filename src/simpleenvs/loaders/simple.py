@@ -132,25 +132,6 @@ class SimpleEnvLoader:
                         "Unable to decode file with supported encodings"
                     )
 
-    def _parse_file_sync(self, file_path: str) -> EnvMap:
-        """Parse .env file synchronously - GIL OPTIMIZED"""
-        if not isinstance(file_path, str):
-            raise InvalidInputError("file_path must be string", file_path)
-
-        try:
-            # 🚀 GIL 최적화: 동기/비동기 구분 없이 통일!
-            from simpleenvs.filestream import read_env_file_optimized
-
-            content = read_env_file_optimized(file_path, encoding="utf-8")
-
-            # Use utils for parsing (파싱 로직은 유지)
-            return parse_env_content(content, strict=False)
-
-        except (FileNotFoundError, FileParsingError):
-            raise  # Re-raise these specific exceptions
-        except Exception as e:
-            raise FileParsingError(file_path, original_error=e)
-
     async def load(self, path: Optional[str] = None, max_depth: int = 2) -> None:
         """Load environment variables from .env file and sync to system"""
         # Validate max_depth
