@@ -1,3 +1,8 @@
+> [!IMPORTANT]
+> Due to personal reasons, the project was not able to be updated further, so we decided that it would be impossible to update it further. We announce today that the maintenance will be completed on August 30, 2025 as of KST.
+>   
+> The docs site will be hosted until March-April of next year upon expiration of the domain. Thank you for using it.
+
 # SimpleEnvs
 
 ![PyPI - Version](https://img.shields.io/pypi/v/simpleenvs-python?label=PyPI%20Package)
